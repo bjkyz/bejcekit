@@ -1,88 +1,64 @@
 import { useEffect, useRef, useState } from 'react'
-import { useProgress } from '@react-three/drei'
-import gsap from 'gsap'
 import { sceneState } from '../lib/scene-state'
-import { lockScroll, remeasure, unlockScroll } from '../lib/scroll'
+import { subscribeLoading } from '../lib/loading'
+import { easeInOutExpo, tween } from '../lib/spring'
+import { remeasure } from '../lib/scroll'
 
 /**
- * PRAVDOMLUVNÝ PRELOADER. useProgress() vrací SKUTEČNÉ bajty — žádný falešný
- * časovač, žádné počítadlo, co se zasekne na 99 %.
+ * ★ PRELOADER NEBLOKUJE OBSAH — a to je zásadní rozdíl oproti první verzi.
  *
- * Odchod je OPONA (clip-path), ne prolnutí. Hero text naskakuje během POSLEDNÍCH
- * 350 ms opony — překryv se čte jako drahý, sekvence jako pomalý.
+ * Původně to byla plná clona přes celou obrazovku, která čekala na 3D model.
+ * Důsledky, které se ukázaly až v měření:
+ *   • LCP měřil PRELOADER, ne nadpis → Lighthouse trestal (1.4 s)
+ *   • návštěvník civěl na počítadlo místo na nabídku služeb
+ *   • scroll byl zamčený, dokud nedoteklo 839 kB modelu
+ *
+ * Teď je to jen tenká LIŠTA PRŮBĚHU nahoře. Text i služby jsou čitelné a
+ * scrollovatelné OKAMŽITĚ; krychle se zapálí, až doteče — jako bonus, ne jako
+ * mýtné. Konverzně i výkonově je to jednoznačně lepší, a drama zůstalo:
+ * zážeh jádra pořád proběhne.
  */
-export default function Preloader({ onDone, reduced }: { onDone: () => void; reduced: boolean }) {
-  const { active, progress } = useProgress()
-  const root = useRef<HTMLDivElement>(null)
-  const fill = useRef<HTMLDivElement>(null)
-  const num = useRef<HTMLDivElement>(null)
+export default function Preloader({ reduced }: { reduced: boolean }) {
+  const [{ progress, active }, setState] = useState({ progress: 0, active: true })
   const [gone, setGone] = useState(false)
+  const bar = useRef<HTMLDivElement>(null)
   const fired = useRef(false)
 
+  useEffect(() => subscribeLoading((p, a) => setState({ progress: p, active: a })), [])
+
+  // Pojistka: kdyby se scéna nikdy nenačetla, lišta po 12 s prostě zmizí.
+  // Obsah je použitelný i bez 3D, takže se nemá co pokazit.
   useEffect(() => {
-    lockScroll()
+    const t = setTimeout(() => setState({ progress: 100, active: false }), 12000)
+    return () => clearTimeout(t)
   }, [])
 
   useEffect(() => {
-    if (fill.current) gsap.to(fill.current, { scaleX: progress / 100, duration: 0.4, ease: 'power2.out' })
-    if (num.current) num.current.textContent = String(Math.round(progress)).padStart(3, '0')
+    if (bar.current) bar.current.style.transform = `scaleX(${progress / 100})`
   }, [progress])
 
   useEffect(() => {
-    // Brána: hotovo je až když loader nic nedělá A je na 100 %.
     if (fired.current || active || progress < 100) return
     fired.current = true
 
-    // Sekce se mohly rozrůst po doběhnutí fontů → přeměř snap body.
+    // Sekce se mohly po doběhnutí fontů přeskládat → přeměř snap body.
     remeasure()
 
-    const finish = () => {
-      setGone(true)
-      unlockScroll()
-      onDone()
-    }
-
     if (reduced) {
-      sceneState.boost = 0
-      finish()
+      setGone(true)
       return
     }
-
-    const tl = gsap.timeline({ onComplete: finish })
-    tl.to(root.current, {
-      clipPath: 'inset(0 0 100% 0)',
-      duration: 1.1,
-      ease: 'expo.inOut',
-    })
     // ZÁŽEH — až teď, když je GLB doparsované a mesh existuje.
-    tl.add(() => {
-      sceneState.boost = 6
-    }, '-=0.85')
-    // Hero text naskočí ještě POD zvedající se oponou.
-    tl.fromTo(
-      '#ident .reveal',
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out', stagger: { amount: 0.35 } },
-      '-=0.35',
-    )
-    return () => {
-      tl.kill()
-    }
-  }, [active, progress, reduced, onDone])
+    sceneState.boost = 6
+    return tween(600, easeInOutExpo, () => {}, () => setGone(true))
+  }, [active, progress, reduced])
 
-  if (gone) return null
+  if (gone || reduced) return null
 
   return (
-    <div className="preloader" ref={root} role="status" aria-live="polite">
-      <div className="preloader__inner">
-        <div className="preloader__num" ref={num}>
-          000
-        </div>
-        <div className="preloader__bar">
-          <div className="preloader__fill" ref={fill} />
-        </div>
-        <div className="preloader__label">Spouštím jednotku 06</div>
-      </div>
+    <div className="loadbar" role="status" aria-live="polite">
+      <div className="loadbar__fill" ref={bar} />
+      <span className="sr-only">Načítám 3D scénu: {Math.round(progress)} %</span>
     </div>
   )
 }

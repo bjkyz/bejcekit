@@ -246,13 +246,19 @@
   color: var(--tx-2);
   text-transform: uppercase;
 }
+/* Zelená = systém je dostupný. Oranžová na webu zbyla JEN na řetězec přechodu,
+   takže když se objeví, opravdu něco znamená. */
 .status__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--amber);
+  background: var(--green);
+  box-shadow: var(--glow-green);
   flex: none;
   animation: blink 2s var(--e-ui) infinite;
+}
+.status__v--ok {
+  color: var(--green);
 }
 @keyframes blink {
   0%,
@@ -302,49 +308,26 @@
   }
 }
 
-/* ── PRELOADER ───────────────────────────────────────────── */
-.preloader {
+/* ── LIŠTA NAČÍTÁNÍ ──────────────────────────────────────────
+   Vědomě NE plná clona. Ta by zakryla obsah, LCP by měřil ji místo nadpisu
+   a návštěvník by čekal na 839 kB modelu, aby se dostal k nabídce služeb.
+   Tohle je 2px proužek nahoře: informuje, ale nikomu nepřekáží. */
+.loadbar {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
   z-index: var(--z-preloader);
-  background: var(--bg-0);
-  display: grid;
-  place-items: center;
-  clip-path: inset(0 0 0 0);
+  pointer-events: none;
+  background: var(--line-1);
 }
-.preloader__inner {
-  display: grid;
-  justify-items: center;
-  gap: 1.25rem;
-}
-.preloader__num {
-  font-family: var(--font-mono);
-  font-size: clamp(3rem, 10vw, 6rem);
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  color: var(--tx-1);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.preloader__bar {
-  width: min(28rem, 60vw);
-  height: 1px;
-  background: var(--line-2);
-  position: relative;
-  overflow: hidden;
-}
-.preloader__fill {
-  position: absolute;
-  inset: 0;
-  background: var(--neon-2);
+.loadbar__fill {
+  height: 100%;
+  width: 100%;
   transform-origin: left;
   transform: scaleX(0);
+  background: linear-gradient(90deg, var(--neon-3), var(--neon-2));
   box-shadow: var(--glow-soft);
-}
-.preloader__label {
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--tx-4);
+  transition: transform 300ms var(--e-out-expo);
 }

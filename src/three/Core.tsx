@@ -3,12 +3,13 @@ import { useFrame } from '@react-three/fiber'
 import { useAnimations, useGLTF } from '@react-three/drei'
 import { easing } from 'maath'
 import { Group, Mesh, MeshStandardMaterial, PointLight } from 'three'
-import { clampDelta, CYAN, sceneState } from '../lib/scene-state'
+import { clampDelta, sceneState } from '../lib/scene-state'
+import { CYAN } from './palette'
 import type { Tier } from '../lib/quality'
 
 /* meshopt komprese → dekodér je inlinovaný v three-stdlib. Nula konfigurace,
    nula CDN. (Draco by si tiše stáhl WASM z gstatic.com.) */
-const MODEL = `${import.meta.env.BASE_URL}models/core.v1.glb`
+const MODEL = `${import.meta.env.BASE_URL}models/core.v2.glb`
 
 /* ★ ZMĚŘENO, NE ODHADNUTO (viz Box3 nad GLB):
    model má maxDim 4.075 jednotky — je tedy VĚTŠÍ než 3jednotková krychle.

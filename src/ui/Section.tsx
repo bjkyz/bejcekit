@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
-import { CONTACT_ROWS, EMAIL, SECTIONS, type Section as S } from '../content/sections'
+import { CONTACT_ROWS, EMAIL, PHONE, PHONE_TEL, SECTIONS, WHATSAPP, type Section as S } from '../content/sections'
 import { useReveal } from '../lib/hooks'
 import Kicker from './Kicker'
 import MagneticCTA from './MagneticCTA'
@@ -22,17 +22,16 @@ export default function Section({
   reduced: boolean
   dragRef: React.RefObject<Group | null>
 }) {
-  const ref = useReveal<HTMLElement>(!reduced)
+  const ref = useReveal<HTMLElement>(!reduced && index !== 0)
   const isHero = index === 0
   const isContact = index === LAST
-  const isProces = s.id === 'proces'
 
   return (
     <section
       id={s.id}
       ref={ref}
       data-index={index}
-      className={`section section--${s.align}`}
+      className={`section section--${s.align}${isHero ? " section--hero" : ""}`}
       aria-labelledby={`${s.id}-h`}
     >
       {isHero && !reduced && <GrabPlate dragRef={dragRef} />}
@@ -59,8 +58,17 @@ export default function Section({
             {s.body}
           </p>
 
-          {isProces ? (
-            <ProcessSteps bullets={s.bullets} />
+          {/* Zelený štítek dostupnosti. Nejsilnější konverzní prvek hero sekce:
+              první, co návštěvník potřebuje vědět, je „bere ten člověk vůbec práci?" */}
+          {s.status && (
+            <p className="status-pill reveal" style={delay(2.6, 6)}>
+              <span className="status-pill__dot" aria-hidden="true" />
+              {s.status}
+            </p>
+          )}
+
+          {s.steps ? (
+            <ProcessSteps steps={s.steps} />
           ) : isContact ? (
             <ContactBlock />
           ) : (
@@ -80,7 +88,8 @@ export default function Section({
 
           {s.deliverable && (
             <p className="deliverable reveal" style={delay(4.6, 6)}>
-              {s.deliverable}
+              <span className="deliverable__k">{s.deliverable.label}</span>
+              {s.deliverable.text}
             </p>
           )}
 
@@ -110,22 +119,18 @@ export default function Section({
   )
 }
 
-/** Sekce 04 — čtyřřádková inženýrská tabulka. Dělá to líp DOM než 3D ciferník. */
-function ProcessSteps({ bullets }: { bullets: string[] }) {
+/** Sekce 04: čtyřřádková inženýrská tabulka. Dělá to líp DOM než 3D ciferník. */
+function ProcessSteps({ steps }: { steps: { title: string; text: string }[] }) {
   return (
     <ol className="steps">
-      {bullets.map((b, i) => {
-        const [head, ...rest] = b.split(' — ')
-        return (
-          <li key={i} className="step reveal" style={delay(3 + i * 0.4, 6)}>
-            <span className="step__i">{String(i + 1).padStart(2, '0')}</span>
-            <span className="step__t">
-              <b>{head}</b>
-              {rest.length > 0 && <> — {rest.join(' — ')}</>}
-            </span>
-          </li>
-        )
-      })}
+      {steps.map((st, i) => (
+        <li key={i} className="step reveal" style={delay(3 + i * 0.4, 6)}>
+          <span className="step__i">{String(i + 1).padStart(2, '0')}</span>
+          <span className="step__t">
+            <b>{st.title}.</b> {st.text}
+          </span>
+        </li>
+      ))}
     </ol>
   )
 }
@@ -176,8 +181,13 @@ function ContactBlock() {
         ))}
       </ul>
 
+      {/* Tři cesty, jak se ozvat — každá pro jiný typ člověka. Žádný formulář.
+          WhatsApp je zelený (stav/dostupnost), telefon je tichý ghost:
+          barva se tu používá k rozlišení, ne k ozdobě. */}
       <div className="cta-row reveal" style={delay(4, 6)}>
         <MagneticCTA href={`mailto:${EMAIL}`} label="Napsat e-mail" variant="solid" />
+        <MagneticCTA href={WHATSAPP} label="WhatsApp" variant="green" icon="whatsapp" />
+        <MagneticCTA href={`tel:${PHONE_TEL}`} label={`Zavolat ${PHONE}`} variant="ghost" icon="phone" />
       </div>
     </>
   )
@@ -186,10 +196,10 @@ function ContactBlock() {
 function Footer() {
   return (
     <footer className="footer reveal" style={delay(5, 6)}>
-      <p>© {new Date().getFullYear()} Jiří Bejček — bejcek.it · Postaveno v Reactu a three.js.</p>
+      <p>© {new Date().getFullYear()} Jiří Bejček · bejcek.it · Postaveno v Reactu a three.js.</p>
       {/* CC-BY atribuce je SMLUVNÍ POVINNOST, ne zdvořilost. Neodstraňovat. */}
       <p>
-        3D model „Primary Ion Drive" —{' '}
+        3D model „Primary Ion Drive“:{' '}
         <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
           Mike Murdock, CC BY 4.0
         </a>

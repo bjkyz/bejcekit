@@ -1,11 +1,13 @@
 import Lenis from 'lenis'
 import Snap from 'lenis/snap'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { bus } from './bus'
 import { FACE_COUNT } from '../content/sections'
 
-gsap.registerPlugin(ScrollTrigger)
+/* ★ ŽÁDNÝ GSAP, ŽÁDNÝ ScrollTrigger.
+   ScrollTrigger tu původně byl, ale nepoháněl ANI JEDNU animaci — všechny
+   revealy dělá IntersectionObserver. Zbyl po něm jen `ScrollTrigger.update()`,
+   který neměl co aktualizovat: ~15 kB gz mrtvé váhy na kritické cestě.
+   A GSAP ticker se dá nahradit jedním rAF, který stejně potřebujeme. */
 
 /**
  * ★ PLAIN MUTOVATELNÝ MODULOVÝ OBJEKT — schválně.
@@ -25,7 +27,7 @@ let lenis: Lenis | null = null
 let snap: Snap | null = null
 let tops: number[] = []
 let allFit = true
-let rafId: ((t: number) => void) | null = null
+let rafId: number | null = null
 let lastIndex = 0
 
 /**
@@ -95,8 +97,12 @@ export function initScroll(reducedMotion: boolean): () => void {
 
   lenis = new Lenis({
     autoRaf: false, // ★ jinak běží Lenis a GSAP na dvou rAF smyčkách a ScrollTrigger
-    lerp: 0.09, //   čte o 1–2 snímky starou pozici → viditelný jitter
+    //   čte o 1–2 snímky starou pozici → viditelný jitter
+    lerp: 0.075, // nižší = delší doběh, hedvábnější. Pod ~0.06 už to plave.
+    wheelMultiplier: 0.85, // kolečko myši jinak „cuká" po velkých skocích
     syncTouch: true, // (smoothTouch byl přejmenován)
+    syncTouchLerp: 0.09, // prst má mít okamžitou odezvu, ne gumu
+    touchInertiaExponent: 1.6,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   })
 
@@ -108,12 +114,13 @@ export function initScroll(reducedMotion: boolean): () => void {
     scrollState.index = Math.round(scrollState.progress)
     scrollState.transit = Math.abs(e.velocity) > 0.06
     emitLanding(scrollState.index)
-    ScrollTrigger.update()
   })
 
-  rafId = (t: number) => lenis?.raf(t * 1000)
-  gsap.ticker.add(rafId)
-  gsap.ticker.lagSmoothing(0)
+  const tick = (t: number) => {
+    lenis?.raf(t)
+    rafId = requestAnimationFrame(tick)
+  }
+  rafId = requestAnimationFrame(tick)
 
   const onResize = () => {
     measure()
@@ -125,7 +132,7 @@ export function initScroll(reducedMotion: boolean): () => void {
 
   return () => {
     window.removeEventListener('resize', onResize)
-    if (rafId) gsap.ticker.remove(rafId)
+    if (rafId !== null) cancelAnimationFrame(rafId)
     snap?.destroy()
     lenis?.destroy()
     snap = null
@@ -139,8 +146,11 @@ function buildSnap(l: Lenis): Snap {
   const s = new Snap(l, {
     type,
     distanceThreshold: '30%',
-    duration: type === 'mandatory' ? 0.8 : 0.7,
-    debounce: 0,
+    // Delší a měkčí dojezd. Při 0.8 s a lineárním konci to „luplo" na místo;
+    // expo-out dojede rychle a poslední kus jen doplyne.
+    duration: type === 'mandatory' ? 1.05 : 0.85,
+    easing: (t) => 1 - Math.pow(1 - t, 4),
+    debounce: 120, // ať snap nenaskočí uprostřed gesta
   })
   for (const t of tops) s.add(t)
   return s
@@ -151,16 +161,6 @@ function emitLanding(i: number): void {
   bus.emit('face:leave', lastIndex)
   lastIndex = i
   bus.emit('face:land', i)
-}
-
-/** Preloader drží scroll, dokud se scéna nenačte. */
-export function lockScroll(): void {
-  lenis?.stop()
-  document.body.classList.add('is-loading')
-}
-export function unlockScroll(): void {
-  lenis?.start()
-  document.body.classList.remove('is-loading')
 }
 
 /** Kotvy z navigace a lišty. Funguje i bez Lenisu (omezený pohyb). */

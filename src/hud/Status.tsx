@@ -37,7 +37,7 @@ export default function Status({ tier }: { tier: string }) {
           </span>
         ) : (
           <span>
-            jednotka 06 · strana {String(i).padStart(2, '0')}/05 — {s.plateCode}
+            jednotka 06 · strana {String(i).padStart(2, '0')}/05 · {s.plateCode}
           </span>
         )}
       </div>
@@ -46,7 +46,7 @@ export default function Status({ tier }: { tier: string }) {
           Řádek „AKTIVNÍ SUBSYSTÉM" je pryč: duplikoval hlavičku panelu, pravou
           lištu i kicker sekce, a jeho výška tlačila CTA sekcí WEB a AI přímo
           na tenhle panel. */}
-      <Row k="Stav" v="Přijímám nové projekty" />
+      <Row k="Volná kapacita" v="Zbývá 1 místo" ok />
       <Row k="Odezva" v="Do 24 hodin" />
 
       <div className="status__meta">
@@ -56,12 +56,12 @@ export default function Status({ tier }: { tier: string }) {
   )
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+function Row({ k, v, ok }: { k: string; v: string; ok?: boolean }) {
   return (
     <div className="status__row">
       <span>{k}</span>
       <span className="status__dots" />
-      <span className="status__v">{v}</span>
+      <span className={`status__v${ok ? ' status__v--ok' : ''}`}>{v}</span>
     </div>
   )
 }

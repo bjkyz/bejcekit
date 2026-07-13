@@ -43,19 +43,61 @@
   color: var(--neon-2);
 }
 
+/* ── ŠTÍTEK DOSTUPNOSTI ──────────────────────────────────────
+   Jediný zelený prvek hero sekce. Odpovídá na první otázku, kterou má
+   návštěvník v hlavě: „bere ten člověk vůbec práci?" */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem 0.9rem 0.5rem 0.75rem;
+  border: 1px solid var(--green-line);
+  background: var(--green-bg);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--green);
+}
+.status-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: var(--glow-green);
+  flex: none;
+  animation: pulse-dot 2.4s var(--e-ui) infinite;
+}
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+
 /* ── ODRÁŽKY ─────────────────────────────────────────────── */
 .bullets {
   margin-top: 1.5rem;
   display: grid;
   gap: var(--sp-bullets-gap);
 }
+/* ★ ČITELNOST: souvislý český text NIKDY v mono.
+   Mono je široké, na 12px se dlouhá věta láme do kaše a háčky splývají.
+   Mono proto drží jen INDEX (přístrojový ráz), text je sans a o stupeň větší. */
 .bullet {
   display: grid;
   grid-template-columns: 2.25rem 1fr;
-  align-items: start;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
+  align-items: baseline;
+  font-family: var(--font-sans);
+  font-size: var(--fs-bullet);
+  line-height: 1.5;
   color: var(--tx-2);
   padding-bottom: var(--sp-bullet-pad);
   border-bottom: 1px solid var(--line-1);
@@ -65,21 +107,34 @@
   padding-bottom: 0;
 }
 .bullet__i {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
   color: var(--neon-3);
   font-variant-numeric: tabular-nums;
 }
 
 /* ── VÝSTUP ──────────────────────────────────────────────── */
+/* VÝSTUP = co klient reálně dostane. Pozitivní fakt → zelená. */
 .deliverable {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
+  font-family: var(--font-sans);
+  font-size: var(--fs-bullet);
+  line-height: 1.55;
   color: var(--tx-1);
-  border: 1px solid var(--line-2);
-  border-left: 2px solid var(--neon-2);
+  border: 1px solid var(--green-line);
+  border-left: 2px solid var(--green);
   padding: 0.75rem 1rem;
   margin-top: var(--sp-deliverable-top);
-  background: rgba(15, 163, 184, 0.05);
+  background: var(--green-bg);
+}
+.deliverable__k {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--green);
+  display: block;
+  margin-bottom: 0.3rem;
 }
 
 /* ── CHIPY SE STACKEM ────────────────────────────────────── */
@@ -163,6 +218,20 @@
   transition-duration: var(--d-press);
 }
 
+/* WhatsApp — zelená = stav/dostupnost. Nikde jinde na webu není. */
+.btn--green {
+  border-color: var(--green-line);
+  color: var(--green);
+}
+.btn--green::after {
+  box-shadow: var(--glow-green);
+}
+.btn--green:hover {
+  border-color: var(--green);
+  background: var(--green-bg);
+  color: var(--green);
+}
+
 /* Vyplněné CTA existuje na celém webu POUZE na sekci 05. */
 .btn--solid {
   background: var(--neon-2);
@@ -205,9 +274,9 @@
   font-variant-numeric: tabular-nums;
 }
 .step__t {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
+  font-family: var(--font-sans);
+  font-size: var(--fs-bullet);
+  line-height: 1.55;
   color: var(--tx-2);
 }
 .step__t b {

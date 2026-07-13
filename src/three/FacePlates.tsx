@@ -1,75 +1,115 @@
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Text } from '@react-three/drei'
 import { easing } from 'maath'
-import type { Group, MeshBasicMaterial } from 'three'
+import { CanvasTexture, Group, LinearFilter, MeshBasicMaterial, SRGBColorSpace } from 'three'
 import { FACE_TRANSFORMS } from '../lib/faces'
 import { SECTIONS } from '../content/sections'
 import { clampDelta, sceneState } from '../lib/scene-state'
 import type { Tier } from '../lib/quality'
 
-/* ★ troika si BEZ `font` tiše stáhne Roboto z fonts.gstatic.com.
-   Shipujeme vlastní .ttf (ne .woff2 — troika parsuje ttf/otf/woff spolehlivě).
-   `characters` předehřeje SDF atlas, aby cedule nenaskočily o snímek později. */
-const FONT = `${import.meta.env.BASE_URL}fonts/troika/GeistMono-Medium-ascii.ttf`
-const WARM = '0123456789 /[]-ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
 /**
  * Cedule na stěnách krychle.
  *
- * Popisky jsou ZÁMĚRNĚ jen ASCII (IDENT, WEB, INFRA, AI, PROCES, KONTAKT).
- * Uvnitř skla by chybějící háček (prázdný čtvereček) byl nejhůř k odhalení.
- * Veškerá čeština s diakritikou žije v DOM — tam ji přečte i Google a čtečka.
+ * ★ CANVAS TEXTURA, NE drei <Text>.
+ *   drei's <Text> je obal nad troika-three-text — plnohodnotný SDF textový engine
+ *   (~100 kB gz). Platit ho za ŠEST KRÁTKÝCH NÁPISŮ, které se nikdy nemění, je
+ *   nesmysl. Navíc si troika bez explicitního `font` tiše stahuje Roboto
+ *   z fonts.gstatic.com, takže s ním musel ve /public bydlet ještě 30kB TTF.
+ *
+ *   Vykreslení do <canvas> a nahrání jako textura umí prohlížeč sám: nula
+ *   závislostí, nula souborů navíc, jeden draw call na ceduli. A protože je to
+ *   normální mesh s mapou, spadne do refrakčního bufferu skla úplně stejně —
+ *   „duchový" efekt zadních cedulí zůstává.
+ *
+ * Popisky jsou ZÁMĚRNĚ ASCII (IDENT, WEB, INFRA…). Veškerá čeština s diakritikou
+ * žije v DOM, kde ji přečte Google i čtečka.
  */
+
+const W = 1024
+const H = 512
+/** Rovina, na kterou se textura promítá (krychle má hranu 3). */
+const PLANE: [number, number] = [2.4, 1.2]
+
+function drawPlate(num: string, code: string): HTMLCanvasElement {
+  const c = document.createElement('canvas')
+  c.width = W
+  c.height = H
+  const g = c.getContext('2d')!
+  g.clearRect(0, 0, W, H)
+  g.textAlign = 'center'
+  g.textBaseline = 'middle'
+
+  // Číslo stěny — menší, světlejší.
+  g.font = '500 84px "Geist Mono", ui-monospace, monospace'
+  g.fillStyle = '#b8f5ff'
+  g.letterSpacing = '14px'
+  g.fillText(num, W / 2, 150)
+
+  // Kód služby — hlavní nápis.
+  g.font = '500 132px "Geist Mono", ui-monospace, monospace'
+  g.fillStyle = '#4fd8e8'
+  g.letterSpacing = '10px'
+  g.fillText(code, W / 2, 330)
+
+  return c
+}
+
 function Plate({ i, tier }: { i: number; tier: Tier }) {
   const grp = useRef<Group>(null)
-  const num = useRef<MeshBasicMaterial>(null)
-  const code = useRef<MeshBasicMaterial>(null)
+  const mat = useRef<MeshBasicMaterial>(null)
   const t = FACE_TRANSFORMS[i]
   const s = SECTIONS[i]
+
+  // Kreslíme AŽ po doběhnutí fontů — jinak canvas sáhne po systémovém fallbacku
+  // a nápis bude jinou písmovkou než zbytek webu.
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let alive = true
+    document.fonts.ready.then(() => alive && setReady(true))
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const tex = useMemo(() => {
+    if (!ready) return null
+    const texture = new CanvasTexture(drawPlate(s.plateNum, s.plateCode))
+    texture.colorSpace = SRGBColorSpace
+    texture.minFilter = LinearFilter // bez mipmap: nápis je vždy zhruba stejně velký
+    texture.magFilter = LinearFilter
+    texture.anisotropy = 4
+    return texture
+  }, [ready, s.plateNum, s.plateCode])
+
+  // Co jsme si sami `new`-li, sami uklidíme.
+  useEffect(() => () => tex?.dispose(), [tex])
 
   useFrame((_, delta) => {
     const dt = clampDelta(delta)
     const active = sceneState.faceIndex === i
-    const want = active ? 1 : 0.22
 
-    if (num.current) easing.damp(num.current, 'opacity', want * 0.75, 0.25, dt)
-    if (code.current) easing.damp(code.current, 'opacity', want, 0.25, dt)
+    if (mat.current) easing.damp(mat.current, 'opacity', active ? 1 : 0.22, 0.25, dt)
 
     /* ★ Na 'low' tieru je skořápka meshPhysicalMaterial s transparent →
        depthWrite:false, takže zadní cedule NEJSOU zakryté a vykreslily by se
        ostře, pozpátku a naležato přes přední stěnu. Proto je tam schováme.
-       (Musí to být tady v useFrame — sceneState re-render nespouští.) */
+       (Musí to být v useFrame — sceneState re-render nespouští.) */
     if (grp.current) grp.current.visible = tier !== 'low' || active
   })
 
+  /* ★ DOKUD NENÍ TEXTURA, MESH VŮBEC NEVZNIKNE.
+     Kdyby se vykreslil s `map={null}` a textura se doplnila až potom, three by
+     shader NEPŘEKOMPILOVAL (přidání mapy vyžaduje material.needsUpdate) a na
+     stěně by zůstal svítit holý bílý obdélník místo nápisu. Tohle je ta klasická
+     past: materiál musí mapu dostat rovnou při vzniku. */
+  if (!tex) return null
+
   return (
     <group ref={grp} position={t.position} quaternion={t.quaternion}>
-      <Text
-        font={FONT}
-        characters={WARM}
-        fontSize={0.26}
-        letterSpacing={0.14}
-        anchorX="center"
-        anchorY="middle"
-        position={[0, 0.42, 0]}
-      >
-        {s.plateNum}
-        <meshBasicMaterial ref={num} color="#b8f5ff" toneMapped={false} transparent depthWrite={false} opacity={0.2} />
-      </Text>
-
-      <Text
-        font={FONT}
-        characters={WARM}
-        fontSize={0.4}
-        letterSpacing={0.06}
-        anchorX="center"
-        anchorY="middle"
-        position={[0, -0.06, 0]}
-      >
-        {s.plateCode}
-        <meshBasicMaterial ref={code} color="#4fd8e8" toneMapped={false} transparent depthWrite={false} opacity={0.22} />
-      </Text>
+      <mesh>
+        <planeGeometry args={PLANE} />
+        <meshBasicMaterial ref={mat} map={tex} transparent toneMapped={false} depthWrite={false} opacity={0.22} />
+      </mesh>
     </group>
   )
 }

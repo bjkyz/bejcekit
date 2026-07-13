@@ -153,6 +153,29 @@ main {
   transform: none;
 }
 
+/* ★ HERO SE NIKDY NEODHALUJE PŘES OPACITU. Chrome element s opacity:0 do LCP
+   NEPOČÍTÁ — takže naše vlastní reveal animace posouvala Largest Contentful Paint
+   o víc než sekundu (1.8 s) a srážela Lighthouse. Hero je navíc v prvním okně,
+   kde IntersectionObserver stejně nemá co pozorovat.
+
+   Řešení: hero je od první snímku plně viditelný a nastupuje POUZE posunem.
+   Transform Chrome do LCP nezapočítává, takže LCP = první vykreslení,
+   a vizuálně je nájezd úplně stejný. */
+.section--hero .reveal {
+  opacity: 1;
+  transform: none;
+  animation: hero-rise 760ms var(--e-out-expo) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+@keyframes hero-rise {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: none;
+  }
+}
+
 /* ČESKÁ MASKA ŘÁDKU. Bez toho padding overflow:hidden UŘÍZNE háčky
    nad „Řešíme", „Přímá", „Zálohování". Přesně tak se pozná web
    postavený na anglické šabloně. */

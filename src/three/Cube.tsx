@@ -41,8 +41,8 @@ export default function Cube({ tier, dragRef }: { tier: Tier; dragRef: React.Ref
       aim,
       'v',
       resting ? Math.round(p) : p,
-      resting ? 0.35 : 0.06, // 0.06 za pohybu = prst a krychle jdou 1:1
-      dt,
+      resting ? 0.4 : 0.07, // za pohybu jde krychle skoro 1:1 s prstem,
+      dt, //                   v klidu delší, měkčí dojezd na stěnu
     )
 
     const i = MathUtils.clamp(Math.floor(aim.v), 0, LAST - 1)
@@ -55,7 +55,7 @@ export default function Cube({ tier, dragRef }: { tier: Tier; dragRef: React.Ref
     if (spin.current) {
       // eps 1e-4, ne výchozích 1e-3 — to je NA SLOŽKU a viditelně zastaví
       // rotaci kousek před stěnou.
-      easing.dampQ(spin.current.quaternion, target, 0.22, dt, undefined, undefined, 1e-4)
+      easing.dampQ(spin.current.quaternion, target, 0.26, dt, undefined, undefined, 1e-4)
     }
 
     // Teplo: 0 na stěně, 1 v půlce otáčky. Řídí ostření skla, jas jádra i bloom.

@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
 import { easing } from 'maath'
 import type { PointLight } from 'three'
-import { clampDelta, AMBI, CYAN, RIM, sceneState } from '../lib/scene-state'
+import { clampDelta, sceneState } from '../lib/scene-state'
+import { AMBI, CYAN, RIM } from './palette'
 
 /**
  * ★ ŽÁDNÝ <Environment preset="city">. Preset si za běhu stahuje HDR z pmndrs CDN

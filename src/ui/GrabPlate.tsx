@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
-import { Euler, Group, Quaternion } from 'three'
+import { elasticOut } from '../lib/spring'
+import type { Group } from 'three'
 
+/* ★ ŽÁDNÝ hodnotový import z 'three'. GrabPlate visí na hero sekci, tedy
+   v hlavním bundlu — jediné `import { Euler } from 'three'` by sem přitáhlo
+   celou three.js na kritickou cestu prvního vykreslení a zabilo by to celé
+   líné načítání scény. Nepotřebujeme ho: Object3D.rotation UŽ JE Euler,
+   a three si z něj kvaternion dopočítá sám. */
 const MAX_Y = (10 * Math.PI) / 180
 const MAX_X = (6 * Math.PI) / 180
-const e = new Euler()
-const IDENTITY = new Quaternion()
+const clamp = (lo: number, hi: number, v: number) => Math.max(lo, Math.min(hi, v))
 
 /**
  * Jediná interaktivní 3D plocha na webu — a jen na sekci 00.
@@ -36,12 +40,12 @@ export default function GrabPlate({ dragRef }: { dragRef: React.RefObject<Group 
     let dragging = false
     let sx = 0
     let sy = 0
+    let raf = 0
 
     const apply = () => {
       const g = dragRef.current
       if (!g) return
-      e.set(off.current.y, off.current.x, 0)
-      g.quaternion.setFromEuler(e)
+      g.rotation.set(off.current.y, off.current.x, 0)
     }
 
     const onDown = (ev: PointerEvent) => {
@@ -51,13 +55,13 @@ export default function GrabPlate({ dragRef }: { dragRef: React.RefObject<Group 
       sx = ev.clientX
       sy = ev.clientY
       el.setPointerCapture(ev.pointerId)
-      gsap.killTweensOf(off.current)
+      if (raf) cancelAnimationFrame(raf)
     }
 
     const onMove = (ev: PointerEvent) => {
       if (!dragging) return
-      off.current.x = gsap.utils.clamp(-MAX_Y, MAX_Y, (ev.clientX - sx) * 0.004)
-      off.current.y = gsap.utils.clamp(-MAX_X, MAX_X, (ev.clientY - sy) * 0.004)
+      off.current.x = clamp(-MAX_Y, MAX_Y, (ev.clientX - sx) * 0.004)
+      off.current.y = clamp(-MAX_X, MAX_X, (ev.clientY - sy) * 0.004)
       apply()
     }
 
@@ -65,13 +69,20 @@ export default function GrabPlate({ dragRef }: { dragRef: React.RefObject<Group 
       if (!dragging) return
       dragging = false
       el.releasePointerCapture(ev.pointerId)
-      gsap.to(off.current, {
-        x: 0,
-        y: 0,
-        duration: 0.9,
-        ease: 'elastic.out(1, 0.3)',
-        onUpdate: apply,
-      })
+      // Odskok zpět s dokmitem — bez GSAPu, jeden rAF.
+      const fx = off.current.x
+      const fy = off.current.y
+      const t0 = performance.now()
+      const spring = (now: number) => {
+        const t = Math.min(1, (now - t0) / 900)
+        const k = 1 - elasticOut(t)
+        off.current.x = fx * k
+        off.current.y = fy * k
+        apply()
+        if (t < 1) raf = requestAnimationFrame(spring)
+        else raf = 0
+      }
+      raf = requestAnimationFrame(spring)
     }
 
     el.addEventListener('pointerdown', onDown)
@@ -88,8 +99,9 @@ export default function GrabPlate({ dragRef }: { dragRef: React.RefObject<Group 
       el.removeEventListener('pointermove', onMove)
       el.removeEventListener('pointerup', onUp)
       el.removeEventListener('pointercancel', onUp)
-      gsap.killTweensOf(offset)
-      group?.quaternion.copy(IDENTITY) // narovnat krychli zpět
+      if (raf) cancelAnimationFrame(raf)
+      offset.x = offset.y = 0
+      group?.rotation.set(0, 0, 0) // narovnat krychli zpět
     }
   }, [dragRef])
 

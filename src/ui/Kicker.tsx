@@ -4,10 +4,12 @@ import { useFaceLand } from '../lib/hooks'
 
 /**
  * Mono popisek s dekódováním při dosednutí stěny.
- * JEDINÉ užití scramblu na celém webu — dvakrát už by to byl trik, ne podpis.
+ * JEDINÉ užití scramblu na celém webu — dvakrát by to byl trik, ne podpis.
  *
- * Animovaný span je aria-hidden a skutečný text visí na aria-label,
- * jinak by čtečka předčítala náhodný šum.
+ * ★ PŘÍSTUPNOST: `aria-label` na holém <span> je ZAKÁZANÝ atribut (span nemá roli,
+ *   na kterou by se dal pověsit) — Lighthouse to hlásí jako chybu. Správně:
+ *   skutečný text je ve vizuálně skryté kopii pro čtečku, animovaná kopie je
+ *   aria-hidden. Čtečka tak nikdy nepřečte náhodný šum ze scramblu.
  */
 export default function Kicker({ text, index, animate }: { text: string; index: number; animate: boolean }) {
   const el = useRef<HTMLSpanElement>(null)
@@ -22,7 +24,8 @@ export default function Kicker({ text, index, animate }: { text: string; index: 
   useEffect(() => () => stop.current?.(), [])
 
   return (
-    <span className="label kicker" aria-label={text}>
+    <span className="label kicker">
+      <span className="sr-only">{text}</span>
       <span ref={el} aria-hidden="true">
         {text}
       </span>

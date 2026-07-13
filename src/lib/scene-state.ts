@@ -1,4 +1,3 @@
-import { Color } from 'three'
 import type { Tier } from './quality'
 
 /**
@@ -30,12 +29,8 @@ export const sceneState = {
  */
 export const clampDelta = (delta: number) => Math.min(delta, 1 / 15)
 
-/** Barvy scény — memoizované. Nikdy `new Color()` uvnitř renderu. */
-export const VOID = new Color('#08090a')
-export const CYAN = new Color('#4fd8e8')
-export const HOT = new Color('#b8f5ff')
-export const RIM = new Color('#52aeff')
-export const AMBI = new Color('#0b1a22')
+/* Barvy scény (THREE.Color) žijí v src/three/palette.ts — tenhle soubor
+   čte i HUD a preloader, a nesmí proto tahat three do hlavního bundlu. */
 
 /**
  * Klíčové pozice kamery pro 6 sekcí. FOV je konstantní 35 a NIKDY se neanimuje.

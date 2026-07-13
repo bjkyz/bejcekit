@@ -31,9 +31,6 @@ html.lenis body {
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
-body.is-loading {
-  overflow: hidden;
-}
 
 img,
 svg {

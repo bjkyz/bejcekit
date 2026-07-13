@@ -1,9 +1,11 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { PerformanceMonitor, Preload } from '@react-three/drei'
+import { PerformanceMonitor, Preload, useProgress } from '@react-three/drei'
 import { Group, NoToneMapping } from 'three'
 import { dprFor, type Tier } from '../lib/quality'
-import { sceneState, VOID } from '../lib/scene-state'
+import { sceneState } from '../lib/scene-state'
+import { VOID } from './palette'
+import { setLoading } from '../lib/loading'
 import Cube from './Cube'
 import Lights from './Lights'
 import Rig from './Rig'
@@ -21,6 +23,18 @@ import Effects from './Effects'
  * (stoupání nad INFRA, nájezd na AI, dojezd na KONTAKT) je tiše mrtvá.
  * Stabilní identita propu to řeší.
  */
+/**
+ * Most mezi drei a preloaderem. `useProgress` se volá TADY (uvnitř líně načteného
+ * chunku) a výsledek jen zapíše do našeho storu — preloader tak nemusí importovat
+ * drei, a three tím pádem nesedí na kritické cestě prvního vykreslení.
+ * Musí být uvnitř <Canvas>, protože sleduje three's LoadingManager.
+ */
+function LoadingBridge() {
+  const { progress, active } = useProgress()
+  useEffect(() => setLoading(progress, active), [progress, active])
+  return null
+}
+
 const CAMERA = { fov: 35, position: [0, 0, 8.8] as [number, number, number], near: 0.1, far: 100 }
 const GL = {
   toneMapping: NoToneMapping, // ★ viz Effects.tsx — jinak si to composer stejně přepíše
@@ -110,6 +124,8 @@ export default function Scene({ tier, dragRef }: { tier: Tier; dragRef: React.Re
           }}
           onFallback={() => setDpr(min)}
         />
+
+        <LoadingBridge />
 
         <Suspense fallback={null}>
           <Lights />

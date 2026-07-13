@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { MeshTransmissionMaterial } from '@react-three/drei'
 import { easing } from 'maath'
 import type { Group, MeshPhysicalMaterial } from 'three'
-import { clampDelta, sceneState, VOID } from '../lib/scene-state'
+import { clampDelta, sceneState } from '../lib/scene-state'
+import { VOID } from './palette'
 import type { Tier } from '../lib/quality'
 
 type MTM = MeshPhysicalMaterial & {

@@ -58,6 +58,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Web je klientsky renderovaný: bez JS je #root prázdný div a návštěvník
+         (nebo hloupý crawler) uvidí černou plochu. Kontakt musí být dosažitelný
+         i tak — je to jediná věc, kvůli které sem kdokoli chodí. -->
+    <noscript>
+      <div style="max-width: 40rem; margin: 0 auto; padding: 4rem 1.5rem; color: #dee3ea; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1 style="color: #f7f8f8; font-size: 1.75rem">bejcek.it · Jiří Bejček</h1>
+        <p>IT a AI inženýr. Weby a SEO, IT infrastruktura, AI a automatizace.</p>
+        <p>Tenhle web potřebuje JavaScript. Napsat mi můžete i bez něj:</p>
+        <p>
+          E-mail: <a href="mailto:bejcek.jirka@gmail.com" style="color: #52aeff">bejcek.jirka@gmail.com</a><br />
+          Telefon: <a href="tel:+420607706102" style="color: #52aeff">+420 607 706 102</a>
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -11,13 +11,25 @@
 /* ★ Cokoli v HUD, co není interaktivní, MUSÍ mít pointer-events: none.
    Stavový panel je dekorace (aria-hidden), ale bez tohohle by svým obdélníkem
    v levém dolním rohu tiše kradl kliky CTA tlačítkům pod sebou — a vypadalo by
-   to jako mrtvé tlačítko, ne jako chyba ve stylech. */
+   to jako mrtvé tlačítko, ne jako chyba ve stylech.
+
+   ★★ .nav V TOM SEZNAMU CHYBĚLA — a byla to nejdražší chybějící řádka na webu.
+   .nav je `position: fixed; top/left/right: 0`, tedy PRŮHLEDNÁ DESKA přes celou
+   šířku okna, vysoká ~85 px. Sama nic nekreslí (nemá pozadí), takže na ni není
+   vidět — ale `.hud > *` jí dalo pointer-events: auto, takže spolkla KAŽDÝ tap
+   i klik v horním pruhu obrazovky. Cokoli, co při rolování doputovalo pod ni
+   (CTA „Chci web, který vydělává", odrážky, e-mail), bylo prostě mrtvé.
+   Na telefonu, kde má sekce plnou šířku, to bral pod sebe úplně každý prvek.
+
+   Deska je tedy nově průchozí a klikají se JEN její děti. */
 .hud > .frame,
 .hud > .rail,
-.hud > .status {
+.hud > .status,
+.hud > .nav {
   pointer-events: none;
 }
-.hud .rail a {
+.hud .rail a,
+.hud .nav a {
   pointer-events: auto;
 }
 
@@ -84,6 +96,55 @@
 @media (max-width: 800px) {
   .nav__links {
     display: none;
+  }
+}
+
+/* ★ ZÁVOJ POD NAVIGACÍ — jen na mobilu a tabletu.
+   Na desktopu se sekce snapují, takže pod navigací nikdy nic nestojí a průhledná
+   lišta je čistě záměr. Na dotyku ale snap není (viz scroll.ts) a sekce je vyšší
+   než okno — obsah tedy navigaci PROJÍŽDÍ POD RUKAMA a bez podkladu se skrz ni
+   propisoval: přes „bejcek.it" se míhala CTA tlačítka a chipy předchozí sekce.
+
+   Měkký přechod, ne plná lišta: nahoře skoro krytý, dole mizí do ztracena —
+   takže krychle pod ním pořád prosvítá a nevznikne „krabice na navigaci".
+   Pozor: .nav má pointer-events: none, takže tenhle podklad nemůže krást kliky. */
+@media (max-width: 1024px) {
+  .nav::before {
+    content: '';
+    position: absolute;
+    /* Přesahuje NAVIGACI O 3rem DOLŮ. Kdyby končil na její hraně, gradient by
+       přesně v místě, kde pod ní text prochází, byl už průhledný — a duch
+       tlačítka by se propisoval dál. Krytí drží celou výšku lišty a do ztracena
+       jde až v tom přesahu pod ní. */
+    inset: 0 0 -3rem 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(8, 9, 10, 0.97) 0%,
+      rgba(8, 9, 10, 0.95) 45%,
+      rgba(8, 9, 10, 0.62) 72%,
+      rgba(8, 9, 10, 0) 100%
+    );
+  }
+}
+
+/* Všechno v navigaci je odkaz, a na dotyku měl 16–33 px na výšku:
+   CTA „Napište mi", značka i odkazy na sekce (ty jsou vidět na tabletu
+   a na telefonu na šířku, kde je okno širší než 800 px). */
+@media (pointer: coarse) {
+  .nav__cta,
+  .nav__mark,
+  .nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* „AI" je jako slovo 16 px široké. Na výšku už cíl stačil, na šířku ne —
+     hitbox se proto roztáhne pod text, samotný nápis zůstane, kde byl. */
+  .nav__link {
+    min-width: 44px;
+    justify-content: center;
   }
 }
 
@@ -195,7 +256,12 @@
   color: var(--neon-2);
 }
 
-/* Na mobilu se lišta překlopí do vodorovných teček dole — hlavní navigace. */
+/* Na mobilu se lišta překlopí do vodorovných teček dole — hlavní navigace.
+   ★ A protože je to na telefonu JEDINÁ navigace (odkazy v .nav__links jsou pod
+   800px schované), musí se do těch teček dát trefit prstem. Tečka má 6 px;
+   klikací plocha kolem ní 44×44. Bez toho je navigace na telefonu ozdoba.
+   Proto `gap: 0` — rozestup dělají samy hitboxy, ne mezera mezi nimi.
+   Šest teček × 44 px + odsazení = ~280 px, takže se pilulka vejde i na 320px. */
 @media (max-width: 1024px) {
   .rail {
     right: auto;
@@ -204,13 +270,24 @@
     bottom: 1.25rem;
     transform: translateX(-50%);
     grid-auto-flow: column;
-    gap: 0.75rem;
+    gap: 0;
     justify-items: center;
-    background: rgba(8, 9, 10, 0.72);
-    backdrop-filter: blur(8px);
-    padding: 0.6rem 0.9rem;
-    border: 1px solid var(--line-1);
+    /* ★ NEPRŮHLEDNÁ, ne 0.72. Sekce je na telefonu vyšší než obrazovka, takže
+       jí text při rolování PROJÍŽDÍ POD pilulkou. Při 0.72 se přes tečky
+       propisovaly řádky odrážek a vypadalo to jako rozbitý layout. Plovoucí
+       navigace musí být zjevná vrstva nad obsahem, ne skvrna v textu. */
+    background: rgba(8, 9, 10, 0.96);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    padding: 0 0.25rem;
+    border: 1px solid var(--line-2);
     border-radius: 999px;
+  }
+  .rail__tick {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    justify-content: center;
+    gap: 0;
   }
   .rail__num {
     display: none;
@@ -223,6 +300,53 @@
   .rail__tick.is-active .rail__bar {
     width: 6px;
     height: 6px;
+  }
+}
+
+/* Nejmenší telefony (320–360 px): pilulka se šesti 44px cíli by se roztáhla
+   přes celou šířku a dotkla se okrajů. Cíl se smrskne na 40 px — pořád nad
+   minimem WCAG 2.5.8 (24 px) a pořád se do něj dá trefit. */
+@media (max-width: 380px) {
+  .rail__tick {
+    min-width: 2.5rem;
+  }
+}
+
+/* ── TELEFON NA ŠÍŘKU ──────────────────────────────────────
+   Dole není místo: pilulka uprostřed spodní hrany přejela odrážky 03 a 04.
+   Na šířku je ale spousta místa PO STRANĚ (text drží 34rem vlevo), tak se
+   lišta vrací tam, kde nikomu nepřekáží — svisle k pravé hraně, jako na desktopu. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .rail {
+    left: auto;
+    right: calc(var(--gutter) * 0.6);
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    grid-auto-flow: row;
+    gap: 0; /* rozestup dělají samy 44px hitboxy, ne mezera mezi nimi */
+    justify-items: end;
+    background: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+  }
+  .rail__tick {
+    /* Čárka je 18 px široká a 1 px vysoká. Hitbox 44×44 se natáhne doleva
+       do prázdna vedle ní — vizuálně se nezmění nic, trefit se dá všechno. */
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    justify-content: flex-end;
+  }
+  .rail__bar {
+    width: 18px;
+    height: 1px;
+    border-radius: 0;
+  }
+  .rail__tick.is-active .rail__bar {
+    width: 30px;
+    height: 1px;
   }
 }
 

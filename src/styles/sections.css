@@ -436,3 +436,62 @@ a.contact-row:hover .contact-row__v {
     display: none;
   }
 }
+
+/* ── TELEFON: STAŽENÉ ROZESTUPY ────────────────────────────
+   Tyhle marginy jsou psané napevno, ne přes proměnnou — takže je výškové
+   dotazy v tokens.css nikdy nezmenšily, ať se stahovalo cokoli jiného.
+   Dohromady dělaly na 390px displeji přes 100 px prázdna a vytlačovaly
+   CTA pod spodní hranu obrazovky. */
+@media (max-width: 640px) {
+  .kicker {
+    margin-bottom: 0.625rem;
+  }
+  .status-pill {
+    margin-top: 1.125rem;
+  }
+  .bullets,
+  .steps {
+    margin-top: 1.125rem;
+  }
+  .step {
+    padding: 0.7rem 0;
+  }
+  .email-link {
+    margin-top: 1.25rem;
+    /* `white-space: nowrap` výš je na desktopu správně, na 390px displeji ale
+       z e-mailu dělá jeden nezlomitelný token, který přeteče sloupec. */
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .contact-rows {
+    margin-top: 1.5rem;
+  }
+  .footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+  }
+}
+
+/* ── DOTYKOVÉ CÍLE ─────────────────────────────────────────
+   Kontaktní řádky měly 17 px na výšku: trefit e-mail nebo telefon prstem
+   byla loterie — a přitom je to JEDINÁ konverzní akce celého webu.
+   Apple i Google chtějí 44×44. Zvětšuje se to jen na dotyku; na myši by
+   ty výšky rozhodily vertikální rytmus, který je jinak v pořádku. */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 48px;
+    padding: 0.85rem 1.25rem;
+  }
+  .contact-row {
+    min-height: 44px;
+    align-items: center;
+  }
+  .email-link {
+    padding: 0.5rem 0;
+  }
+  /* I atribuce CC-BY je odkaz, na který někdo klikne — a měla 33 px. */
+  .footer a {
+    display: inline-block;
+    padding: 0.75rem 0;
+  }
+}

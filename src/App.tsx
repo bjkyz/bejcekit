@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useRef } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Group } from 'three'
 import Hud from './hud/Hud'
 import Section from './ui/Section'
 import Preloader from './ui/Preloader'
+import SceneBoundary from './ui/SceneBoundary'
 import { SECTIONS } from './content/sections'
 import { detectTier } from './lib/quality'
 import { useReducedMotion } from './lib/hooks'
@@ -37,6 +38,12 @@ export default function App() {
   const tier = useMemo(() => (reduced ? 'off' : detectTier()), [reduced])
   const dragRef = useRef<Group>(null)
 
+  /* Scéna je bonus, ne podmínka. Když spadne, jen o ní přestaneme mluvit:
+     zmizí plátno i lišta průběhu a zbude čitelný web. Viz SceneBoundary. */
+  const [sceneFailed, setSceneFailed] = useState(false)
+  const onSceneError = useCallback(() => setSceneFailed(true), [])
+  const showScene = tier !== 'off' && !sceneFailed
+
   useEffect(() => initScroll(reduced), [reduced])
 
   return (
@@ -47,10 +54,12 @@ export default function App() {
 
       <div className="bg-field" aria-hidden="true" />
 
-      {tier !== 'off' && (
-        <Suspense fallback={null}>
-          <Scene tier={tier} dragRef={dragRef} />
-        </Suspense>
+      {showScene && (
+        <SceneBoundary onError={onSceneError}>
+          <Suspense fallback={null}>
+            <Scene tier={tier} dragRef={dragRef} />
+          </Suspense>
+        </SceneBoundary>
       )}
 
       <main id="obsah">
@@ -62,7 +71,7 @@ export default function App() {
       <Hud tier={tier} />
       <div className="grain" aria-hidden="true" />
 
-      {tier !== 'off' && <Preloader reduced={reduced} />}
+      {showScene && <Preloader reduced={reduced} />}
     </>
   )
 }

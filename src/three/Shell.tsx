@@ -47,20 +47,37 @@ export default function Shell({ tier }: { tier: Tier }) {
   })
 
   if (tier === 'low') {
-    /* Levná varianta. Pozor: tenhle materiál JE v transparentní frontě
-       (depthWrite:false), takže zadní cedule už nejsou zakryté — FacePlates
-       je proto na 'low' tieru schová. */
+    /* ★ „LEVNÁ" VARIANTA, KTERÁ BYLA DRAŽŠÍ NEŽ TA DRAHÁ.
+       Stálo tu `transmission={0.9}` na obyčejném meshPhysicalMaterial. Jenže
+       jakákoli nenulová `transmission` nastartuje ve three vlastní
+       `renderTransmissionPass`: scéna se PŘED každým snímkem vykreslí ještě
+       jednou do render targetu — v PLNÉM rozlišení plátna, HalfFloat, s MSAA
+       a s generováním mipmap. Nejde to zlevnit; `resolution` má jen drei's
+       MeshTransmissionMaterial, tenhle ne.
+
+       Výsledek: nejslabší zařízení na webu (tier 'low' = starý telefon) platilo
+       full-res druhý průchod, zatímco 'mid' si vystačilo s FBO 256×256.
+       Levné patro bylo dražší než střední. Přesně naopak, než mělo být.
+
+       Transmission tady tedy nemá co dělat. Sklo se na 'low' fejkuje průhledností
+       a lomem světla na hranách — jeden průchod, žádný extra target. Vypadá to
+       o třídu hůř, ale běží to na tom, na čem to běžet má.
+
+       Pozor: materiál je v transparentní frontě (depthWrite:false), takže zadní
+       cedule nejsou zakryté — FacePlates je proto na 'low' tieru schová. */
     return (
       <group ref={grp}>
         <mesh>
           <boxGeometry args={[3, 3, 3]} />
           <meshPhysicalMaterial
-            transmission={0.9}
-            thickness={0.5}
-            roughness={0.15}
-            ior={1.5}
-            color="#dff7fb"
+            transmission={0}
             transparent
+            opacity={0.16}
+            roughness={0.12}
+            metalness={0}
+            ior={1.5}
+            reflectivity={0.6}
+            color="#dff7fb"
           />
         </mesh>
       </group>

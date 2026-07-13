@@ -11,6 +11,16 @@ import type { Tier } from '../lib/quality'
    nula CDN. (Draco by si tiše stáhl WASM z gstatic.com.) */
 const MODEL = `${import.meta.env.BASE_URL}models/core.v2.glb`
 
+/* ★ DRUHÝ ARGUMENT = useDraco, A MUSÍ BÝT `false`.
+   Komentář výš tvrdil „nula CDN" — jenže `useGLTF(MODEL)` bere DEFAULTY, a ten
+   pro Draco je `true`. drei proto ke každému načtení připojil DRACOLoader
+   s dekodérem z https://www.gstatic.com/draco/. Zachránilo nás jen to, že
+   v modelu žádný Draco payload není, takže se ta cesta nikdy nespustila.
+   Byla to ale nastražená mina: `connect-src 'self'` v CSP by ten request
+   zablokovala v tu vteřinu, co by kdokoli model re-exportoval s Draco —
+   a padlo by to úplně stejně jako meshopt. Vypínáme to natvrdo. */
+const USE_DRACO = false
+
 /* ★ ZMĚŘENO, NE ODHADNUTO (viz Box3 nad GLB):
    model má maxDim 4.075 jednotky — je tedy VĚTŠÍ než 3jednotková krychle.
    Chceme ho uvnitř skla nechat dýchat → cílíme na ~1.75 jednotky. */
@@ -33,7 +43,7 @@ export default function Core({ tier }: { tier: Tier }) {
   const grp = useRef<Group>(null)
   const inner = useRef<Group>(null)
   const light = useRef<PointLight>(null)
-  const { scene, animations } = useGLTF(MODEL)
+  const { scene, animations } = useGLTF(MODEL, USE_DRACO)
   const { actions } = useAnimations(animations, grp)
 
   /** Jen materiály, které mají doopravdy zářit — ty jediné se animují. */
@@ -128,4 +138,4 @@ export default function Core({ tier }: { tier: Tier }) {
   )
 }
 
-useGLTF.preload(MODEL)
+useGLTF.preload(MODEL, USE_DRACO)

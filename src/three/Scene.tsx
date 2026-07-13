@@ -42,10 +42,26 @@ const GL = {
   powerPreference: 'high-performance' as const,
 }
 
+/**
+ * ★ ZTRÁTA WEBGL KONTEXTU — na mobilu se to DĚJE, není to teoretická situace.
+ * Stačí přepnout na jinou appku, nechat telefon chvíli ležet nebo mít pod tlakem
+ * paměť: OS GPU kontext prostě sebere. three sice zavolá preventDefault a kontext
+ * se obnoví, jenže tím se obnoví jen RENDERER — ne to, co na něm viselo.
+ * Refrakční FBO skla (drei useFBO) i cedule (CanvasTexture) po obnově ukazují
+ * na mrtvé GPU objekty a krychle zůstane černá napořád.
+ *
+ * Jediná spolehlivá odpověď je postavit plátno znovu od nuly: `key` na <Canvas>.
+ * Strop na dva pokusy — když kontext padá pořád dokola, zařízení na to prostě
+ * nemá a další remount by byl jen blikající smyčka. Web funguje i bez krychle.
+ */
+const MAX_RESTORES = 2
+
 export default function Scene({ tier, dragRef }: { tier: Tier; dragRef: React.RefObject<Group | null> }) {
   const [min, max] = dprFor(tier)
-  const [dpr, setDpr] = useState(max)
+  const [dpr, setDpr] = useState(() => Math.min(max, window.devicePixelRatio || 1))
   const [visible, setVisible] = useState(true)
+  const [generation, setGeneration] = useState(0)
+  const restores = useRef(0)
   const wrap = useRef<HTMLDivElement>(null)
 
   sceneState.tier = tier
@@ -102,6 +118,7 @@ export default function Scene({ tier, dragRef }: { tier: Tier; dragRef: React.Re
     // na podkladový <canvas> element. Plátno nesmí být ani tabovatelné.
     <div ref={wrap} className="canvas-layer" aria-hidden="true">
       <Canvas
+        key={generation} // ★ viz MAX_RESTORES — obnova po ztrátě kontextu
         dpr={dpr}
         /* 'demand' by scénu zamrazil uprostřed dojezdu ve chvíli, kdy přestanou
            chodit scroll eventy — my všechno tlumíme, takže potřebujeme 'always'.
@@ -109,6 +126,21 @@ export default function Scene({ tier, dragRef }: { tier: Tier; dragRef: React.Re
         frameloop={visible ? 'always' : 'never'}
         camera={CAMERA}
         gl={GL}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement
+          /* three si `webglcontextlost` odchytává samo (a volá preventDefault,
+             bez kterého by prohlížeč kontext nikdy neobnovil), takže tady jen
+             čekáme na obnovu a postavíme scénu znovu. */
+          canvas.addEventListener(
+            'webglcontextrestored',
+            () => {
+              if (restores.current >= MAX_RESTORES) return
+              restores.current += 1
+              setGeneration((g) => g + 1)
+            },
+            { once: true },
+          )
+        }}
       >
         <color attach="background" args={[VOID.r, VOID.g, VOID.b]} />
 
@@ -119,7 +151,12 @@ export default function Scene({ tier, dragRef }: { tier: Tier; dragRef: React.Re
             sceneState.fps = Math.round(fps) // mutace, ne state → žádný re-render
             // Kvantizace + bail-out: onChange chodí několikrát za vteřinu a syrová
             // float hodnota by pokaždé vyvolala re-render celé Scene.
-            const next = Math.round((min + (max - min) * factor) * 20) / 20
+            // ★ Strop je i devicePixelRatio: dpr se sem předává jako SKALÁR a ten
+            //   R3F (na rozdíl od dvojice [min,max]) nijak neomezuje. Bez tohohle
+            //   se na displeji s DPR 1 kreslilo v 1.5× a zahazovalo se 125 % pixelů
+            //   navíc — supersampling, o který nikdo nežádal.
+            const cap = Math.min(max, window.devicePixelRatio || 1)
+            const next = Math.round((min + (cap - min) * factor) * 20) / 20
             setDpr((cur) => (Math.abs(cur - next) < 0.05 ? cur : next))
           }}
           onFallback={() => setDpr(min)}

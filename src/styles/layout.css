@@ -185,10 +185,30 @@ main {
   margin-top: -0.18em;
 }
 
-/* ── MOBIL ─────────────────────────────────────────────────
+/* ── MOBIL A TABLET ────────────────────────────────────────
    Krychle přestává být pozadím textu a stává se pásem nad ním.
    Text dostane plnou šířku a čitelný podklad. */
 @media (max-width: 1024px) {
+  /* ★★ TOHLE BYL TEN HORIZONTÁLNÍ SCROLL. Nejdražší tři řádky v souboru.
+     Závoje výš jsou pseudo-elementy se ZÁPORNÝM vodorovným odsazením
+     (−3.5rem u bočních sekcí, −8rem u sekce 05). Na desktopu je textový sloupec
+     úzký (5 z 12), takže se závoj pohodlně vejde dovnitř okna a nikdo ho nevidí.
+
+     Na mobilu dostane sloupec plnou šířku (grid-column: 1 / -1) — a závoj tím
+     pádem vyčnívá 56 px (boční sekce) až 128 px (sekce 05) ZA PRAVOU HRANU displeje.
+     Následky, změřené na 390px telefonu:
+       • dokument je 518 px široký místo 390 → stránka jezdí do stran
+       • mobilní prohlížeč roztáhne LAYOUTOVÝ VIEWPORT na těch 518 px, takže
+         každý `position: fixed` prvek (nav, HUD, lišta průběhu, rohové značky)
+         se natáhne na 518 px a půlka jich visí mimo obrazovku
+     Na mobilu je závoj stejně nahrazený gradientem přímo na .section__col níž,
+     takže se tu jen vypne. `content: none` ruší celý pseudo-element. */
+  .section--left .section__col::before,
+  .section--right .section__col::before,
+  .section--center .section__col::before {
+    content: none;
+  }
+
   .section__col,
   .section--right .section__col,
   .section--center .section__col {
@@ -202,15 +222,33 @@ main {
     margin-right: 0;
   }
   .section {
-    /* text dolů, krychle nahoře zůstane vidět */
+    /* Text dolů, krychle nahoře zůstane vidět. Horní odsazení kryje navigaci,
+       spodní pilulku s tečkami — a k tomu bezpečnou zónu (home indicator). */
     align-items: end;
-    padding: 6rem var(--gutter) 6rem;
+    padding: var(--sp-sec-top) var(--gutter) var(--sp-sec-bottom);
   }
   .section__col {
     /* čitelnost přes 3D: jemný závoj přesně pod textem, ne přes celou plochu */
     background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.92) 100%);
-    padding: 2rem 1.25rem 1.5rem;
+    padding: 1.5rem 1.25rem 1.25rem;
     margin: 0 -1.25rem;
     border-radius: 4px;
+  }
+}
+
+/* ── TELEFON NA ŠÍŘKU ──────────────────────────────────────
+   844×390. Na výšku nezbývá nic: 100svh je 390 px a jen navigace s pilulkou
+   sežerou 120 z nich. Sekce se do okna nevejde ani teoreticky, tak se o to
+   ani nepokoušíme — min-height jde dolů, ať se stránka smí normálně rolovat
+   a text není namačkaný. Krychle ustoupí, slovo dostane přednost. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .section {
+    min-height: auto;
+    align-items: center;
+    padding: 4.5rem var(--gutter) 3.5rem;
+  }
+  .section__col {
+    /* Na šířku je řádek dlouhý a špatně se čte — text drží polovinu okna. */
+    max-width: 34rem;
   }
 }

@@ -118,7 +118,13 @@
   --sp-sec-top: 5.5rem;
   --sp-sec-bottom: 6.5rem;
 
-  /* ── LAYOUT ── */
+  /* ── LAYOUT ──
+     ★ ŽÁDNÉ viewport-fit=cover, a tedy ani env(safe-area-inset-*).
+     Bez `cover` drží iOS obsah sám uvnitř bezpečné zóny a všechny insety jsou 0.
+     S `cover` by se stránka roztáhla pod výřez i home indicator a KAŽDÝ okraj
+     (navigace, pilulka, sekce) by si je musel odečítat ručně. Web je celý
+     #08090a, takže jediné, co tím získáme, jsou černé pruhy na černém pozadí.
+     Nulový zisk, spousta nových způsobů, jak si rozbít okraje. */
   --gutter: clamp(1.25rem, 4vw, 4rem);
   --maxw: 90rem;
   --z-bg: 0;
@@ -159,5 +165,42 @@
     /* Panel je pod 820px skrytý → spodní padding se může vrátit dolů. */
     --sp-sec-top: 4.5rem;
     --sp-sec-bottom: 4.5rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ★ TELEFON — ŠÍŘKA, NE VÝŠKA. MUSÍ BÝT AŽ ÚPLNĚ DOLE.
+   Oba dotazy nad tímhle míří na VÝŠKU, protože vznikly kvůli nízkým
+   notebookům. Jenže telefon není nízký notebook — je hlavně ÚZKÝ, a na to
+   se nikdo neptal. Důsledek: iPhone 13 (390×844) spadl do `max-height: 1000px`,
+   dostal nadpis ~55 px, ten se na 390 px zlomil do čtyř řádků a každá sekce
+   přerostla obrazovku o 60–130 px (měřeno: 903–1060 px v okně vysokém 844).
+   Spodek sekce — a s ním CTA — se tím pádem uřízl pod dolní hranou.
+
+   Tenhle blok je poslední, takže na telefonu přebíjí oba výškové. Škáluje
+   podle vw a stahuje rozestupy tak, aby se sekce do okna vešla i česky. */
+@media (max-width: 640px) {
+  :root {
+    --fs-d0: clamp(1.875rem, 7.2vw, 2.5rem);
+    --fs-d1: clamp(1.5rem, 5.8vw, 2rem);
+    --fs-d2: clamp(1.125rem, 5vw, 1.5rem);
+    --fs-sub: 1rem;
+    --fs-body: 0.9375rem;
+    --fs-bullet: 0.875rem;
+    --lh-d0: 1.06;
+    --lh-d1: 1.12;
+    --lh-body: 1.55;
+
+    --sp-bullets-gap: 0.35rem;
+    --sp-bullet-pad: 0.4rem;
+    --sp-body-top: 0.875rem;
+    --sp-deliverable-top: 0.875rem;
+    --sp-stack-top: 0.875rem;
+    --sp-cta-top: 1.125rem;
+
+    /* Nahoře navigace (~68 px), dole pilulka s tečkami (~50 px).
+       Víc si sekce na telefonu dovolit nemůže. */
+    --sp-sec-top: 4.75rem;
+    --sp-sec-bottom: 4.75rem;
   }
 }

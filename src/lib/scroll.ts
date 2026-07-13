@@ -52,12 +52,20 @@ function measure(): void {
  * dočíst spodek — text, který nikdy nepřečte. Proto se v takovém případě
  * automaticky přepne na `proximity`.
  *
+ * ★★ NA DOTYKU SE NESNAPUJE VŮBEC — `null`, ne „jen proximity".
+ * Původně tu proximity byla právě jako ústupek pro telefony. Jenže na telefonu
+ * se česká sekce do okna nevejde skoro nikdy (naměřeno: 900–1020 px v okně
+ * vysokém 844) a proximity má práh 30 %: uživatel dorolluje doprostřed sekce,
+ * pustí prst — a snap ho i s momentum dojezdem odtáhne zpátky na začátek.
+ * Text pod tím zlomem si nepřečte, protože se k němu fyzicky nedostane.
+ * Prst má vždycky přednost před choreografií.
+ *
  * Krychli to nevadí: ta jede podle SPOJITÉHO progresu z offsetTop, ne ze snapu.
  * Snap je leštidlo, ne nosná konstrukce — o to se stará zákon dosednutí v Cube.tsx.
  */
-function snapType(): 'mandatory' | 'proximity' {
-  const coarse = window.matchMedia('(pointer: coarse)').matches
-  return coarse || !allFit ? 'proximity' : 'mandatory'
+function snapType(): 'mandatory' | 'proximity' | null {
+  if (window.matchMedia('(pointer: coarse)').matches) return null
+  return allFit ? 'mandatory' : 'proximity'
 }
 
 function progressFromScroll(y: number): number {
@@ -95,13 +103,35 @@ export function initScroll(reducedMotion: boolean): () => void {
     }
   }
 
+  const coarse = window.matchMedia('(pointer: coarse)').matches
+
   lenis = new Lenis({
     autoRaf: false, // ★ jinak běží Lenis a GSAP na dvou rAF smyčkách a ScrollTrigger
     //   čte o 1–2 snímky starou pozici → viditelný jitter
     lerp: 0.075, // nižší = delší doběh, hedvábnější. Pod ~0.06 už to plave.
     wheelMultiplier: 0.85, // kolečko myši jinak „cuká" po velkých skocích
-    syncTouch: true, // (smoothTouch byl přejmenován)
-    syncTouchLerp: 0.09, // prst má mít okamžitou odezvu, ne gumu
+
+    /**
+     * ★ NA DOTYKU SE SCROLL NEHACKUJE. syncTouch: false, a je to schválně.
+     *
+     * syncTouch znamená, že si Lenis vezme touchmove, zavolá preventDefault
+     * a setrvačnost si dopočítá SÁM v JS. Na desktopu s kolečkem je to výhra.
+     * Na telefonu tím ale přepíšeš to jediné, co dělá nativní scroll opravdu
+     * dobře — a co uživatel zná od prvního dne, co má telefon v ruce:
+     *   • momentum a odpor gumy, na který má prst vypálenou svalovou paměť
+     *   • schovávání a vysouvání adresního řádku (to je vázané na NATIVNÍ scroll;
+     *     když ho odchytíš, lišta zůstane viset a ukradne ~60 px výšky)
+     *   • plynulost — nativní scroll běží na compositoru, tohle jede na JS vlákně
+     *     a při 60fps krychli vedle toho začne škubat
+     * Odměnou za tenhle risk je „hedvábnější" dojezd, kterého si na telefonu
+     * nikdo nevšimne. Špatný obchod.
+     *
+     * Krychli to nevadí: Lenis i bez syncTouch poslouchá nativní scroll a dál
+     * emituje 'scroll' s pozicí i rychlostí, takže choreografie běží dál — a snap
+     * je na dotyku stejně jen 'proximity' (viz snapType()).
+     */
+    syncTouch: !coarse,
+    syncTouchLerp: 0.09,
     touchInertiaExponent: 1.6,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   })
@@ -124,8 +154,10 @@ export function initScroll(reducedMotion: boolean): () => void {
 
   const onResize = () => {
     measure()
-    if (!snap || !lenis) return
-    snap.destroy()
+    if (!lenis) return
+    // Nesmí to viset na `if (!snap) return`: na dotyku je snap null (schválně),
+    // ale po otočení displeje se stejně musí přeměřit i přestavět.
+    snap?.destroy()
     snap = buildSnap(lenis)
   }
   window.addEventListener('resize', onResize)
@@ -141,8 +173,9 @@ export function initScroll(reducedMotion: boolean): () => void {
   }
 }
 
-function buildSnap(l: Lenis): Snap {
+function buildSnap(l: Lenis): Snap | null {
   const type = snapType()
+  if (type === null) return null // dotyk — viz snapType()
   const s = new Snap(l, {
     type,
     distanceThreshold: '30%',

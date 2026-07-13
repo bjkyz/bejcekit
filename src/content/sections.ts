@@ -54,7 +54,7 @@ export const SECTIONS: Section[] = [
     plateNum: '00',
     headline: 'Weby, které vydělávají. IT, které nespadne.',
     body:
-      'Jsem Jiří Bejček, nezávislý IT inženýr. Stavím weby, které Google najde a zákazníci neopustí. Spravuji servery, co běží i ve tři ráno. A nasazuji AI tam, kde reálně šetří hodiny. Jeden člověk místo agentury: mluvíte přímo s tím, kdo tu práci dělá.',
+      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazníci neopustí. Nasazuji AI a jazykové modely tam, kde reálně šetří hodiny. A spravuji servery, co běží i ve tři ráno. Jeden člověk místo agentury: mluvíte přímo s tím, kdo tu práci dělá.',
     bullets: [
       'Pevná cena a termín. Písemně, ještě než začnu.',
       'Odezva do 24 hodin, i o víkendu.',
@@ -121,12 +121,12 @@ export const SECTIONS: Section[] = [
     plateNum: '03',
     headline: 'Práci, která se opakuje, ať dělá stroj.',
     body:
-      'Automatizace a AI tam, kde ušetří hodiny. Ne tam, kde se dobře vyjímá na poradě. Nejdřív spočítáme, kolik hodin měsíčně to ušetří a co bude stát provoz. Teprve pak to stavím. Když čísla nevyjdou, řeknu vám to.',
+      'Jako AI inženýr nasazuji jazykové modely tam, kde ušetří hodiny. Ne tam, kde se dobře vyjímají na poradě. Nejdřív spočítáme, kolik hodin měsíčně to ušetří a co bude stát provoz. Teprve pak to stavím. Když čísla nevyjdou, řeknu vám to.',
     bullets: [
-      'Automatizace procesů a integrace systémů. n8n, API, webhooky.',
-      'AI asistent nad vašimi dokumenty a daty. Odpovídá z vašich podkladů, ne z internetu.',
+      'AI asistenti nad vašimi dokumenty a daty (RAG). Odpovídají z vašich podkladů, ne z internetu.',
+      'Platformy pro SEO. Tvorba a optimalizace obsahu ve velkém, řízená daty.',
+      'Automatizace procesů a integrace systémů. n8n, API, webhooky, napojení na CRM.',
       'Zpracování faktur, e-mailů a formulářů bez ručního přepisování.',
-      'Napojení na CRM. Třídění poptávek, příprava nabídek, hlídání termínů.',
     ],
     deliverable: {
       label: 'Co dostanete',

@@ -114,6 +114,27 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── DŮKAZ ───────────────────────────────────────────────────
+   Ověřitelné tvrzení bije chvástání. Proto je to jeden ostrý řádek,
+   ne barevný banner: působí jako fakt, ne jako reklama. */
+.proof {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: var(--sp-deliverable-top);
+  font-family: var(--font-sans);
+  font-size: var(--fs-bullet);
+  line-height: 1.5;
+  color: var(--tx-1);
+  font-weight: 500;
+}
+.proof__mark {
+  color: var(--green);
+  font-weight: 700;
+  flex: none;
+  line-height: 1.4;
+}
+
 /* ── VÝSTUP ──────────────────────────────────────────────── */
 /* VÝSTUP = co klient reálně dostane. Pozitivní fakt → zelená. */
 .deliverable {

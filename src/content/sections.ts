@@ -25,6 +25,8 @@ export interface Section {
   headline: string
   body: string
   bullets: string[]
+  /** Ověřitelný důkaz místo tvrzení. Nejsilnější věc, kterou web má. */
+  proof?: string
   /** Co klient reálně dostane. Zelený rámeček. */
   deliverable?: { label: string; text: string }
   /** Kroky procesu (jen sekce 04). */
@@ -69,21 +71,22 @@ export const SECTIONS: Section[] = [
     kicker: '[ 01 / WEB ]',
     plateCode: 'WEB',
     plateNum: '01',
-    headline: 'Weby, které Google najde a lidé neopustí.',
+    headline: 'SEO, které vás dostane nahoru.',
     body:
-      'Rychlost a SEO nejsou příplatek, ale součást stavby. Technicky čistý web, který vyhledávače bez problémů projdou, načte se do vteřiny a nepustí návštěvníka pryč. Bez šablon, bez pluginového bahna a bez technického dluhu, který za rok zaplatíte dvakrát.',
+      'SEO nedělám jako přílepek po dokončení webu. Je součástí stavby od prvního řádku. Proto weby, které postavím, vyhledávače najdou a lidé je neopustí. Čtyři důvody, proč to funguje:',
     bullets: [
-      'SEO a Core Web Vitals. Struktura, rychlost a data pro vyhledávače. Měřitelně, ne slibem.',
-      'Firemní weby a prezentace. Obsah upravíte sami, bez programátora.',
-      'Webové aplikace a interní nástroje. Role, reporty, napojení na vaše systémy.',
-      'E-shopy a portály propojené s ERP, skladem nebo účetnictvím.',
-      'Převzetí webu po jiném dodavateli. Audit, stabilizace, dokumentace.',
+      'Rychlost je rankovací faktor. Core Web Vitals v zeleném, ne v oranžové.',
+      'Technická čistota. Sémantické HTML, strukturovaná data, sitemap, čisté URL.',
+      'Google i Seznam. Český trh není jen Google, většina šablon to ignoruje.',
+      'Měření od prvního dne. Search Console, pozice, konverze. Vidíte, jestli to funguje.',
     ],
+    /** Nejsilnější argument webu: ověřitelný důkaz místo tvrzení. */
+    proof: 'Důkaz: web, který právě čtete, má Lighthouse 97 / 100 / 100 / 100. Změřte si to sami.',
     deliverable: {
       label: 'Co dostanete',
-      text: 'Nasazený běžící web, Core Web Vitals v zeleném, repozitář a dokumentaci. Plus měření, ať vidíte, že to funguje.',
+      text: 'Nasazený běžící web, Core Web Vitals v zeleném, napojenou Search Console a měsíční report pozic.',
     },
-    stack: ['SEO', 'Core Web Vitals', 'React', 'TypeScript', 'Node.js', 'PostgreSQL'],
+    stack: ['SEO', 'Core Web Vitals', 'Search Console', 'React', 'TypeScript', 'Node.js'],
     cta: { label: 'Chci web, který vydělává', href: '#kontakt' },
     align: 'left',
     subsystem: 'WEB & SEO',

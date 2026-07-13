@@ -86,6 +86,13 @@ export default function Section({
             )
           )}
 
+          {s.proof && (
+            <p className="proof reveal" style={delay(4.3, 6)}>
+              <span className="proof__mark" aria-hidden="true">✓</span>
+              {s.proof}
+            </p>
+          )}
+
           {s.deliverable && (
             <p className="deliverable reveal" style={delay(4.6, 6)}>
               <span className="deliverable__k">{s.deliverable.label}</span>
@@ -197,12 +204,21 @@ function Footer() {
   return (
     <footer className="footer reveal" style={delay(5, 6)}>
       <p>© {new Date().getFullYear()} Jiří Bejček · bejcek.it · Postaveno v Reactu a three.js.</p>
-      {/* CC-BY atribuce je SMLUVNÍ POVINNOST, ne zdvořilost. Neodstraňovat. */}
+      {/* ★ CC BY 4.0 ATRIBUCE. Není to zdvořilost, ale podmínka licence, a musí
+          obsahovat VŠECHNY ČTYŘI věci: název díla, autora, licenci s odkazem
+          a informaci, že dílo bylo UPRAVENO. Model jsme upravili (přebarvené
+          materiály, překomprimovaná geometrie), takže bez posledního bodu by
+          atribuce byla neúplná a licence porušená. Neodstraňovat, nezkracovat. */}
       <p>
-        3D model „Primary Ion Drive“:{' '}
+        3D model{' '}
+        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf" target="_blank" rel="noreferrer">
+          „Primary Ion Drive“
+        </a>{' '}
+        od Mikea Murdocka, licence{' '}
         <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
-          Mike Murdock, CC BY 4.0
+          CC BY 4.0
         </a>
+        . Model byl upraven (barvy materiálů, komprese geometrie).
       </p>
     </footer>
   )

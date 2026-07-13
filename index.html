@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="cs" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>bejcek.it — Weby a aplikace, IT infrastruktura, AI a automatizace</title>
+    <meta
+      name="description"
+      content="Jiří Bejček — nezávislý IT inženýr. Stavím weby a webové aplikace, spravuji infrastrukturu a nasazuji AI tam, kde reálně šetří hodiny. Pevná cena, přímá komunikace, odezva do 24 hodin."
+    />
+    <meta name="theme-color" content="#08090a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:title" content="bejcek.it — Technologie, které drží." />
+    <meta
+      property="og:description"
+      content="Weby a aplikace · IT infrastruktura · AI a automatizace. Jeden inženýr místo agentury."
+    />
+
+    <!-- Oba fonty preloadujeme, jinak dostaneme FOUT přímo na počítadle preloaderu. -->
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Hero model — ať se stahuje souběžně s JS, ne až po něm. -->
+    <link rel="preload" href="/models/core.v1.glb" as="fetch" type="model/gltf-binary" crossorigin />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "bejcek.it — Jiří Bejček",
+        "description": "Weby a webové aplikace, správa IT infrastruktury, AI a automatizace procesů.",
+        "email": "jiri.bejcek@tipit.cz",
+        "areaServed": "CZ",
+        "knowsLanguage": "cs",
+        "makesOffer": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Weby a webové aplikace" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "IT podpora a správa infrastruktury" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI a automatizace procesů" } }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

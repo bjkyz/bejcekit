@@ -1,0 +1,348 @@
+/* ── TYPOGRAFICKÉ ROLE ───────────────────────────────────── */
+.display {
+  font-family: var(--font-sans);
+  font-size: var(--fs-d0);
+  font-weight: 600;
+  letter-spacing: var(--ls-d0);
+  line-height: var(--lh-d0);
+  color: var(--tx-1);
+  text-wrap: balance;
+}
+
+.headline {
+  font-family: var(--font-sans);
+  font-size: var(--fs-d1);
+  font-weight: 600;
+  letter-spacing: var(--ls-d1);
+  line-height: var(--lh-d1);
+  color: var(--tx-1);
+  text-wrap: balance;
+}
+
+.body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--tx-2);
+  max-width: 46ch;
+  margin-top: var(--sp-body-top);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-3); /* --tx-3, ne --tx-4: tohle nese význam a musí projít AA */
+}
+
+/* ── KICKER ──────────────────────────────────────────────── */
+.kicker {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--neon-2);
+}
+
+/* ── ODRÁŽKY ─────────────────────────────────────────────── */
+.bullets {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: var(--sp-bullets-gap);
+}
+.bullet {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  align-items: start;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+  color: var(--tx-2);
+  padding-bottom: var(--sp-bullet-pad);
+  border-bottom: 1px solid var(--line-1);
+}
+.bullets--plain .bullet {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.bullet__i {
+  color: var(--neon-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── VÝSTUP ──────────────────────────────────────────────── */
+.deliverable {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+  color: var(--tx-1);
+  border: 1px solid var(--line-2);
+  border-left: 2px solid var(--neon-2);
+  padding: 0.75rem 1rem;
+  margin-top: var(--sp-deliverable-top);
+  background: rgba(15, 163, 184, 0.05);
+}
+
+/* ── CHIPY SE STACKEM ────────────────────────────────────── */
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: var(--sp-stack-top);
+}
+.stack__chip {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-3);
+  border: 1px solid var(--line-1);
+  padding: 0.3rem 0.6rem;
+  border-radius: 2px;
+}
+
+/* ── CTA ─────────────────────────────────────────────────── */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: var(--sp-cta-top);
+}
+.section--center .cta-row {
+  justify-content: center;
+}
+
+/* Magnetické tlačítko: vnější obal je jen zvětšená zásahová plocha (20px),
+   aby magnet chytal dřív, než kurzor dojede na vizuální hranu. */
+.magnetic {
+  display: inline-block;
+  padding: 20px;
+  margin: -20px;
+  will-change: transform;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 0.9rem 1.4rem;
+  border: 1px solid var(--neon-2);
+  color: var(--neon-2);
+  border-radius: 2px;
+  position: relative;
+  transition:
+    color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui),
+    border-color var(--d-hover) var(--e-ui);
+  will-change: transform;
+}
+.btn::after {
+  /* záře se vykreslí jednou a animuje se jen opacity — blur v box-shadow
+     by se překresloval každý snímek */
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 2px;
+  box-shadow: var(--glow-soft);
+  opacity: 0;
+  transition: opacity var(--d-lift) var(--e-ui);
+  pointer-events: none;
+}
+.btn:hover::after {
+  opacity: 1;
+}
+.btn:hover {
+  background: rgba(79, 216, 232, 0.08);
+  color: var(--neon-1);
+}
+.btn:active {
+  transform: scale(0.98);
+  transition-duration: var(--d-press);
+}
+
+/* Vyplněné CTA existuje na celém webu POUZE na sekci 05. */
+.btn--solid {
+  background: var(--neon-2);
+  color: var(--bg-0);
+  font-weight: 600;
+}
+.btn--solid:hover {
+  background: var(--neon-1);
+  color: var(--bg-0);
+}
+
+.btn--ghost {
+  border-color: var(--line-2);
+  color: var(--tx-3);
+}
+.btn--ghost:hover {
+  border-color: var(--line-3);
+  color: var(--tx-1);
+  background: transparent;
+}
+
+/* ── PROCES: čtyřřádková inženýrská tabulka ──────────────── */
+.steps {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line-1);
+}
+.step {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line-1);
+  align-items: baseline;
+}
+.step__i {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  color: var(--neon-3);
+  letter-spacing: var(--ls-label);
+  font-variant-numeric: tabular-nums;
+}
+.step__t {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+  color: var(--tx-2);
+}
+.step__t b {
+  color: var(--tx-1);
+  font-weight: 600;
+}
+
+/* ── KONTAKT ─────────────────────────────────────────────── */
+.email-link {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--fs-d2);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--tx-1);
+  margin-top: 2rem;
+  position: relative;
+  white-space: nowrap;
+}
+.email-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.1em;
+  height: 2px;
+  width: 100%;
+  background: var(--neon-2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 500ms var(--e-out-expo);
+}
+.email-link:hover::after {
+  transform: scaleX(1);
+}
+.email-link:hover {
+  color: var(--neon-1);
+}
+.email-link.is-copied {
+  color: var(--neon-2);
+}
+
+.contact-rows {
+  margin-top: 2.5rem;
+  display: grid;
+  gap: 0.5rem;
+  max-width: 32rem;
+  width: 100%;
+}
+.contact-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+}
+.contact-row__k {
+  color: var(--tx-3);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-label);
+}
+.contact-row__dots {
+  border-bottom: 1px dotted var(--tx-4); /* ornament — smí být pod AA */
+  transform: translateY(-0.25em);
+}
+.contact-row__v {
+  color: var(--tx-2);
+  transition: color var(--d-hover) var(--e-ui);
+}
+a.contact-row:hover .contact-row__v {
+  color: var(--neon-2);
+}
+
+.footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: 1.8;
+  color: var(--tx-4); /* ornament */
+  text-align: center;
+}
+.footer a {
+  color: var(--tx-3);
+}
+.footer a:hover {
+  color: var(--neon-2);
+}
+
+/* ── ÚCHOP (jen sekce 00) ──────────────────────────────────
+   Plocha kryje krychli, ale leží POD textovým sloupcem (z-index 0 vs 1).
+   Kdyby byla nad ním, tiše by textu kradla kliky i označování — a vypadalo by
+   to jako chyba ve stylech. Táhnout jde tedy všude po krychli mimo text. */
+.grab-plate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(72vmin, 680px);
+  height: min(72vmin, 680px);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  pointer-events: auto;
+  z-index: 0;
+}
+.grab-plate:active {
+  cursor: grabbing;
+}
+
+/* Nápověda patří DOLŮ pod obsah, ne doprostřed přes odrážky. */
+.grab-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 2.5rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-4);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 600ms var(--e-out-expo);
+  pointer-events: none;
+}
+.grab-hint.is-on {
+  opacity: 1;
+}
+
+/* Na dotyku je úchop mrtvý — tam scroll patří prstu. */
+@media (hover: none) {
+  .grab-plate,
+  .grab-hint {
+    display: none;
+  }
+}

@@ -1,0 +1,193 @@
+/* ═══════════════════════════════════════════════════════════
+   ČTYŘVRSTVÝ STOH + KÁZEŇ NA POINTER-EVENTS.
+   Když se tohle udělá obráceně, celý web přestane jít klikat
+   způsobem, který vypadá jako chyba ve stylech. Proto:
+   plátno je VŽDY pointer-events:none, výjimky se opt-innou.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Šířku/výšku nastavuje Scene.tsx z documentElement.clientWidth/Height — na mobilu
+   se layoutový viewport (podle kterého se sází `inset: 0`) liší od viditelného
+   a plátno by bylo širší než obrazovka. Tady jen kotva a fallback. */
+.canvas-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-canvas);
+  pointer-events: none; /* jinak spolkne každý klik na každý odkaz nad sebou */
+  overflow: hidden;
+}
+.canvas-layer canvas {
+  display: block;
+}
+
+main {
+  position: relative;
+  z-index: var(--z-main);
+}
+
+/* ── SEKCE ──────────────────────────────────────────────── */
+.section {
+  min-height: 100svh; /* svh, ne vh — vh je pod mobilní URL lištou špatně a skáče */
+  display: grid;
+  align-items: center;
+  /* Dole je víc místa než nahoře: sedí tam fixní stavový panel a nesmí na něj
+     spadnout obsah. Hodnoty jsou vyladěné podle měření — při 6/7rem přetékala
+     sekce WEB i na 1920×1080. */
+  padding: var(--sp-sec-top) var(--gutter) var(--sp-sec-bottom);
+  position: relative;
+}
+
+.section__grid {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0 1.5rem;
+  position: relative;
+  z-index: 1; /* nad .grab-plate (z-index 0) — text musí zůstat klikatelný */
+}
+
+/* Sloupec s textem. Krychle drží střed, text uhýbá do stran. */
+.section__col {
+  grid-column: 2 / span 5;
+}
+.section--right .section__col {
+  grid-column: 7 / span 5;
+}
+.section--center .section__col {
+  grid-column: 3 / span 8;
+  text-align: center;
+  justify-items: center;
+}
+.section--center .body,
+.section--center .sub {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Sekce 00 a 05 mají text PŘES STŘED, tedy přímo přes krychli. Bez podkladu je
+   text nad zářícím jádrem nečitelný. Měkký radiální závoj: uprostřed skoro krytý,
+   k okrajům mizí do ztracena — takže krychle kolem textu pořád prosvítá a nevznikne
+   „krabice na text". */
+.section--center .section__col {
+  position: relative;
+  isolation: isolate;
+}
+.section--center .section__col::before {
+  content: '';
+  position: absolute;
+  inset: -5rem -8rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    56% 50% at 50% 50%,
+    rgba(8, 9, 10, 0.72) 0%,
+    rgba(8, 9, 10, 0.55) 48%,
+    rgba(8, 9, 10, 0.24) 70%,
+    transparent 84%
+  );
+}
+/* Boční sloupce potřebují závoj taky — text přebíhá přes hranu krychle a bez
+   podkladu tam ztratí kontrast. Gradient mizí směrem do středu, takže krychli
+   nezakryje, jen pod textem ztmaví pozadí. */
+.section--left .section__col,
+.section--right .section__col {
+  position: relative;
+  isolation: isolate;
+}
+.section--left .section__col::before,
+.section--right .section__col::before {
+  content: '';
+  position: absolute;
+  inset: -2rem -3.5rem;
+  z-index: -1;
+  pointer-events: none;
+}
+.section--left .section__col::before {
+  background: linear-gradient(
+    to right,
+    rgba(8, 9, 10, 0.84) 0%,
+    rgba(8, 9, 10, 0.7) 50%,
+    rgba(8, 9, 10, 0.3) 80%,
+    transparent 100%
+  );
+}
+.section--right .section__col::before {
+  background: linear-gradient(
+    to left,
+    rgba(8, 9, 10, 0.84) 0%,
+    rgba(8, 9, 10, 0.7) 50%,
+    rgba(8, 9, 10, 0.3) 80%,
+    transparent 100%
+  );
+}
+
+.section--center .section__col > * {
+  position: relative;
+}
+
+/* Kde je vidět stavový panel (levý dolní roh), tam mu sekce MUSÍ vyhradit
+   místo — jinak na něj spadne CTA sekcí WEB a AI. Změřeno, ne odhadnuto:
+   panel je ~120px vysoký včetně odsazení, rezervujeme 8.5rem = 136px. */
+@media (min-width: 1025px) and (min-height: 821px) {
+  .section {
+    padding-bottom: 9.5rem;
+  }
+}
+
+/* ── REVEAL ─────────────────────────────────────────────────
+   20px, ne 100px. Velký posun je nejhlasitější amatérský signál. */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity var(--d-reveal) var(--e-out-expo),
+    transform var(--d-reveal) var(--e-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ČESKÁ MASKA ŘÁDKU. Bez toho padding overflow:hidden UŘÍZNE háčky
+   nad „Řešíme", „Přímá", „Zálohování". Přesně tak se pozná web
+   postavený na anglické šabloně. */
+.line-mask {
+  overflow: hidden;
+  padding-top: 0.18em;
+  margin-top: -0.18em;
+}
+
+/* ── MOBIL ─────────────────────────────────────────────────
+   Krychle přestává být pozadím textu a stává se pásem nad ním.
+   Text dostane plnou šířku a čitelný podklad. */
+@media (max-width: 1024px) {
+  .section__col,
+  .section--right .section__col,
+  .section--center .section__col {
+    grid-column: 1 / -1;
+    text-align: left;
+    justify-items: start;
+  }
+  .section--center .body,
+  .section--center .sub {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .section {
+    /* text dolů, krychle nahoře zůstane vidět */
+    align-items: end;
+    padding: 6rem var(--gutter) 6rem;
+  }
+  .section__col {
+    /* čitelnost přes 3D: jemný závoj přesně pod textem, ne přes celou plochu */
+    background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.92) 100%);
+    padding: 2rem 1.25rem 1.5rem;
+    margin: 0 -1.25rem;
+    border-radius: 4px;
+  }
+}

@@ -1,0 +1,144 @@
+/* ═══════════════════════════════════════════════════════════════
+   JEDINÝ ZDROJ PRAVDY. Každý hex, easing, doba a velikost písma.
+   Tmavá, do studena posunutá — aby v ní azurová seděla přirozeně.
+   Jedna akcentová rodina. Jedna modrá (odkazy/focus). Jedna oranžová (2 užití).
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ── POZADÍ — nikdy #000 (na OLEDu se rozmazává při scrollu a nemá kam stoupat) ── */
+  --bg-0: #08090a;
+  --bg-1: #0d0f11;
+  --bg-2: #131619;
+  --bg-3: #1a1e22;
+  --bg-4: #23282d;
+
+  /* ── VLASOVÉ LINKY — jen alfa, nikdy plný hex (skládají se přes plátno) ── */
+  --line-1: rgba(255, 255, 255, 0.06);
+  --line-2: rgba(255, 255, 255, 0.1);
+  --line-3: rgba(255, 255, 255, 0.16);
+
+  /* ── TEXT ── */
+  --tx-1: #f7f8f8; /* nadpisy       18.5:1 */
+  --tx-2: #d0d6e0; /* text          13:1   */
+  --tx-3: #8a8f98; /* mono popisky  6.3:1  ✓ WCAG AA */
+  --tx-4: #62666d; /* 3.3:1 — NEPROJDE AA. JEN ORNAMENT: tečkované vodiče,
+                      řádek s FPS/CC-BY, mřížka. Nikdy nosný text. */
+
+  /* ── NEON — jedna rodina, čtyři stupně. Rozpočet akcentu < 5 % plochy. ── */
+  --neon-1: #b8f5ff; /* nejteplejší: puls po hraně, hover */
+  --neon-2: #4fd8e8; /* ★ ZNAČKA. Emise jádra, hrany krychle, aktivní tick, CTA. 11.8:1 */
+  --neon-3: #0fa3b8; /* konstrukce: rohové značky, podtržení, linky */
+  --neon-4: #06414a; /* pata záře pod krychlí */
+
+  --blue: #52aeff; /* POUZE odkazy + focus ring */
+  --amber: #ffb224; /* PŘESNĚ DVĚ UŽITÍ NA CELÉM WEBU:
+                       1. blikající ● LIVE tečka
+                       2. řetězec „>> PŘECHOD 03 → 04"
+                       Nic jiného na webu není teplé. Ta vzácnost je důvod,
+                       proč to čte jako varovná kontrolka a ne jako dekorace. */
+
+  /* ── ZÁŘE — velký blur, ZÁPORNÝ spread. Nikdy vrstvené text-shadow. ── */
+  --glow-soft: 0 0 40px -8px rgba(79, 216, 232, 0.35);
+  --glow-hard: 0 0 0 1px rgba(79, 216, 232, 0.3), 0 0 24px -6px rgba(79, 216, 232, 0.45);
+  --glow-text: 0 0 24px rgba(79, 216, 232, 0.28);
+  --focus: 0 0 0 2px rgba(82, 174, 255, 0.45);
+
+  --elev-1: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --elev-2: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 64px rgba(8, 9, 10, 0.4);
+
+  /* ── POHYB ── */
+  --e-out-expo: cubic-bezier(0.16, 1, 0.3, 1); /* THE křivka. Každý reveal. */
+  --e-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --e-inout-expo: cubic-bezier(0.87, 0, 0.13, 1); /* jen opona preloaderu */
+  --e-ui: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --e-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --d-press: 100ms;
+  --d-hover: 160ms;
+  --d-lift: 240ms;
+  --d-reveal: 700ms;
+  --d-roll: 600ms;
+  --d-pulse: 700ms;
+  --d-curtain: 1100ms;
+  --d-ignite: 1400ms;
+
+  /* ── TYPOGRAFIE ── */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-d0: clamp(2.875rem, 1rem + 8vw, 6.125rem); /* H1 — jen sekce 00 */
+  --fs-d1: clamp(2.1875rem, 1rem + 5.5vw, 4.75rem); /* H2 */
+  --fs-d2: clamp(1.5rem, 0.5rem + 3.6vw, 3.25rem); /* e-mail na 05 */
+  --fs-sub: clamp(1.125rem, 1rem + 0.9vw, 1.375rem);
+  --fs-body: 0.9375rem;
+  --fs-mono: 0.75rem;
+  --fs-label: 0.6875rem;
+
+  /* Prokládání. Jediné místo, kde jde do plusu, je --ls-label. */
+  --ls-d0: -0.04em;
+  --ls-d1: -0.035em;
+  --ls-sub: -0.01em;
+  --ls-label: 0.12em;
+
+  /* ČESKÝ ŘÁDKOVÝ PROKLAD: ne 0.89, co si dovolí anglická display typografie.
+     Při 98px a -0.04em by háčky ě/š/č/ř/ž kolidovaly s dotahy řádku nad nimi. */
+  --lh-d0: 1;
+  --lh-d1: 1.04;
+  --lh-sub: 1.35;
+  --lh-body: 1.6;
+  --lh-mono: 1.5;
+
+  /* ── ROZESTUPY (řídí je média dotazy níž; komponenty na ně jen sahají) ──
+     ★ POZOR: média dotaz NEZVYŠUJE SPECIFICITU. Kdyby tenhle soubor přebíjel
+     přímo .bullets/.body/..., pozdější sections.css by ho stejně převálcoval
+     (tokens.css se importuje PRVNÍ). Proto se tu mění JEN proměnné na :root —
+     ty pozdější soubory nepřepisují. */
+  --sp-bullets-gap: 0.625rem;
+  --sp-bullet-pad: 0.625rem;
+  --sp-body-top: 1.125rem;
+  --sp-deliverable-top: 1.25rem;
+  --sp-stack-top: 1.125rem;
+  --sp-cta-top: 1.5rem;
+  --sp-sec-top: 5.5rem;
+  --sp-sec-bottom: 6.5rem;
+
+  /* ── LAYOUT ── */
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+  --maxw: 90rem;
+  --z-bg: 0;
+  --z-canvas: 1;
+  --z-main: 2;
+  --z-hud: 3;
+  --z-preloader: 10;
+}
+
+/* ★ Sekce se musí VEJÍT do 100svh, jinak text spadne na stavový panel.
+   Nejdelší sekce (AI, WEB) mají nadpis + odstavec + 4 odrážky + VÝSTUP + stack + CTA.
+   Na běžném notebooku 1440×900 se to v plné velikosti nevejde — proto se od 1000px
+   výšky dolů zmenšuje displej i rozestupy. Práh je 1000px, ne 860px: 900px je
+   ta nejběžnější výška notebooku a musí spadnout do sevřené varianty. */
+@media (max-height: 1000px) {
+  :root {
+    --fs-d0: clamp(2.25rem, 4.6vh + 1rem, 4rem);
+    --fs-d1: clamp(1.75rem, 3.6vh + 0.75rem, 3.25rem);
+    --fs-body: 0.875rem;
+    --lh-body: 1.55;
+    /* Nejtěsnější reálný případ: 1440×900 = nejdelší sekce (WEB) + viditelný panel. */
+    --sp-bullets-gap: 0.375rem;
+    --sp-bullet-pad: 0.375rem;
+    --sp-body-top: 0.875rem;
+    --sp-deliverable-top: 0.75rem;
+    --sp-stack-top: 0.75rem;
+    --sp-cta-top: 0.875rem;
+  }
+}
+@media (max-height: 820px) {
+  :root {
+    --fs-d0: clamp(2rem, 4vh + 0.75rem, 3rem);
+    --fs-d1: clamp(1.5rem, 3vh + 0.6rem, 2.5rem);
+    --lh-body: 1.45;
+    --lh-mono: 1.45;
+    /* Panel je pod 820px skrytý → spodní padding se může vrátit dolů. */
+    --sp-sec-top: 4.5rem;
+    --sp-sec-bottom: 4.5rem;
+  }
+}

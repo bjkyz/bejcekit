@@ -1,0 +1,350 @@
+/* HUD je inertní kontejner. Děti se do klikání opt-innou samy. */
+.hud {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-hud);
+  pointer-events: none;
+}
+.hud > * {
+  pointer-events: auto;
+}
+/* ★ Cokoli v HUD, co není interaktivní, MUSÍ mít pointer-events: none.
+   Stavový panel je dekorace (aria-hidden), ale bez tohohle by svým obdélníkem
+   v levém dolním rohu tiše kradl kliky CTA tlačítkům pod sebou — a vypadalo by
+   to jako mrtvé tlačítko, ne jako chyba ve stylech. */
+.hud > .frame,
+.hud > .rail,
+.hud > .status {
+  pointer-events: none;
+}
+.hud .rail a {
+  pointer-events: auto;
+}
+
+/* ── NAVIGACE ────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem var(--gutter);
+  mix-blend-mode: normal;
+}
+.nav__mark {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tx-1);
+}
+.nav__mark b {
+  color: var(--neon-2);
+  font-weight: 600;
+}
+.nav__links {
+  display: flex;
+  gap: 1.75rem;
+  align-items: center;
+}
+.nav__link {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-3);
+  transition: color var(--d-hover) var(--e-ui);
+  position: relative;
+}
+.nav__link:hover {
+  color: var(--tx-1);
+}
+.nav__link.is-active {
+  color: var(--neon-2);
+}
+.nav__cta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--neon-2);
+  border: 1px solid var(--line-2);
+  padding: 0.55rem 0.9rem;
+  border-radius: 2px;
+  transition:
+    border-color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui);
+}
+.nav__cta:hover {
+  border-color: var(--neon-2);
+  background: rgba(79, 216, 232, 0.08);
+}
+@media (max-width: 800px) {
+  .nav__links {
+    display: none;
+  }
+}
+
+/* ── ROHOVÉ ZNAČKY ──────────────────────────────────────────
+   Čtyři rohy z conic-gradientů — žádné pseudo-elementy, žádný DOM navíc.
+   Ramena povyrostou během přechodu mezi stěnami. */
+@property --bracket {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 14px;
+}
+.frame {
+  position: fixed;
+  inset: 1.25rem;
+  --bracket: 14px;
+  transition: --bracket 400ms var(--e-out-expo);
+}
+.frame.is-transit {
+  --bracket: 22px;
+}
+.frame span {
+  position: absolute;
+  width: var(--bracket);
+  height: var(--bracket);
+  border-color: var(--neon-3);
+  border-style: solid;
+  border-width: 0;
+  transition: border-color var(--d-hover) var(--e-ui);
+}
+.frame span:nth-child(1) {
+  top: 0;
+  left: 0;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.frame span:nth-child(2) {
+  top: 0;
+  right: 0;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+.frame span:nth-child(3) {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+.frame span:nth-child(4) {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+.frame.is-transit span {
+  border-color: var(--neon-2);
+}
+
+/* ── PRAVÁ LIŠTA ─────────────────────────────────────────── */
+.rail {
+  position: fixed;
+  right: calc(var(--gutter) * 0.6);
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 1.1rem;
+  justify-items: end;
+}
+.rail__tick {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--tx-4);
+  transition: color var(--d-hover) var(--e-ui);
+}
+.rail__tick:hover {
+  color: var(--tx-2);
+}
+.rail__num {
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateX(4px);
+  transition:
+    opacity var(--d-hover) var(--e-ui),
+    transform var(--d-hover) var(--e-ui);
+}
+.rail__tick:hover .rail__num,
+.rail__tick.is-active .rail__num {
+  opacity: 1;
+  transform: none;
+}
+.rail__bar {
+  display: block;
+  width: 18px;
+  height: 1px;
+  background: var(--line-3);
+  transition:
+    width var(--d-lift) var(--e-out-expo),
+    background-color var(--d-lift) var(--e-ui);
+}
+.rail__tick.is-active .rail__bar {
+  width: 34px;
+  background: var(--neon-2);
+  box-shadow: var(--glow-soft);
+}
+.rail__tick.is-active {
+  color: var(--neon-2);
+}
+
+/* Na mobilu se lišta překlopí do vodorovných teček dole — hlavní navigace. */
+@media (max-width: 1024px) {
+  .rail {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 1.25rem;
+    transform: translateX(-50%);
+    grid-auto-flow: column;
+    gap: 0.75rem;
+    justify-items: center;
+    background: rgba(8, 9, 10, 0.72);
+    backdrop-filter: blur(8px);
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--line-1);
+    border-radius: 999px;
+  }
+  .rail__num {
+    display: none;
+  }
+  .rail__bar {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .rail__tick.is-active .rail__bar {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* ── STAVOVÝ PANEL ───────────────────────────────────────── */
+.status {
+  position: fixed;
+  left: var(--gutter);
+  bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  line-height: 1.9;
+  color: var(--tx-3);
+  min-width: 22rem;
+  font-variant-numeric: tabular-nums;
+}
+.status__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--tx-2);
+  text-transform: uppercase;
+}
+.status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex: none;
+  animation: blink 2s var(--e-ui) infinite;
+}
+@keyframes blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0.25;
+  }
+}
+.status__transit {
+  color: var(--amber);
+  text-transform: uppercase;
+}
+.status__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: baseline;
+  text-transform: uppercase;
+}
+.status__dots {
+  border-bottom: 1px dotted var(--tx-4);
+  transform: translateY(-0.25em);
+}
+.status__v {
+  color: var(--tx-3);
+}
+/* Jediný ornamentální řádek na webu. Tady žije i povinná CC-BY atribuce. */
+.status__meta {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line-1);
+  color: var(--tx-4);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Panel je fixní u spodní hrany. Na nízkém okně sekce přeroste 100svh a její
+   spodek by se pod panel podsunul — to vypadá jako rozbitý layout. Radši zmizí:
+   je to přístrojová ozdoba, ne nosná informace. Vše, co v něm stojí, je i v textu. */
+@media (max-width: 1024px), (max-height: 820px) {
+  .status {
+    display: none;
+  }
+}
+
+/* ── PRELOADER ───────────────────────────────────────────── */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  background: var(--bg-0);
+  display: grid;
+  place-items: center;
+  clip-path: inset(0 0 0 0);
+}
+.preloader__inner {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+}
+.preloader__num {
+  font-family: var(--font-mono);
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--tx-1);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.preloader__bar {
+  width: min(28rem, 60vw);
+  height: 1px;
+  background: var(--line-2);
+  position: relative;
+  overflow: hidden;
+}
+.preloader__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--neon-2);
+  transform-origin: left;
+  transform: scaleX(0);
+  box-shadow: var(--glow-soft);
+}
+.preloader__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-4);
+}

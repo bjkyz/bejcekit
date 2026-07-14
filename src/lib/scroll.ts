@@ -26,9 +26,78 @@ export const scrollState = {
 let lenis: Lenis | null = null
 let snap: Snap | null = null
 let tops: number[] = []
+let heights: number[] = []
+let cols: HTMLElement[] = []
 let allFit = true
 let rafId: number | null = null
 let lastIndex = 0
+let choreo = false
+
+/* ═══════════ OSTŘENÍ TEXTU PODLE SCROLLU ═══════════
+   Reveal přes IntersectionObserver umí jen JEDNU věc: jednou provždy text ukázat.
+   Co dělá web „scroll-driven", je ale ta druhá polovina — že obsah na scroll taky
+   REAGUJE, průběžně a oběma směry. Sekce, která odjíždí ze středu, musí ustoupit;
+   sekce, která přijíždí, se musí zaostřit. Kamera i krychle přesně tohle dělají
+   (jedou po spojitém `progress`), takže by text neměl být jediná mrtvá vrstva.
+
+   Počítá se ze VZDÁLENOSTI STŘEDU SEKCE OD STŘEDU OKNA, v jednotkách výšky okna. */
+
+/** Do téhle vzdálenosti je text plně v ohnisku. Musí to být PLATÓ, ne špička:
+    česká sekce na mobilu přeroste okno a člověk čte i její spodek — kdyby ostrost
+    vrcholila v jediném bodě, text by mu při dočítání pod rukama pohasínal. */
+const PLATEAU = 0.34
+/** Za touhle vzdáleností je sekce utlumená naplno. */
+const FADE = 0.95
+/** Podlaha krytí. Nikdy 0 — utlumená sekce má být v pozadí, ne zmizelá. */
+const FLOOR = 0.3
+/** Svislý úlet utlumené sekce, v px. Stejný řád jako reveal (20px), ne parallax. */
+const DRIFT = 30
+
+/**
+ * ★ ŽÁDNÉ getBoundingClientRect() V TÉHLE SMYČCE.
+ * Běží při každém scroll snímku. Čtení rectů 6 sekcí = 6 vynucených layoutů za
+ * snímek. Pozice i výšky jsou proto naměřené dopředu v measure() a tady se jen
+ * počítá — a zapisuje se výhradně do `opacity` a `transform`, tedy vlastností,
+ * které umí compositor a nespustí ani layout, ani přemalování.
+ */
+function focusPass(y: number): void {
+  if (!choreo) return
+  const vh = window.innerHeight
+  const mid = y + vh / 2
+
+  for (let i = 0; i < cols.length; i++) {
+    const el = cols[i]
+    const d = (tops[i] + heights[i] / 2 - mid) / vh
+    const dist = Math.abs(d)
+
+    const raw = dist <= PLATEAU ? 1 : Math.max(0, 1 - (dist - PLATEAU) / (FADE - PLATEAU))
+    const f = raw * raw * (3 - 2 * raw) // smoothstep
+
+    /* ★ V OHNISKU SE STYL ÚPLNĚ SUNDÁ, nezapíše se „opacity: 1".
+       Trvalý `transform` (byť o 0 px) drží text na vlastní compositor vrstvě a
+       vypne mu subpixelové vyhlazování — písmo pak na Windows viditelně zšedne
+       a rozmaže se. Odstraněním vlastnosti se vrstva zahodí a text je zase ostrý.
+       Ve zbytku dokumentu je vrstva naopak žádoucí, tam se totiž hýbe. */
+    if (f > 0.995) {
+      if (el.style.opacity !== '') {
+        el.style.opacity = ''
+        el.style.transform = ''
+      }
+      continue
+    }
+
+    const drift = Math.max(-1, Math.min(1, d)) * (1 - f) * DRIFT
+    el.style.opacity = (FLOOR + (1 - FLOOR) * f).toFixed(3)
+    el.style.transform = `translate3d(0, ${drift.toFixed(1)}px, 0)`
+  }
+}
+
+function clearFocus(): void {
+  for (const el of cols) {
+    el.style.opacity = ''
+    el.style.transform = ''
+  }
+}
 
 /**
  * ★ Snap body i progres se počítají ze SKUTEČNÉHO section.offsetTop,
@@ -37,10 +106,15 @@ let lastIndex = 0
  * natrvalo rozešla.
  */
 function measure(): void {
-  const els = document.querySelectorAll<HTMLElement>('.section')
-  tops = Array.from(els, (el) => el.offsetTop)
+  const els = Array.from(document.querySelectorAll<HTMLElement>('.section'))
+  tops = els.map((el) => el.offsetTop)
+  heights = els.map((el) => el.offsetHeight)
+  /* Ostří se SLOUPEC, ne celá sekce: sekce je jen mřížka přes celé okno a její
+     krytí by nebylo na čem vidět. Sloupec navíc nese i závoj (::before), takže
+     s textem pohasíná i podklad pod ním a nezůstane viset prázdný flek. */
+  cols = els.map((el) => el.querySelector<HTMLElement>('.section__col')).filter((el) => el !== null)
   // Vejde se KAŽDÁ sekce do jedné obrazovky?
-  allFit = Array.from(els).every((el) => el.offsetHeight <= window.innerHeight + 2)
+  allFit = heights.every((h) => h <= window.innerHeight + 2)
 }
 
 /**
@@ -81,6 +155,10 @@ function progressFromScroll(y: number): number {
 
 export function initScroll(reducedMotion: boolean): () => void {
   measure()
+
+  /* Ostření je POHYB, ne obsah. Při omezeném pohybu tedy nejede vůbec a text
+     zůstane v plné síle — nikdy se neschovává, jen se přestane hýbat. */
+  choreo = !reducedMotion
 
   // Při omezeném pohybu Lenis vůbec nespouštíme — nechá se nativní scroll.
   if (reducedMotion) {
@@ -143,6 +221,7 @@ export function initScroll(reducedMotion: boolean): () => void {
     scrollState.velocity = e.velocity
     scrollState.index = Math.round(scrollState.progress)
     scrollState.transit = Math.abs(e.velocity) > 0.06
+    focusPass(e.scroll)
     emitLanding(scrollState.index)
   })
 
@@ -152,8 +231,14 @@ export function initScroll(reducedMotion: boolean): () => void {
   }
   rafId = requestAnimationFrame(tick)
 
+  /* Vstupní stav: sekce pod okrajem okna se rovnou utlumí, ať první scroll nezačíná
+     skokem z plné síly. Hero má střed v ohnisku, takže na něj žádný styl nesedne —
+     a LCP tím pádem zůstává nedotčené (viz .section--hero v layout.css). */
+  focusPass(window.scrollY)
+
   const onResize = () => {
     measure()
+    focusPass(lenis?.scroll ?? window.scrollY)
     if (!lenis) return
     // Nesmí to viset na `if (!snap) return`: na dotyku je snap null (schválně),
     // ale po otočení displeje se stejně musí přeměřit i přestavět.
@@ -167,6 +252,7 @@ export function initScroll(reducedMotion: boolean): () => void {
     if (rafId !== null) cancelAnimationFrame(rafId)
     snap?.destroy()
     lenis?.destroy()
+    clearFocus() // ať po odpojení nezůstane viset utlumený sloupec
     snap = null
     lenis = null
     rafId = null

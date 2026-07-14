@@ -54,3 +54,38 @@ export function faceTransform(q: Quaternion): { position: Vector3; quaternion: Q
 }
 
 export const FACE_TRANSFORMS = FACE_QUATS.map(faceTransform)
+
+/**
+ * ★ NATOČENÍ KAMERY, ABY SE DÍVALA NA i-TOU STĚNU. Jádro celé choreografie.
+ *
+ * Krychle se NEOTÁČÍ. Obíhá ji kamera — a tohle je ta záměna, díky které to jde
+ * napsat na jeden řádek: `q⁻¹`.
+ *
+ * FACE_QUATS[i] je natočení KRYCHLE, kterým se i-tá stěna postaví čelem ke kameře.
+ * Jenže „otočit krychli o q" a „obletět ji kamerou o q⁻¹" je z pohledu obrázku na
+ * obrazovce PŘESNĚ TOTÉŽ (jen relativní vztah kamery a krychle rozhoduje). Takže:
+ *
+ *     natočení kamery pro i-tou stěnu  =  FACE_QUATS[i]⁻¹
+ *     pozice kamery pro i-tou stěnu    =  (0,0,R) otočené tímtéž kvaternionem
+ *
+ * Kamera tím vždycky sedí PŘESNĚ na normále stěny, ve vzdálenosti R, a hledí
+ * přesně do jejího středu. Vzpřímeně: q⁻¹ nese i správné „nahoru", takže cedule
+ * nikdy nedorazí naležato (to je ta samá past, kterou řeší faceTransform výš).
+ *
+ * ★★ TŘI VĚCI, KTERÉ TÍM DOSTANEME ZADARMO:
+ *
+ *   1. ŽÁDNÝ GIMBAL LOCK. Na horní (+Y) a dolní (−Y) stěnu se kamera dostane
+ *      přímo nad/pod krychli — a tam je klasické lookAt() DEGENEROVANÉ: směr
+ *      pohledu je rovnoběžný s `up` (0,1,0), takže se orientace nedá dopočítat
+ *      a obraz sebou křečovitě škubne. Slerp mezi kvaterniony tenhle případ
+ *      vůbec nezná. Proto se tu NIKDE nevolá lookAt.
+ *
+ *   2. KAŽDÝ KROK JE PŘESNĚ 90°. Dědí se to z hamiltonovské cesty ve STEPS výš:
+ *      slerp tedy nikdy nedostane 180° otočku s nejednoznačnou osou. Kamera se
+ *      po kouli veze po nejkratším oblouku a nikdy „nepřepadne".
+ *
+ *   3. OBLOUK, NE TĚTIVA. Pozice se dopočítává Z kvaternionu (ne lerpem mezi
+ *      dvěma body), takže kamera drží konstantní poloměr a nikdy si během
+ *      přeletu nenajede dovnitř krychle.
+ */
+export const FACE_CAM_QUATS: Quaternion[] = FACE_QUATS.map((q) => q.clone().normalize().invert())

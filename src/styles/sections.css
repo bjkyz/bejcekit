@@ -348,11 +348,26 @@
 }
 .contact-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* ikona · popisek · tečky · hodnota */
+  grid-template-columns: auto auto 1fr auto;
   gap: 0.75rem;
   align-items: baseline;
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
+}
+
+/* ★ IKONA SEDÍ NA ÚČAŘÍ, NE VE STŘEDU ŘÁDKU.
+   `align-items: baseline` na gridu srovná <span> podle jeho účaří — jenže span
+   s jediným <svg> uvnitř žádné účaří nemá a spadne o pár pixelů níž než text
+   vedle. Proto je obal `inline-flex` (dostane vlastní účaří ze svého boxu)
+   a svg se doladí posunem o 0.15em. Bez toho řádek viditelně kulhá. */
+.contact-row__ico {
+  display: inline-flex;
+  color: var(--tx-3);
+  transition: color var(--d-hover) var(--e-ui);
+}
+.contact-row__ico svg {
+  transform: translateY(0.15em);
 }
 .contact-row__k {
   color: var(--tx-3);
@@ -368,7 +383,10 @@
   color: var(--tx-2);
   transition: color var(--d-hover) var(--e-ui);
 }
-a.contact-row:hover .contact-row__v {
+a.contact-row:hover .contact-row__v,
+a.contact-row:hover .contact-row__ico,
+a.contact-row:focus-visible .contact-row__v,
+a.contact-row:focus-visible .contact-row__ico {
   color: var(--neon-2);
 }
 
@@ -466,6 +484,20 @@ a.contact-row:hover .contact-row__v {
   .contact-rows {
     margin-top: 1.5rem;
   }
+  /* Ikona přibyla jako čtvrtý sloupec a na 390px displeji je každý pixel drahý.
+     Tečkovaná spojnice je ČISTÝ ORNAMENT — jde ven jako první a řádek tím
+     dostane zpátky mezeru i svůj gap. Nosné (ikona, popisek, hodnota) zůstává. */
+  .contact-row {
+    grid-template-columns: auto auto 1fr;
+    gap: 0.6rem;
+  }
+  .contact-row__dots {
+    display: none;
+  }
+  .contact-row__v {
+    justify-self: end;
+    overflow-wrap: anywhere;
+  }
   .footer {
     margin-top: 2rem;
     padding-top: 1rem;
@@ -485,6 +517,11 @@ a.contact-row:hover .contact-row__v {
   .contact-row {
     min-height: 44px;
     align-items: center;
+  }
+  /* Řádek se tu centruje, ne účaří — doladění na účaří (výš) by ikonu
+     naopak shodilo z osy. */
+  .contact-row__ico svg {
+    transform: none;
   }
   .email-link {
     padding: 0.5rem 0;

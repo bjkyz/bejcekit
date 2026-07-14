@@ -44,7 +44,7 @@ function Nav({ active }: { active: number }) {
   )
 }
 
-/** Čtyři rohové značky. Během otáčení krychle jim povyrostou ramena. */
+/** Čtyři rohové značky. Během přeletu kamery mezi stěnami jim povyrostou ramena. */
 function Frame() {
   const [transit, setTransit] = useState(false)
   useEffect(() => {

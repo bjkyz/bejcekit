@@ -5,6 +5,7 @@ import { useReveal } from '../lib/hooks'
 import Kicker from './Kicker'
 import MagneticCTA from './MagneticCTA'
 import GrabPlate from './GrabPlate'
+import Icon from './Icons'
 
 const LAST = SECTIONS.length - 1
 
@@ -179,7 +180,19 @@ function ContactBlock() {
       <ul className="contact-rows reveal" style={delay(3, 6)}>
         {CONTACT_ROWS.map((r) => (
           <li key={r.label}>
-            <a className="contact-row" href={r.href} target={r.href?.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+            <a
+              className="contact-row"
+              href={r.href}
+              /* Ikona je aria-hidden a tečky taky, takže odečítači obrazovky by
+                 z řádku „GitHub … /bjkyz" zbylo jen „/bjkyz". Jméno odkazu se
+                 proto skládá ručně a nezávisí na tom, co je zrovna vidět. */
+              aria-label={`${r.label}: ${r.value}`}
+              target={r.href.startsWith('http') ? '_blank' : undefined}
+              rel={r.href.startsWith('http') ? 'noreferrer' : undefined}
+            >
+              <span className="contact-row__ico" aria-hidden="true">
+                <Icon name={r.icon} size={16} />
+              </span>
               <span className="contact-row__k">{r.label}</span>
               <span className="contact-row__dots" aria-hidden="true" />
               <span className="contact-row__v">{r.value}</span>

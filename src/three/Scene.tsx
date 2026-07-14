@@ -9,6 +9,7 @@ import { setLoading } from '../lib/loading'
 import Cube from './Cube'
 import Lights from './Lights'
 import Rig from './Rig'
+import Choreo from './Choreo'
 import Effects from './Effects'
 
 /**
@@ -163,6 +164,14 @@ export default function Scene({ tier, dragRef }: { tier: Tier; dragRef: React.Re
         />
 
         <LoadingBridge />
+
+        {/* ★ CHOREO MUSÍ BÝT PRVNÍ A MIMO <Suspense>.
+            Píše sceneState.aim/heat, ze kterých pak čte pět dalších useFrame smyček
+            (Rig, Shell, Core, EdgeLattice, Effects). R3F je volá v pořadí připojení,
+            takže kdyby Choreo viselo až za krychlí, četli by ostatní o snímek starší
+            hodnotu. A mimo Suspense proto, aby dráha žila i ve chvíli, kdy se model
+            ještě dopéká — kamera pak po doskočení preloaderu nikam neskáče. */}
+        <Choreo />
 
         <Suspense fallback={null}>
           <Lights />

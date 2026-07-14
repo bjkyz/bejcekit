@@ -14,6 +14,10 @@
  *   stejně skoro nepoužívá.
  */
 
+/* Type-only import — po překladu z něj nezbude nic, takže si obsah nepřitáhne
+   žádný runtime kód z ui/. */
+import type { IconName } from '../ui/Icons'
+
 export type Align = 'center' | 'left' | 'right'
 
 export interface Section {
@@ -182,12 +186,20 @@ export const SECTIONS: Section[] = [
   },
 ]
 
-/** Kontaktní řádky sekce 05. */
-export const CONTACT_ROWS: { label: string; value: string; href?: string }[] = [
-  { label: 'E-mail', value: EMAIL, href: `mailto:${EMAIL}` },
-  { label: 'Telefon', value: PHONE, href: `tel:${PHONE_TEL}` },
-  { label: 'LinkedIn', value: '/in/jiribejcek', href: 'https://www.linkedin.com/in/jiribejcek' },
-  { label: 'GitHub', value: '/bjkyz', href: 'https://github.com/bjkyz' },
+/**
+ * Kontaktní řádky sekce 05.
+ *
+ * Ikona je nosič významu, ne ozdoba: obálka / sluchátko / octocat se přečtou
+ * dřív než slovo vedle nich. Popisek přesto zůstává — ikona sama o sobě je
+ * pro odečítač obrazovky prázdné místo (viz aria-hidden v ui/Icons.tsx).
+ *
+ * LinkedIn je zatím venku. Až profil bude stát za odkaz, přidá se sem jeden
+ * řádek a ikona do ui/Icons.tsx. Nikde jinde se o kontaktech nerozhoduje.
+ */
+export const CONTACT_ROWS: { label: string; value: string; href: string; icon: IconName }[] = [
+  { label: 'E-mail', value: EMAIL, href: `mailto:${EMAIL}`, icon: 'mail' },
+  { label: 'Telefon', value: PHONE, href: `tel:${PHONE_TEL}`, icon: 'phone' },
+  { label: 'GitHub', value: '/bjkyz', href: 'https://github.com/bjkyz', icon: 'github' },
 ]
 
 export const FACE_COUNT = SECTIONS.length

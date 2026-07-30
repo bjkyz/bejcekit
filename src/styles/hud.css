@@ -78,7 +78,7 @@
 }
 .nav__cta {
   font-family: var(--font-mono);
-  font-size: var(--fs-label);
+  font-size: var(--fs-btn); /* ★ ne --fs-label: fixní „Napište mi" je vidět na 100 % pozic scrollu */
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--neon-2);
@@ -313,6 +313,102 @@ html.staged .frame {
     width: 6px;
     height: 6px;
   }
+
+  /**
+   * ★★ PŘI ČTENÍ USTOUPÍ, PŘI ROLOVÁNÍ SE VRÁTÍ.
+   *
+   * Pilulka je na telefonu jediná navigace, a proto musí být neprůhledná (viz
+   * poznámka výš). Jenže sekce je tu vyšší než okno, takže jí text PROJÍŽDÍ POD —
+   * a co zrovna leží u spodní hrany, to pilulka zakryje. Na snímcích to sedlo na
+   * důkaz s Lighthouse (t768/WEB), na rámeček VÝSTUP i na řádky s e-mailem
+   * a telefonem v sekci 05. Zakrývat kontaktní údaje je na webu, jehož jediný
+   * účel je konverze, ta nejdražší možná chyba.
+   *
+   * Řešení není pilulku zprůhlednit (to už jednou selhalo — text se skrz ni
+   * propisoval), ale svázat ji s tím, co člověk zrovna dělá:
+   *   ROLUJE = naviguje  → potřebuje vidět, kde je         → pilulka je vidět
+   *   STOJÍ  = čte       → potřebuje čistý text            → pilulka ustoupí
+   * Stejná logika, jakou má systémový posuvník. Vrátí se na první pohyb prstu,
+   * takže se nedá „ztratit".
+   *
+   * Mizí JEN opacita, žádný transform: `.rail` má na výšku translateX(-50%)
+   * a na šířku translateY(-50%), a přepisovat je odsud by ji vystřelilo z osy.
+   */
+  .rail {
+    transition: opacity 320ms var(--e-ui);
+  }
+  .rail.is-idle {
+    opacity: 0;
+  }
+  /**
+   * ★★ VYPNOUT SE TO MUSÍ NA KOTVÁCH, NE NA OBALU. NEJDRAŽŠÍ ŘÁDEK TOHOHLE SOUBORU.
+   *
+   * `pointer-events: none` na `.rail` NEFUNGUJE: hned nahoře je
+   * `.hud .rail a { pointer-events: auto }`, a explicitní hodnota na potomkovi
+   * přebíjí zděděné `none` z rodiče. A `opacity: 0` samo o sobě hit-testing
+   * neruší vůbec.
+   *
+   * Výsledek byl horší než původní stav: lišta zmizela z očí, ale všech šest
+   * 44×44 hitboxů dál leželo přes text a KRADLO TAPY. Ověřeno skutečně
+   * odeslaným dotykem přes CDP — tap doprostřed hero tlačítka „Prohlédnout
+   * služby" (768×1024) odrolloval na sekci 04 místo na 01, při naměřené
+   * `opacity: 0`. Neviditelné tlačítko, které ukradne kliknutí, je ta nejhorší
+   * možná varianta: uživatel nevidí, co ho odneslo pryč.
+   */
+  .rail.is-idle a {
+    pointer-events: none;
+  }
+  /* Klávesnice o navigaci přijít nesmí ani na okamžik. */
+  .rail:focus-within {
+    opacity: 1;
+  }
+  .rail:focus-within a {
+    pointer-events: auto;
+  }
+}
+
+/* ★★ TABLET: LIŠTA ZPÁTKY K PRAVÉ HRANĚ.
+   Na telefonu musí pilulka zůstat dole uprostřed — po stranách tam místo není.
+   Na tabletu ale je: textový sloupec drží max-width: 36rem (layout.css), takže
+   při 768 px končí kolem 600 px a vpravo zbývá volný pruh.
+
+   Dole naopak sedla PŘESNĚ na hero tlačítka. Naměřeno na 768×1024: pilulka
+   y 958–1004 / x 247–521, obě CTA y 945–996 — zakryla spodní 38 px z 51 px
+   vysokého tlačítka a popisek ghost varianty úplně. A protože `.hud .rail a`
+   má pointer-events: auto (nahoře), braly její 44×44 hitboxy tapy MÍSTO
+   tlačítek. Nešlo tedy jen o překryv, ale o ukradenou konverzi. */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .rail {
+    left: auto;
+    right: calc(var(--gutter) * 0.6);
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    grid-auto-flow: row;
+    justify-items: end;
+    background: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+  }
+  .rail__tick {
+    justify-content: flex-end;
+  }
+  .rail__bar {
+    width: 18px;
+    height: 1px;
+    border-radius: 0;
+  }
+  .rail__tick.is-active .rail__bar {
+    width: 30px;
+    height: 1px;
+  }
+  /* U pravé hrany nic nezakrývá, takže nemá proč ustupovat. */
+  .rail.is-idle {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 /* Nejmenší telefony (320–360 px): pilulka se šesti 44px cíli by se roztáhla
@@ -360,6 +456,12 @@ html.staged .frame {
     width: 30px;
     height: 1px;
   }
+  /* Na šířku stojí lišta u pravé hrany mimo textový sloupec (ten drží 34rem
+     vlevo), takže nemá co zakrývat a ustupovat nemusí. */
+  .rail.is-idle {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 /* ── STAVOVÝ PANEL ───────────────────────────────────────── */
@@ -370,7 +472,10 @@ html.staged .frame {
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   letter-spacing: 0.06em;
-  line-height: 1.9;
+  /* 1.9 bylo přepychové proklad na ornamentu: panel měřil 107 px a přesně o tolik
+     si každá sekce musela nadsadit spodní odsazení. Výška panelu se platí ze
+     stejného rozpočtu jako text, který se čte. */
+  line-height: var(--lh-mono);
   color: var(--tx-3);
   min-width: 22rem;
   font-variant-numeric: tabular-nums;
@@ -437,8 +542,14 @@ html.staged .frame {
 
 /* Panel je fixní u spodní hrany. Na nízkém okně sekce přeroste 100svh a její
    spodek by se pod panel podsunul — to vypadá jako rozbitý layout. Radši zmizí:
-   je to přístrojová ozdoba, ne nosná informace. Vše, co v něm stojí, je i v textu. */
-@media (max-width: 1024px), (max-height: 820px) {
+   je to přístrojová ozdoba, ne nosná informace. Vše, co v něm stojí, je i v textu.
+
+   ★ PRÁH ZVEDNUT Z 820 NA 1000 px. Při čitelném písmu (tělo 17px, odrážky 16px)
+   nejdelší sekce do notebooku 1440×900 ani 1280×800 nevejde — naměřeno. Panel by
+   se tam tedy s jejím spodkem, se stackem i s CTA opravdu překryl, což se na
+   snímcích potvrdilo. Buď panel, nebo čitelný text a přístupné CTA; volba je snadná.
+   Nad 1000 px výšky (typicky 1920×1080) se všechno vejde a panel zůstává. */
+@media (max-width: 1024px), (max-height: 1000px) {
   .status {
     display: none;
   }

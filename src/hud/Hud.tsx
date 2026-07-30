@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { SECTIONS } from '../content/sections'
-import { useActiveSection } from '../lib/hooks'
+import { useActiveSection, useScrollIdle } from '../lib/hooks'
 import { scrollToSection } from '../lib/scroll'
 import { sceneState } from '../lib/scene-state'
 import Status from './Status'
@@ -63,8 +63,11 @@ function Frame() {
 
 /** Pravá lišta — SKUTEČNÉ kotvy, ne dekorace. Na mobilu se překlopí do teček dole. */
 function Rail({ active }: { active: number }) {
+  /* Na telefonu pilulka plave přes text; při čtení ustoupí. Viz hud.css a useScrollIdle.
+     Na desktopu je třída bez efektu (pravidlo je uvnitř max-width: 1024px). */
+  const idle = useScrollIdle()
   return (
-    <nav className="rail" aria-label="Sekce">
+    <nav className={`rail${idle ? ' is-idle' : ''}`} aria-label="Sekce">
       {SECTIONS.map((s, i) => (
         <a
           key={s.id}

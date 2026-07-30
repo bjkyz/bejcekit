@@ -112,7 +112,10 @@ ol {
    animované zrno je repaint celé plochy každý snímek. */
 .grain {
   position: fixed;
-  inset: -50%;
+  /* ★ inset: 0, ne -50%. Přesah na čtyřnásobek plochy okna nemá co získat —
+     dlaždice se opakuje — ale kompozitor tu čtyřnásobnou vrstvu musí držet
+     a míchat nad plátnem. Naměřeno: 3840×2160 px vrstvy při okně 1920×1080. */
+  inset: 0;
   z-index: var(--z-grain);
   pointer-events: none;
   opacity: 0.035;

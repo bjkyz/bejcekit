@@ -23,8 +23,11 @@
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   color: var(--tx-2);
-  max-width: 46ch;
+  max-width: var(--measure-body);
   margin-top: var(--sp-body-top);
+  /* Česká slova jsou dlouhá a sloupec úzký; bez tohohle zůstávají na konci
+     řádků díry. `pretty` řeší jen poslední řádky, `balance` je pro nadpisy. */
+  text-wrap: pretty;
 }
 
 .label {
@@ -39,7 +42,7 @@
 /* ── KICKER ──────────────────────────────────────────────── */
 .kicker {
   display: inline-block;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   color: var(--neon-2);
 }
 
@@ -87,6 +90,7 @@
   margin-top: 1.5rem;
   display: grid;
   gap: var(--sp-bullets-gap);
+  max-width: var(--measure-text);
 }
 /* ★ ČITELNOST: souvislý český text NIKDY v mono.
    Mono je široké, na 12px se dlouhá věta láme do kaše a háčky splývají.
@@ -97,14 +101,25 @@
   align-items: baseline;
   font-family: var(--font-sans);
   font-size: var(--fs-bullet);
-  line-height: 1.5;
+  line-height: var(--lh-bullet);
   color: var(--tx-2);
   padding-bottom: var(--sp-bullet-pad);
   border-bottom: 1px solid var(--line-1);
+  text-wrap: pretty;
 }
+/* ★ HERO: MŘÍŽKA VEN, ŘÁDEK DOVNITŘ.
+   Sekce 00 je vycentrovaná, ale `.bullet` je mřížka s pevným sloupcem 2.25rem
+   pro značku. Text v druhém sloupci se centruje sám za sebe, takže odstup značky
+   od prvního písmene vycházel na každém řádku jinak (naměřeno na 1920: 29 px,
+   78 px a 0 px) a tečky vypadaly jako smetí, ne jako odrážky. V běžném toku
+   drží značka půl em před svým textem a celý řádek se centruje jako celek. */
 .bullets--plain .bullet {
+  display: block;
   border-bottom: 0;
   padding-bottom: 0;
+}
+.bullets--plain .bullet__i {
+  margin-inline-end: 0.5em;
 }
 .bullet__i {
   font-family: var(--font-mono);
@@ -124,9 +139,11 @@
   margin-top: var(--sp-deliverable-top);
   font-family: var(--font-sans);
   font-size: var(--fs-bullet);
-  line-height: 1.5;
+  line-height: var(--lh-bullet);
   color: var(--tx-1);
   font-weight: 500;
+  max-width: var(--measure-text);
+  text-wrap: pretty;
 }
 .proof__mark {
   color: var(--green);
@@ -140,11 +157,13 @@
 .deliverable {
   font-family: var(--font-sans);
   font-size: var(--fs-bullet);
-  line-height: 1.55;
+  line-height: var(--lh-bullet);
   color: var(--tx-1);
+  max-width: var(--measure-text);
+  text-wrap: pretty;
   border: 1px solid var(--green-line);
   border-left: 2px solid var(--green);
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 0.95rem;
   margin-top: var(--sp-deliverable-top);
   background: var(--green-bg);
 }
@@ -158,22 +177,43 @@
   margin-bottom: 0.3rem;
 }
 
-/* ── CHIPY SE STACKEM ────────────────────────────────────── */
+/* ── STACK ────────────────────────────────────────────────────
+   ★ ORÁMOVANÉ CHIPY VEN, TICHÝ ŘÁDEK DOVNITŘ. Dva důvody, oba měřené:
+     • VÝŠKA. Šest orámovaných chipů se na 538px sloupci zlomilo do dvou řad
+       a stálo 65 px — víc než odstavec. Přitom je to jmenný seznam technologií,
+       tedy nejméně nosný blok sekce. Jako běžící řádek stojí zhruba třetinu.
+     • DOJEM. Chip s rámečkem a poloměrem čte jako štítek z administrace.
+       Tady je potřeba poznámka pod čarou, ne odznaky.
+   Oddělovač je pseudo-element, ne znak v obsahu: nekopíruje se a odečítač
+   obrazovky ho nepřečte. */
+/* ★ ŽÁDNÁ MÍRA ŘÁDKU. Není to souvislý text, ale seznam krátkých názvů — strop
+   na 52 znacích ho zbytečně zlomil do dvou řad a sebral zpátky výšku, kvůli které
+   chipy padly. Šířku mu dává sloupec. */
 .stack {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.15rem 0.3rem;
   margin-top: var(--sp-stack-top);
 }
 .stack__chip {
   font-family: var(--font-mono);
   font-size: var(--fs-label);
+  line-height: var(--lh-mono);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--tx-3);
-  border: 1px solid var(--line-1);
-  padding: 0.3rem 0.6rem;
-  border-radius: 2px;
+}
+/* ★ ODDĚLOVAČ PATŘÍ NA PŘEDCHOZÍ POLOŽKU, NE NA NÁSLEDUJÍCÍ.
+   Dřív to byl absolutně pozicovaný ::before na následujícím chipu se záporným
+   `left`. Dvě chyby najednou: (1) když se řádek zalomil, tečka zůstala viset
+   10 px VLEVO ZA sloupcem, protože ležela mimo vlastní box — naměřeno na 390px
+   i na 1280px; (2) opticky se lepila na následující slovo, takže mezi slovy
+   chyběla mezera. Jako ::after v normálním toku se nemá jak dostat na začátek
+   řádku a mezera je symetrická sama od sebe. */
+.stack__chip:not(:last-child)::after {
+  content: '·';
+  margin-left: 0.3rem;
+  color: var(--tx-4);
 }
 
 /* ── CTA ─────────────────────────────────────────────────── */
@@ -201,10 +241,10 @@
   align-items: center;
   gap: 0.6rem;
   font-family: var(--font-mono);
-  font-size: var(--fs-label);
+  font-size: var(--fs-btn); /* ★ ne --fs-label: viz tokens.css, výzva k akci není popisek */
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 0.9rem 1.4rem;
+  padding: 0.95rem 1.5rem;
   border: 1px solid var(--neon-2);
   color: var(--neon-2);
   border-radius: 2px;
@@ -264,9 +304,13 @@
   color: var(--bg-0);
 }
 
+/* ★ Ghost je podřízený, ne neviditelný. Při --line-2 (alfa 0.10) vycházela hrana
+   na #212223 proti #08090a — a přitom je to na sekci 05 nejširší tlačítko z trojice.
+   Nejtišší rám na nejširší ploše čte jako chyba, ne jako hierarchie. Tu nese
+   výplň a barva, ne to, jestli je rámeček vidět. */
 .btn--ghost {
-  border-color: var(--line-2);
-  color: var(--tx-3);
+  border-color: var(--line-3);
+  color: var(--tx-2);
 }
 .btn--ghost:hover {
   border-color: var(--line-3);
@@ -278,11 +322,15 @@
 .steps {
   margin-top: 1.5rem;
   border-top: 1px solid var(--line-1);
+  max-width: var(--measure-text);
 }
+/* Stejný idiom jako `.bullet` (azurový dvojciferný index proti sans textu), takže
+   i stejná mřížka. Dřív měl krok 3rem + gap 1rem, tedy odsazení textu 64 px proti
+   36 px u odrážek — dvě různé lišty pro totéž, v sousedních sekcích. */
 .step {
   display: grid;
-  grid-template-columns: 3rem 1fr;
-  gap: 0 1rem;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0;
   padding: 0.9rem 0;
   border-bottom: 1px solid var(--line-1);
   align-items: baseline;
@@ -297,8 +345,9 @@
 .step__t {
   font-family: var(--font-sans);
   font-size: var(--fs-bullet);
-  line-height: 1.55;
+  line-height: var(--lh-bullet);
   color: var(--tx-2);
+  text-wrap: pretty;
 }
 .step__t b {
   color: var(--tx-1);
@@ -354,6 +403,7 @@
   align-items: baseline;
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
+  line-height: var(--lh-mono); /* jinak zdědí --lh-body 1.65 z <body> */
 }
 
 /* ★ IKONA SEDÍ NA ÚČAŘÍ, NE VE STŘEDU ŘÁDKU.
@@ -391,14 +441,18 @@ a.contact-row:focus-visible .contact-row__ico {
 }
 
 .footer {
-  margin-top: 4rem;
+  /* ★ MÍRA: patička byla nejdelší řádek na webu (naměřeno 123 znaků na 1024px).
+     Je to sice drobné písmo a atribuce, ale CC BY se má dát přečíst. */
+  max-width: var(--measure-wide);
+  margin: 4rem auto 0;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line-1);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  line-height: 1.8;
+  line-height: 1.75;
   color: var(--tx-4); /* ornament */
   text-align: center;
+  text-wrap: pretty;
 }
 .footer a {
   color: var(--tx-3);

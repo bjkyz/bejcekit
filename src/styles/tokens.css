@@ -79,30 +79,73 @@
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
-  --fs-d0: clamp(2.875rem, 1rem + 8vw, 6.125rem); /* H1 — jen sekce 00 */
-  --fs-d1: clamp(2.1875rem, 1rem + 5.5vw, 4.125rem); /* H2 — strop 66px:
-                       nad 1080px výšky neplatí žádný média dotaz a při 76px
-                       přetékala sekce WEB o 30px na stavový panel. */
-  --fs-d2: clamp(1.5rem, 0.5rem + 3.6vw, 3.25rem); /* e-mail na 05 */
-  --fs-sub: clamp(1.125rem, 1rem + 0.9vw, 1.375rem);
-  --fs-body: 0.9375rem;
-  --fs-bullet: 0.875rem; /* text odrážek — sans, ne mono (viz sections.css) */
-  --fs-mono: 0.75rem; /* JEN přístrojové údaje: readouty, kontaktní řádky */
-  --fs-label: 0.6875rem;
+  /**
+   * ★★ VELIKOST PÍSMA SE ŘÍDÍ ŠÍŘKOU. ROZESTUPY VÝŠKOU. NIKDY OBRÁCENĚ.
+   *
+   * Dřív byly velikosti písma přepisované ve výškových dotazech (max-height: 1000px
+   * a 820px), protože se sekce musely vejít do 100svh. Mělo to tři měřené následky:
+   *   • 1024×768 monitor dostal TĚLO 14px/1.45, zatímco telefon 390×844 měl 15px/1.55 —
+   *     desktop četl hůř než mobil, protože rozhodovala výška okna, ne šířka řádku
+   *   • pásmo 641–1024px nepokrývala ŽÁDNÁ podmínka (šířkový dotaz končil na 640,
+   *     výškové chtěly ≤1000): tablet 768×1024 dostal displej 77px vedle těla 15px
+   *     a řádky dlouhé 93–107 znaků
+   *   • na každém prahu skočila velikost skokem
+   *
+   * Teď je celá škála spojitá clamp() funkce ŠÍŘKY: žádné prahy, žádná díra, křivka
+   * je monotónní a nemůže se převrátit. Vejít se do okna řeší výhradně --sp-* níž.
+   *
+   * Spodní meze jsou podlahy čitelnosti, ne odhady: tělo nikdy pod 16px, odrážky pod
+   * 15px, verzálkové mono pod 12px. Horní meze drží displej při zemi — velký nadpis
+   * vedle drobného textu je nejnápadnější stopa po šabloně a užírá výšku, kterou
+   * potřebuje text, který se doopravdy čte.
+   */
+  --fs-d0: clamp(2.125rem, 1.7rem + 2.1vw, 4.375rem); /* H1, jen sekce 00: 34 → 70 px */
+  --fs-d1: clamp(1.6875rem, 1.35rem + 1.6vw, 3.25rem); /* H2 sekcí:        27 → 52 px */
+  --fs-d2: clamp(1.375rem, 1.05rem + 1.3vw, 2.25rem); /* e-mail na 05:     22 → 36 px */
+  --fs-body: clamp(1rem, 0.9rem + 0.3vw, 1.0625rem); /* TĚLO:              16 → 17 px */
+  --fs-bullet: clamp(0.9375rem, 0.885rem + 0.22vw, 1rem); /* odrážky:      15 → 16 px */
+  --fs-mono: clamp(0.8125rem, 0.79rem + 0.08vw, 0.875rem); /* readouty:    13 → 14 px */
+  /* ★ TLAČÍTKA MAJÍ VLASTNÍ STUPEŇ. Jela na --fs-label, tedy na 11px verzálkovém
+     mono s prokladem 0.12em — na jediné konverzní akci celého webu. Popisek smí být
+     drobný, výzva k akci ne. */
+  --fs-btn: clamp(0.8125rem, 0.78rem + 0.1vw, 0.875rem); /* CTA:           13 → 14 px */
+  --fs-label: clamp(0.75rem, 0.73rem + 0.06vw, 0.8125rem); /* popisky:     12 → 13 px */
 
-  /* Prokládání. Jediné místo, kde jde do plusu, je --ls-label. */
-  --ls-d0: -0.04em;
-  --ls-d1: -0.035em;
-  --ls-sub: -0.01em;
+  /* Prokládání. Jediné místo, kde jde do plusu, je --ls-label.
+     Displej už není 98px, takže tak agresivní zápor jako -0.04em ztratil smysl:
+     při 34px na telefonu by slova lezla na sebe. */
+  --ls-d0: -0.032em;
+  --ls-d1: -0.028em;
   --ls-label: 0.12em;
 
   /* ČESKÝ ŘÁDKOVÝ PROKLAD: ne 0.89, co si dovolí anglická display typografie.
-     Při 98px a -0.04em by háčky ě/š/č/ř/ž kolidovaly s dotahy řádku nad nimi. */
-  --lh-d0: 1;
-  --lh-d1: 1.04;
-  --lh-sub: 1.35;
-  --lh-body: 1.6;
+     Háčky ě/š/č/ř/ž jdou nad verzálkovou výšku a kolidují s dotahy řádku nad nimi,
+     takže displej nesmí pod 1.05 a souvislý text potřebuje 1.65, ne 1.45. */
+  --lh-d0: 1.06;
+  --lh-d1: 1.1;
+  --lh-body: 1.65;
+  --lh-bullet: 1.6;
   --lh-mono: 1.5;
+
+  /* ★ MÍRA ŘÁDKU. Role, které ji neměly, měřily 75–123 znaků (nejhůř patička
+     na 1024px). Čtenářské optimum je 45–75; přes 80 oko ztrácí návaznost řádků.
+
+     ★★ V rem, NE V ch — a je to podstatný rozdíl. `ch` je šířka nuly V PÍSMU
+     TOHO ELEMENTU, takže jeden a týž token dá jinou šířku podle toho, na čem
+     sedí: `.bullets` je <ul> a dědí --fs-body (17px), kdežto --fs-bullet (16px)
+     je až na potomkovi `.bullet`; `.proof` je 16px/500, `.deliverable` 16px/400.
+     Naměřeno na 1920: čtyři role se stejným `52ch` skončily na 551–586 px, tedy
+     se čtyřmi různými pravými okraji. A protože fonty jedou na `font-display:
+     optional`, resolvovalo by se `ch` při pomalé síti dokonce proti systémovému
+     záložnímu písmu. rem je absolutní: jeden token = jedna šířka.
+
+     Patička zůstává v `ch` schválně — je celá v mono, kde je každý glyf stejně
+     široký a `ch` je tam tedy přesně to, co slibuje. */
+  --measure-body: 32rem; /* ≈ 61 znaků při 17px */
+  /* 37rem, ne 36: při 36 se na 1920 ořízly odrážky o 10 px, sekce WEB tím
+     narostla o 9 px a přestala se vejít do okna (a s ní spadl povinný snap). */
+  --measure-text: 37rem;
+  --measure-wide: 60ch; /* mono, viz výš */
 
   /* ── ROZESTUPY (řídí je média dotazy níž; komponenty na ně jen sahají) ──
      ★ POZOR: média dotaz NEZVYŠUJE SPECIFICITU. Kdyby tenhle soubor přebíjel
@@ -174,32 +217,52 @@ html.staged {
    Na běžném notebooku 1440×900 se to v plné velikosti nevejde — proto se od 1000px
    výšky dolů zmenšuje displej i rozestupy. Práh je 1000px, ne 860px: 900px je
    ta nejběžnější výška notebooku a musí spadnout do sevřené varianty. */
-@media (max-height: 1000px) {
+/**
+ * ★★ VÝŠKA OKNA SMÍ SÁHNOUT JEN NA DISPLEJ A NA ROZESTUPY. NIKDY NA ČTENÝ TEXT.
+ *
+ * Na nízkém okně je pořád potřeba ušetřit výšku — jen se to nesmí brát z toho,
+ * co člověk čte. Nadpis je plocha, ne čitelnost, takže se sráží jako první;
+ * tělo, odrážky a tlačítka zůstávají na svém, ať je okno jakkoli nízké.
+ *
+ * ★ `min-width: 1025px` NENÍ KOSMETIKA, JE TO CELÁ PODMÍNKA PLATNOSTI.
+ * Pod 1025px běží režim jeviště: sekce se do okna vejít NEMUSÍ, text pod jevištěm
+ * normálně teče a stránka roluje (naměřeno: sekce jsou tam o 130–420px vyšší než
+ * okno a je to tak správně). Šetřit výšku tam nemá koho zachránit — a bez téhle
+ * podmínky by telefon 390×844 spadl do „nízkého okna" a zdrobnil si nadpis
+ * kvůli omezení, které se ho vůbec netýká.
+ */
+@media (min-width: 1025px) and (max-height: 1000px) {
   :root {
-    --fs-d0: clamp(2.25rem, 4.6vh + 1rem, 4rem);
-    --fs-d1: clamp(1.75rem, 3.6vh + 0.75rem, 3.25rem);
-    --fs-body: 0.875rem;
-    --fs-bullet: 0.8125rem;
-    --lh-body: 1.55;
-    /* Nejtěsnější reálný případ: 1440×900 = nejdelší sekce (WEB, 5 odrážek
-       + rámeček VÝSTUP + 6 chipů + CTA) a k tomu viditelný stavový panel. */
+    --fs-d0: clamp(2.25rem, 1.5rem + 1.9vw, 3.75rem);
+    --fs-d1: clamp(1.75rem, 1.3rem + 1.35vw, 3rem);
+    /* Nejtěsnější reálný případ: 1440×900 = nejdelší sekce (WEB: nadpis, odstavec,
+       4 odrážky, důkaz, rámeček VÝSTUP, 6 chipů a CTA) a k tomu stavový panel. */
     --sp-bullets-gap: 0.3rem;
     --sp-bullet-pad: 0.35rem;
-    --sp-body-top: 0.875rem;
-    --sp-deliverable-top: 0.75rem;
-    --sp-stack-top: 0.75rem;
-    --sp-cta-top: 0.875rem;
+    --sp-body-top: 0.8125rem;
+    --sp-deliverable-top: 0.8125rem;
+    --sp-stack-top: 0.6875rem;
+    --sp-cta-top: 0.9375rem;
+
+    /* ★ DOLE ANO, NAHOŘE NE — a ten rozdíl je změřený, ne estetický.
+       Panel se skrývá už od 1000 px výšky (hud.css), takže mezi 821 a 1000 px
+       si sekce dole rezervovala 104 px pod ornamentem, který tam není. Tam se
+       ubrat může: pod posledním prvkem není nic než prázdno.
+
+       NAHOŘE se to samé ubrat NESMÍ. Navigace je fixní deska vysoká ~88 px
+       a --sp-sec-top je jediné, co pod ni pouští text. Při 4.5rem (72 px) spadl
+       odstup mezi spodní hranou navigace a prvním řádkem z 24 px na jednotky
+       pixelů — text se o navigaci otíral. Zůstává tedy základních 5.5rem. */
+    --sp-sec-bottom: 4.5rem;
   }
 }
-@media (max-height: 820px) {
+@media (min-width: 1025px) and (max-height: 820px) {
   :root {
-    --fs-d0: clamp(2rem, 4vh + 0.75rem, 3rem);
-    --fs-d1: clamp(1.5rem, 3vh + 0.6rem, 2.5rem);
-    --lh-body: 1.45;
-    --lh-mono: 1.45;
-    /* Panel je pod 820px skrytý → spodní padding se může vrátit dolů. */
-    --sp-sec-top: 4.5rem;
-    --sp-sec-bottom: 4.5rem;
+    /* Spodní meze obou clamp() jsou při min-width: 1025px nedosažitelné (v 1025 px
+       je preferovaná hodnota už nad nimi). Drží jen jako pojistka, kdyby breakpoint
+       někdy klesl — ne jako reálná podlaha. */
+    --fs-d0: clamp(2.125rem, 1.35rem + 1.5vw, 3rem);
+    --fs-d1: clamp(1.625rem, 1.15rem + 1.1vw, 2.5rem);
   }
 }
 
@@ -212,30 +275,24 @@ html.staged {
    přerostla obrazovku o 60–130 px (měřeno: 903–1060 px v okně vysokém 844).
    Spodek sekce — a s ním CTA — se tím pádem uřízl pod dolní hranou.
 
-   Tenhle blok je poslední, takže na telefonu přebíjí oba výškové. Škáluje
-   podle vw a stahuje rozestupy tak, aby se sekce do okna vešla i česky. */
+   ★★ VELIKOSTI PÍSMA UŽ TENHLE BLOK NEŘEŠÍ — a je to ta hlavní oprava čitelnosti.
+   Sráželo se tu tělo i odrážky, aby se sekce vešla do okna. Jenže v režimu jeviště
+   se do okna vejít NEMÁ: text začíná pod pásem a normálně teče dál (naměřeno:
+   sekce jsou o 130–420 px vyšší než okno a stránka se prostě roluje). Písmo se
+   tedy zdrobňovalo kvůli omezení, které na telefonu neexistuje. Škálu teď řídí
+   spojitý clamp() podle šířky a jeho spodní meze jsou podlahy čitelnosti.
+   Zbývají jen rozestupy — a ty smí být na telefonu naopak vzdušnější. */
 @media (max-width: 640px) {
   :root {
-    --fs-d0: clamp(1.875rem, 7.2vw, 2.5rem);
-    --fs-d1: clamp(1.5rem, 5.8vw, 2rem);
-    --fs-d2: clamp(1.125rem, 5vw, 1.5rem);
-    --fs-sub: 1rem;
-    --fs-body: 0.9375rem;
-    --fs-bullet: 0.875rem;
-    --lh-d0: 1.06;
-    --lh-d1: 1.12;
-    --lh-body: 1.55;
+    --sp-bullets-gap: 0.5rem;
+    --sp-bullet-pad: 0.6rem;
+    --sp-body-top: 1rem;
+    --sp-deliverable-top: 1.125rem;
+    --sp-stack-top: 1.125rem;
+    --sp-cta-top: 1.375rem;
 
-    --sp-bullets-gap: 0.35rem;
-    --sp-bullet-pad: 0.4rem;
-    --sp-body-top: 0.875rem;
-    --sp-deliverable-top: 0.875rem;
-    --sp-stack-top: 0.875rem;
-    --sp-cta-top: 1.125rem;
-
-    /* Nahoře navigace (~68 px), dole pilulka s tečkami (~50 px).
-       Víc si sekce na telefonu dovolit nemůže. */
+    /* Nahoře navigace (~68 px), dole pilulka s tečkami (~50 px). */
     --sp-sec-top: 4.75rem;
-    --sp-sec-bottom: 4.75rem;
+    --sp-sec-bottom: 5.25rem;
   }
 }

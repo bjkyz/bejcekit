@@ -105,10 +105,20 @@ export default function App() {
   useEffect(() => initScroll(reduced || tier === 'off'), [reduced, tier])
 
   /* HUD čte tier ze sceneState (Scene ho za běhu snižuje). Tady se jen založí
-     výchozí hodnota — důležité hlavně pro 'off', kdy se Scene nikdy nemountne. */
+     výchozí hodnota — důležité hlavně pro 'off', kdy se Scene nikdy nemountne.
+
+     ★ MUSÍ TO VISET I NA `showScene`, NE JEN NA `tier`.
+     'off' do sceneState jinak nikdo nikdy nezapíše: Scene si tier mapuje na
+     Level (`tier === 'off' ? 'low' : tier`), takže 'off' neumí, a `tier` sám je
+     useMemo z detectTier() a po pádu scény se nezmění. Když se tedy scéna vzdá
+     za běhu — governor sundá poslední patro, spadne WebGL kontext, nenačte se
+     chunk — panel dál hlásil poslední naměřené „60 fps · tier high" vedle
+     prázdného místa po plátně. Tenhle panel má tisknout jen hodnoty, které
+     aplikace opravdu drží. */
   useEffect(() => {
-    sceneState.tier = tier
-  }, [tier])
+    sceneState.tier = showScene ? tier : 'off'
+    if (!showScene) sceneState.fps = 0
+  }, [tier, showScene])
 
   /**
    * ★ JEVIŠTĚ MUSÍ ZŮSTAT PRAVDIVÉ PO CELOU DOBU BĚHU.

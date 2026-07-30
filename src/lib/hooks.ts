@@ -68,6 +68,46 @@ export function useActiveSection(): number {
   return active
 }
 
+/**
+ * Stojí scroll? Po `ms` bez pohybu vrátí true, na první pohyb zase false.
+ * Používá to lišta sekcí, aby na telefonu při čtení ustoupila z textu (hud.css).
+ *
+ * ★ STAV SE MĚNÍ JEN NA PŘEKLOPENÍ, NE PŘI KAŽDÉM SNÍMKU SCROLLU.
+ * Naivní `setIdle(false)` v posluchači by při rolování překreslil celý HUD
+ * šedesátkrát za vteřinu. Skutečná hodnota proto žije v refu a setState se
+ * zavolá jen tehdy, když se opravdu překlopí — tedy dvakrát za gesto.
+ *
+ * Posluchač visí na NATIVNÍM scrollu schválně: Lenis běží nad oknem (ne ve
+ * vlastním obalu) a v jednoduchém režimu neběží vůbec, takže tohle je jediné
+ * místo, které platí ve všech větvích.
+ */
+export function useScrollIdle(ms = 1200): boolean {
+  const [idle, setIdle] = useState(false)
+  const idleRef = useRef(false)
+  useEffect(() => {
+    let timer = 0
+    const rest = () => {
+      idleRef.current = true
+      setIdle(true)
+    }
+    const onScroll = () => {
+      if (idleRef.current) {
+        idleRef.current = false
+        setIdle(false)
+      }
+      clearTimeout(timer)
+      timer = window.setTimeout(rest, ms)
+    }
+    timer = window.setTimeout(rest, ms)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(timer)
+    }
+  }, [ms])
+  return idle
+}
+
 /** Přihlášení k dosednutí krychle na stěnu (kvůli scramblu a pulsu). */
 export function useFaceLand(fn: (i: number) => void): void {
   const saved = useRef(fn)

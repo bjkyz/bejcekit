@@ -118,8 +118,13 @@ main {
   text-align: center;
   justify-items: center;
 }
+/* Role, které mají vlastní míru řádku (max-width v sections.css), by se ve
+   vycentrované sekci jinak přilepily doleva. */
 .section--center .body,
-.section--center .sub {
+.section--center .bullets,
+.section--center .proof,
+.section--center .deliverable,
+.section--center .steps {
   margin-left: auto;
   margin-right: auto;
 }
@@ -188,9 +193,36 @@ main {
 /* Kde je vidět stavový panel (levý dolní roh), tam mu sekce MUSÍ vyhradit
    místo — jinak na něj spadne CTA sekcí WEB a AI. Změřeno, ne odhadnuto:
    panel je ~120px vysoký včetně odsazení, rezervujeme 8.5rem = 136px. */
-@media (min-width: 1025px) and (min-height: 821px) {
+/* ★ Práh musí sedět s tím, kdy je panel vůbec vidět (hud.css: skrytý do 1000 px
+   výšky). Rezervovat pod ním místo na oknech, kde žádný panel není, znamenalo
+   uříznout si 152 px výšky pro nic — a přesně o ně se pak tísnil text. */
+/* ★ ÚZKÝ DESKTOP (1025–1279): SLOUPEC MUSÍ DOSTAT VÍC MŘÍŽKY.
+   Přechod z 1024 na 1025 px vypíná režim jeviště: sloupec jde z plné šířky
+   (strop 36rem = 576 px) na 5 z 12 mřížky, což je při 1025 px jen 379 px.
+   Naměřeno: řádek spadl z 61 znaků na 45, tedy pod čtenářské minimum — o jediný
+   pixel šířky okna se čitelnost ZHORŠILA. Šest sloupců to srovná a krychli
+   pořád zbývá půlka okna; skutečnou míru řádku stejně drží --measure-* v rem. */
+@media (min-width: 1025px) and (max-width: 1279px) {
+  .section__col {
+    grid-column: 2 / span 6;
+  }
+  .section--right .section__col {
+    grid-column: 6 / span 6;
+  }
+  /* ★ STŘEDOVÉ SEKCE SE TU NEROZŠIŘUJÍ — a je to schválně.
+     Za prvé je nemá cenu rozšiřovat: 8 z 12 sloupců dává i při 1025 px přes
+     600 px, takže žádný skok proti režimu jeviště nevzniká. Za druhé by to
+     rozbilo okno: `.section--center .section__col::before` je závoj s odsazením
+     -8rem do stran (128 px). Při span 10 od druhého sloupce končí závoj na
+     1033 px v okně širokém 1025 — naměřeno jako 6px vodorovný scroll. Je to
+     přesně ta past, kvůli které je závoj pod 1024 px vypnutý (viz níž). */
+}
+
+@media (min-width: 1025px) and (min-height: 1001px) {
+  /* Panel měří po stažení prokladu (hud.css) ~97 px a sedí 24 px nad spodní
+     hranou, tedy 121 px. 8rem = 128 px mu nechává 7 px vzduchu. */
   .section {
-    padding-bottom: 9.5rem;
+    padding-bottom: 8rem;
   }
 }
 
@@ -271,9 +303,16 @@ main {
     grid-column: 1 / -1;
     text-align: left;
     justify-items: start;
+    /* ★ SLOUPEC DOSTAL PLNOU ŠÍŘKU — A NA TABLETU TÍM ŘÁDEK NAROSTL NA 93–107 ZNAKŮ.
+       Na telefonu se nic nestane (390px okno je užší než tenhle strop), ale na
+       768px na výšku to je rozdíl mezi textem a tapetou. */
+    max-width: 36rem;
   }
   .section--center .body,
-  .section--center .sub {
+  .section--center .bullets,
+  .section--center .proof,
+  .section--center .deliverable,
+  .section--center .steps {
     margin-left: 0;
     margin-right: 0;
   }
@@ -290,7 +329,7 @@ main {
     background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.92) 100%);
     padding: 1.5rem 1.25rem 1.25rem;
     margin: 0 -1.25rem;
-    border-radius: 4px;
+    border-radius: 2px; /* jediná 4px v jinak 2px systému */
   }
 }
 

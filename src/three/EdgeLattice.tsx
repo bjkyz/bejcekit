@@ -21,6 +21,28 @@ const CORNERS: Vector3[] = []
 for (const x of [-HALF, HALF])
   for (const y of [-HALF, HALF]) for (const z of [-HALF, HALF]) CORNERS.push(new Vector3(x, y, z))
 
+/**
+ * ★ INDEXOVÝ ROH. Jeden stud je o polovinu větší než ostatních sedm.
+ *
+ * Krychle je invariantní vůči celé oktaedrické grupě: otoč ji o 90° kolem libovolné
+ * osy a dostaneš TÝŽ OBRÁZEK. A protože kamera po dráze skáče přesně po 90° krocích,
+ * znamenalo to, že se po přeletu vrátí do záběru, který je od toho předchozího
+ * geometricky nerozeznatelný. Kamera urazila čtvrtinu koule a divák neviděl DŮKAZ,
+ * že se něco stalo — jen mihnutí a zase tentýž objekt.
+ *
+ * Jeden odlišný roh tu symetrii rozbije. Po 90° kroku je jinde, takže silueta je
+ * objektivně jiná a oko má čeho se chytit: „stroj je natočený jinak než před chvílí".
+ *
+ * ★★ JEDEN ROH, NE OSM NÁHODNÝCH VELIKOSTÍ. Osm různě velkých studů vypadá jako chyba
+ *   v kódu. Jeden vědomě odlišný se čte jako ZÁMĚR — jako počáteční roh přístroje,
+ *   podle kterého se pozná orientace. Přesně tuhle značku má na sobě každý reálný
+ *   konektor a každé pouzdro čipu, a proto ji člověk přečte, aniž by o tom věděl.
+ *
+ * Index 7 = (+1.5, +1.5, +1.5) — poslední v pořadí, ve kterém se roh sype výš.
+ */
+const INDEX_CORNER = 7
+const INDEX_SCALE = 1.5
+
 export default function EdgeLattice() {
   const studs = useRef<InstancedMesh>(null)
   const edgeMat = useRef<LineBasicMaterial>(null)
@@ -42,7 +64,10 @@ export default function EdgeLattice() {
     if (!studs.current) return
     const m = new Matrix4()
     CORNERS.forEach((c, i) => {
-      m.makeTranslation(c.x, c.y, c.z)
+      const s = i === INDEX_CORNER ? INDEX_SCALE : 1
+      // Škálovat MUSÍ jít společně s posunem, v jedné matici — setMatrixAt bere celou
+      // transformaci instance a druhé volání by to první přepsalo, ne doplnilo.
+      m.makeScale(s, s, s).setPosition(c.x, c.y, c.z)
       studs.current!.setMatrixAt(i, m)
     })
     studs.current.instanceMatrix.needsUpdate = true

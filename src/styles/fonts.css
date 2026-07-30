@@ -1,14 +1,21 @@
 /* Geist + Geist Mono, obojí OFL, obojí variable (wght 100–900).
    SELF-HOSTED, subset na latin + latin-ext → všechna česká diakritika
    (ě š č ř ž ý á í é ů ú ť ď ň) ověřena jako přítomná.
-   Nula síťových requestů, nula CLS, žádné Google Fonts. */
+   Nula síťových requestů, nula CLS, žádné Google Fonts.
+
+   ★ font-display: OPTIONAL, ne swap. Chrome počítá překreslení textu po výměně
+   fontu jako NOVÝ LCP kandidát — se `swap` tím hero odstavec platil vteřiny LCP
+   navíc. Fonty jsou preloadované a mají ~38 kB, takže první vykreslení skoro
+   vždy stihnou a rozdíl nikdo neuvidí. Když je síť opravdu mizerná, jedna
+   návštěva pojede na systémovém sans a příště už z cache — žádné přeblikávání
+   textu v půlce čtení. */
 
 @font-face {
   font-family: 'Geist';
   src: url('/fonts/geist-var-latin.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -16,5 +23,5 @@
   src: url('/fonts/geist-mono-var-latin.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }

@@ -16,11 +16,15 @@ export default function Section({
   s,
   index,
   reduced,
+  hasScene,
   dragRef,
 }: {
   s: S
   index: number
   reduced: boolean
+  /** Běží 3D? Bez scény nesmí existovat úchop ani nápověda „táhni a otoč" —
+      vybízely by k tažení za krychli, která na obrazovce není. */
+  hasScene: boolean
   dragRef: React.RefObject<Group | null>
 }) {
   const ref = useReveal<HTMLElement>(!reduced && index !== 0)
@@ -35,7 +39,7 @@ export default function Section({
       className={`section section--${s.align}${isHero ? " section--hero" : ""}`}
       aria-labelledby={`${s.id}-h`}
     >
-      {isHero && !reduced && <GrabPlate dragRef={dragRef} />}
+      {isHero && !reduced && hasScene && <GrabPlate dragRef={dragRef} />}
 
       <div className="section__grid">
         <div className="section__col">

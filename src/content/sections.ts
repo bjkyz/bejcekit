@@ -58,14 +58,14 @@ export const SECTIONS: Section[] = [
     plateNum: '00',
     headline: 'Weby, které vydělávají. IT, které nespadne.',
     body:
-      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazníci neopustí. Nasazuji AI a jazykové modely tam, kde reálně šetří hodiny. A spravuji servery, co běží i ve tři ráno. Jeden člověk místo agentury: mluvíte přímo s tím, kdo tu práci dělá.',
+      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI tam, kde ušetří hodiny, a nikde jinde. A spravuji servery tak, aby vás výpadek nestál tržby. Jeden člověk místo agentury: mluvíte přímo s tím, kdo tu práci dělá a kdo za ni ručí.',
     bullets: [
       'Pevná cena a termín. Písemně, ještě než začnu.',
-      'Odezva do 24 hodin, i o víkendu.',
-      'Česko, remote i na místě.',
+      'Odpovím do 24 hodin, i o víkendu.',
+      'Česko, remote i na místě. Přístupy a kód zůstávají vaše.',
     ],
     status: 'Volná kapacita: zbývá 1 místo',
-    cta: { label: 'Nezávazně poptat', href: '#kontakt' },
+    cta: { label: 'Chci nezávaznou nabídku', href: '#kontakt' },
     ghostCta: { label: 'Prohlédnout služby', href: '#web' },
     align: 'center',
     subsystem: 'IDENTIFIKACE',
@@ -75,20 +75,20 @@ export const SECTIONS: Section[] = [
     kicker: '[ 01 / WEB ]',
     plateCode: 'WEB',
     plateNum: '01',
-    headline: 'SEO, které vás dostane nahoru.',
+    headline: 'Nahoře ve vyhledávání. Bez placení za klik.',
     body:
-      'SEO nedělám jako přílepek po dokončení webu. Je součástí stavby od prvního řádku. Proto weby, které postavím, vyhledávače najdou a lidé je neopustí. Čtyři důvody, proč to funguje:',
+      'Zákazník, který vás najde ve vyhledávání, nestojí nic. Zákazník z reklamy stojí pokaždé znovu. Proto SEO nedělám jako přílepek na konci, ale od prvního řádku kódu. Čtyři důvody, proč to funguje:',
     bullets: [
-      'Rychlost je rankovací faktor. Core Web Vitals v zeleném, ne v oranžové.',
-      'Technická čistota. Sémantické HTML, strukturovaná data, sitemap, čisté URL.',
-      'Google i Seznam. Český trh není jen Google, většina šablon to ignoruje.',
-      'Měření od prvního dne. Search Console, pozice, konverze. Vidíte, jestli to funguje.',
+      'Rychlost je rankovací faktor i konverzní páka. Core Web Vitals v zeleném, ne v oranžové.',
+      'Sémantické HTML, strukturovaná data, sitemap, čisté URL. Google nemusí hádat, o čem web je.',
+      'Google i Seznam. Seznam pořád drží kus českého trhu a většina šablon ho ignoruje.',
+      'Search Console, pozice a konverze od prvního dne. Vidíte, jestli se investice vrací.',
     ],
     /** Nejsilnější argument webu: ověřitelný důkaz místo tvrzení. */
-    proof: 'Důkaz: web, který právě čtete, má Lighthouse 97 / 100 / 100 / 100. Změřte si to sami.',
+    proof: 'Důkaz: web, který právě čtete, má Lighthouse 97 / 100 / 100 / 100. Neberte to ode mě, změřte si to.',
     deliverable: {
       label: 'Co dostanete',
-      text: 'Nasazený běžící web, Core Web Vitals v zeleném, napojenou Search Console a měsíční report pozic.',
+      text: 'Nasazený běžící web, Core Web Vitals v zeleném, napojenou Search Console a měsíční report pozic a poptávek.',
     },
     stack: ['SEO', 'Core Web Vitals', 'Search Console', 'React', 'TypeScript', 'Node.js'],
     cta: { label: 'Chci web, který vydělává', href: '#kontakt' },
@@ -100,14 +100,14 @@ export const SECTIONS: Section[] = [
     kicker: '[ 02 / INFRA ]',
     plateCode: 'INFRA',
     plateNum: '02',
-    headline: 'Infrastruktura, o které nemusíte přemýšlet.',
+    headline: 'Servery, které vás nevzbudí ve tři ráno.',
     body:
-      'Převezmu vaše IT do správy, zdokumentuju ho a vyházím z něj tiché miny. Zálohy, u kterých jsme opravdu vyzkoušeli obnovení, ne jen odškrtli zelenou fajfku. A hlavně: člověk, který zvedne telefon.',
+      'Převezmu vaše IT, zdokumentuju ho a vyházím z něj tiché miny. Zálohu, kterou nikdo nikdy nezkusil obnovit, za zálohu nepovažuji. O problému vím dřív, než vám zavolá zákazník. A hlavně: když se něco stane, zvedne telefon člověk, ne hlasová schránka.',
     bullets: [
-      'Správa serverů a virtualizace. Proxmox, Linux, Windows Server, Docker.',
-      'Monitoring a alerting 24/7. O výpadku vím dřív než váš zákazník.',
-      'Zálohy a plán obnovy, který každé čtvrtletí skutečně otestujeme.',
-      'Sítě, VPN, firewall, Microsoft 365 a koncové stanice.',
+      'Monitoring a alerting 24/7. Alert padá mně na telefon, i v noci a o víkendu.',
+      'Obnovení ze zálohy testujeme každé čtvrtletí nanečisto. Ne jednou za rok na papíře.',
+      'Proxmox, Linux, Windows Server, Docker. Servery a virtualizace bez pokusů na živém provozu.',
+      'Sítě, VPN, firewall, Microsoft 365 a koncové stanice. Jedno číslo na celé IT.',
     ],
     deliverable: {
       label: 'Co dostanete',
@@ -123,14 +123,14 @@ export const SECTIONS: Section[] = [
     kicker: '[ 03 / AI ]',
     plateCode: 'AI',
     plateNum: '03',
-    headline: 'Práci, která se opakuje, ať dělá stroj.',
+    headline: 'Většina AI projektů se nevyplatí.',
     body:
-      'Jako AI inženýr nasazuji jazykové modely tam, kde ušetří hodiny. Ne tam, kde se dobře vyjímají na poradě. Nejdřív spočítáme, kolik hodin měsíčně to ušetří a co bude stát provoz. Teprve pak to stavím. Když čísla nevyjdou, řeknu vám to.',
+      'Ty zbylé ušetří hodiny každý týden. Rozdíl mezi nimi se pozná propočtem, ne prezentací. Nejdřív spočítám, kolik hodin měsíčně to sundá z lidí a co bude stát provoz. Teprve pak stavím. Když se to nevrátí, zakázku nevezmu.',
     bullets: [
-      'AI asistenti nad vašimi dokumenty a daty (RAG). Odpovídají z vašich podkladů, ne z internetu.',
-      'Platformy pro SEO. Tvorba a optimalizace obsahu ve velkém, řízená daty.',
-      'Automatizace procesů a integrace systémů. n8n, API, webhooky, napojení na CRM.',
-      'Zpracování faktur, e-mailů a formulářů bez ručního přepisování.',
+      'AI asistent odpovídá z vašich dokumentů a dat, ne z internetu (RAG). Žádné vymýšlení.',
+      'Faktury, e-maily a formuláře bez ručního přepisování. Data padají rovnou do systému.',
+      'Obsah pro SEO ve velkém, řízený daty. Články a popisky, které by ručně stály stovky hodin.',
+      'n8n, API, webhooky, CRM. Propojím systémy, které spolu dnes nemluví.',
     ],
     deliverable: {
       label: 'Co dostanete',
@@ -146,9 +146,9 @@ export const SECTIONS: Section[] = [
     kicker: '[ 04 / PROCES ]',
     plateCode: 'PROCES',
     plateNum: '04',
-    headline: 'Čtyři kroky. Žádná mlha.',
+    headline: 'Čtyři kroky. Žádné překvapení na faktuře.',
     body:
-      'Víte, co dostanete, kdy to dostanete a kolik to stojí, dřív než napíšu první řádek kódu. Pracuji v krátkých, viditelných iteracích: každý týden vidíte postup, ne slib, že postup bude.',
+      'Rozsah, termín a cena jsou na papíře dřív, než napíšu první řádek kódu. Pak pracuji v krátkých iteracích: každý týden vidíte postup, ne slib, že postup bude. Když se rozsah změní, znáte cenu dřív, než se do změny pustím.',
     bullets: [],
     steps: [
       {
@@ -161,11 +161,11 @@ export const SECTIONS: Section[] = [
       },
       {
         title: 'Dodávka',
-        text: 'Krátké iterace a průběžné nasazování. Vidíte funkční verzi, ne slidy o funkční verzi.',
+        text: 'Nasazuji průběžně. Vidíte běžící verzi, ne slidy o běžící verzi.',
       },
       {
         title: 'Provoz',
-        text: 'Nasazení, monitoring, zálohy, další rozvoj. Po vystavení faktury nemizím.',
+        text: 'Monitoring, zálohy, další rozvoj. Po vystavení faktury nemizím.',
       },
     ],
     cta: { label: 'Domluvit úvodní hovor zdarma', href: '#kontakt' },
@@ -177,9 +177,9 @@ export const SECTIONS: Section[] = [
     kicker: '[ 05 / KONTAKT ]',
     plateCode: 'KONTAKT',
     plateNum: '05',
-    headline: 'Napište mi. Odpovím do 24 hodin.',
+    headline: 'Napište mi. Do 24 hodin víte, na čem jste.',
     body:
-      'Popište problém vlastními slovy, technickou část si přeložím sám. Žádný formulářový labyrint, žádný obchodník mezi námi. Píšete přímo člověku, který tu práci bude dělat. A když na váš problém nejsem ten správný, řeknu vám to a doporučím někoho, kdo je.',
+      'Popište problém vlastními slovy, technickou část si přeložím sám. Žádný formulářový labyrint, žádný obchodník mezi námi: píšete rovnou tomu, kdo tu práci bude dělat. A když na váš problém nejsem ten pravý, řeknu vám to a pošlu vás za někým, kdo je.',
     bullets: [],
     align: 'center',
     subsystem: 'KONTAKT',

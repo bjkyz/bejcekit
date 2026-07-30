@@ -5,7 +5,7 @@ import { scrollToSection } from '../lib/scroll'
 import { sceneState } from '../lib/scene-state'
 import Status from './Status'
 
-export default function Hud({ tier }: { tier: string }) {
+export default function Hud() {
   const active = useActiveSection()
 
   return (
@@ -13,7 +13,7 @@ export default function Hud({ tier }: { tier: string }) {
       <Nav active={active} />
       <Frame />
       <Rail active={active} />
-      <Status tier={tier} />
+      <Status />
     </div>
   )
 }

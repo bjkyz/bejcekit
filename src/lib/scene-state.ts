@@ -19,6 +19,14 @@ export const sceneState = {
   transit: false,
   fps: 60,
   tier: 'high' as Tier,
+  /**
+   * Běží 3D v režimu jeviště (horní pás nad textem, viz lib/stage.ts)?
+   * Píše App, čte Rig. Mutace, ne React state — čte se to 60×/s.
+   *
+   * Rig se na to NESMÍ ptát přes matchMedia ani clientWidth: obojí je čtení layoutu
+   * a v useFrame smyčce by to každý snímek vynutilo reflow.
+   */
+  staged: false,
   /** Zážeh jádra. Preloader ho vystřelí na 6 AŽ po doparsování GLB; Core ho pak
       tlumí zpět k nule. Mesh, který ještě neexistuje, nejde zapálit — proto se
       to nedělá shaderem v preloaderu, ale rampou světla po loadu. */
@@ -72,18 +80,36 @@ export const clampDelta = (delta: number) => Math.min(delta, 1 / 15)
  * „dynamiku" záběru: nádech (odstup) a příklon (nájezd).
  *
  * ★ SPOČÍTÁNO, NE ODHADNUTO. Při fov 35° je viditelná výška ve vzdálenosti R
- *   rovna 2·R·tan(17.5°) = 0.63·R. Pro R = 8.6 to dělá 5.4 jednotky, takže stěna
- *   o hraně 3 zabere ~55 % výšky okna a má kam dýchat. Pod R ≈ 6.8 by se krychle
- *   do okna přestala vejít úplně — proto se to hlídá ještě jednou za běhu
- *   (NEED_SPAN v three/Rig.tsx), kde do toho mluví i poměr stran displeje.
+ *   rovna 2·R·tan(17.5°) = 0.6303·R.
+ *
+ * ★★ PROČ SE TO CELÉ ODSUNULO O ~17 % DÁL (bylo 8.2–9.2).
+ *
+ *   Z krychle není vidět hrana 3, ale její SILUETA. A ta se uprostřed přeletu,
+ *   kdy se na ni kamera dívá zešikma, roztáhne na stěnovou úhlopříčku 3·√2 = 4.24.
+ *   Při R = 8.8 je viditelná výška 5.55 jednotky, takže silueta zabrala 76 % výšky
+ *   okna a rohové study seděly na jeho hraně. Výsledek nebyl STROJ, kolem kterého
+ *   kamera obíhá, ale KLEC, ve které kamera sedí: nadpis hero sekce se doslova
+ *   vykresloval uvnitř drátěného rámu a na telefonu krychle prořízla text.
+ *
+ *   Objekt potřebuje kolem sebe NEGATIVNÍ PROSTOR, jinak se nečte jako objekt.
+ *   Při R = 10.3 je viditelná výška 6.49 a silueta zabere 65 % — kolem dokola
+ *   zbývá vzduch. Teprve tím je vidět i samotný oblet: měnící se silueta se musí
+ *   mít vůči čemu měnit, a to je okraj záběru.
+ *
+ * ★★★ ROZPĚTÍ SE MUSÍ VEJÍT NAD PODLAHU V Rig.tsx. Odstup se za běhu ještě hlídá
+ *   podle poměru stran (FIT_SPAN_*), a ta podlaha je TVRDÁ: kdyby vyšla výš než
+ *   nejmenší radius tady, sežrala by je VŠECHNY a všech šest stanic by se srovnalo
+ *   na jedno číslo. Nádech i nájezd — celá dynamika záběru — by tiše zmizely a nikdo
+ *   by nepoznal proč. FIT_SPAN_WIDE (5.6) dává podlahu 8.88 < 9.6, takže na širokém
+ *   displeji nezabírá nikdy a rozpětí níž platí přesně tak, jak je napsané.
  */
 export const ORBIT_RADIUS: number[] = [
-  8.8, // 00 IDENT   — nejdál, text jde přes střed a potřebuje klid
-  8.5, // 01 WEB
-  8.6, // 02 INFRA   — shora
-  8.3, // 03 AI      — nejtěsnější záběr, stroj je na dosah
-  9.2, // 04 PROCES  — největší odstup, nejklidnější záběr webu
-  8.2, // 05 KONTAKT — zblízka a zespodu: stroj se tyčí a čeká na vstup
+  10.3, // 00 IDENT   — nejdál, text jde přes střed a potřebuje klid
+  9.9, //  01 WEB
+  10.1, // 02 INFRA   — shora
+  9.7, //  03 AI      — nejtěsnější záběr, stroj je na dosah
+  10.8, // 04 PROCES  — největší odstup, nejklidnější záběr webu
+  9.6, //  05 KONTAKT — zblízka a zespodu: stroj se tyčí a čeká na vstup
 ]
 
 /**

@@ -41,6 +41,16 @@ a {
   color: inherit;
   text-decoration: none;
 }
+/* Výchozí modrý výběr trhá paletu — jediná cizí barva na webu. */
+::selection {
+  background: rgba(79, 216, 232, 0.28);
+  color: var(--tx-1);
+}
+/* Android jinak bliká šedým obdélníkem přes celé CTA; :active stavy máme vlastní. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
 button {
   font: inherit;
   color: inherit;
@@ -103,7 +113,7 @@ ol {
 .grain {
   position: fixed;
   inset: -50%;
-  z-index: 4;
+  z-index: var(--z-grain);
   pointer-events: none;
   opacity: 0.035;
   mix-blend-mode: overlay;

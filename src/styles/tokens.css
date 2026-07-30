@@ -127,11 +127,46 @@
      Nulový zisk, spousta nových způsobů, jak si rozbít okraje. */
   --gutter: clamp(1.25rem, 4vw, 4rem);
   --maxw: 90rem;
+
+  /**
+   * ★ VÝŠKA JEVIŠTĚ — horního pásu, ve kterém na telefonu žije 3D.
+   *
+   * VÝCHOZÍ NULA. Každý calc(), který se o ni opírá, se tím pádem sám od sebe
+   * vynuluje a chová se, jako by žádné jeviště neexistovalo. Právě proto smí
+   * pravidla pro jeviště stát MIMO média dotaz: neplatí prostě tím, že se odečtou.
+   * Zapíná se jedinou třídou na <html> (viz lib/stage.ts) — a ta je i jediné místo,
+   * kde je breakpoint. V CSS už podruhé není, takže se s ničím nemůže rozejít.
+   *
+   * ★★ svh, NIKDY vh ANI JS-MĚŘENÝ PIXEL. Na iOS se při rolování vysouvá URL lišta;
+   *   vh i clientHeight se s ní mění, takže by pás při každém takovém pohybu změnil
+   *   výšku — a s ním odsazení VŠECH sekcí. Stránka by se pod prstem cukala.
+   *   svh je z definice ta MALÁ (lišta vysunutá) výška a nehne se.
+   */
+  --stage-h: 0px;
+
+  /**
+   * ★ POŘADÍ VRSTEV. Plátno mění patro podle režimu — a to je celý ten vtip:
+   *     ŠIROKO  plátno = PODKLAD  (--z-canvas 1)  → text se píše PŘES stroj
+   *     ÚZKO    plátno = JEVIŠTĚ  (--z-stage  3)  → text MIZÍ ZA strojem
+   *   Na telefonu je sekce vyšší než okno, takže text při rolování pod jeviště
+   *   nutně podjede. Když je plátno NAD ním a má neprůhledné pozadí, prostě tam
+   *   zmizí — a nemusí se maskovat vůbec nic. Viz lib/stage.ts.
+   */
   --z-bg: 0;
   --z-canvas: 1;
   --z-main: 2;
-  --z-hud: 3;
+  --z-stage: 3;
+  --z-hud: 4;
+  --z-grain: 5;
   --z-preloader: 10;
+}
+
+/* ★ TADY A NIKDE JINDE SE ROZHODUJE, JAK JE JEVIŠTĚ VYSOKÉ.
+   Třídu sází lib/stage.ts (a synchronně main.tsx, kvůli CLS). Žádný média dotaz:
+   breakpoint patří do stage.ts, protože k němu musí umět připočíst i to, jestli
+   vůbec běží WebGL — a na to se CSS zeptat neumí. */
+html.staged {
+  --stage-h: 42svh;
 }
 
 /* ★ Sekce se musí VEJÍT do 100svh, jinak text spadne na stavový panel.

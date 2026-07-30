@@ -118,9 +118,13 @@ export default function Core({ tier }: { tier: Tier }) {
 
     // Jádro se během otáčky opře PROTI skořápce a pak ji dožene.
     if (inner.current) inner.current.rotation.y -= 0.9 * h * dt
-    if (grp.current && tier !== 'low') {
-      grp.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.2) * 0.05
-    }
+
+    /* ★ KOLÉBÁNÍ BĚŽÍ I NA 'low'. Býval tu guard `tier !== 'low'` a byl to špatný
+       obchod: zápis do rotation.z stojí NULU (žádný draw call, žádný shader, jeden
+       float), zatímco vypnuté kolébání stojí přesně to, co scéna na slabém telefonu
+       potřebuje nejvíc — aby vypadala živě. Šetřilo se tam, kde se nedalo ušetřit,
+       za cenu obrazu právě tam, kde byl nejmrtvější. */
+    if (grp.current) grp.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.2) * 0.05
   })
 
   return (

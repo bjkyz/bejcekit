@@ -63,7 +63,20 @@ const DRIFT = 30
 function focusPass(y: number): void {
   if (!choreo) return
   const vh = window.innerHeight
-  const mid = y + vh / 2
+
+  /**
+   * ★ OHNISKO NENÍ VE STŘEDU OKNA, KDYŽ HORNÍ PÁS ZABÍRÁ JEVIŠTĚ.
+   *
+   * Ostří se podle vzdálenosti od ohniska, a to bylo natvrdo v půlce okna. V režimu
+   * jeviště je ale horních 42 % okna PLÁTNO — text tam vůbec nesmí být. Čtecí zóna
+   * je tedy spodních 58 % a její střed leží na 0.42 + 0.58/2 = 0.71 výšky okna.
+   *
+   * Bez téhle korekce míří ohnisko doprostřed okna, tedy skoro na spodní hranu
+   * jeviště: text by byl nejostřejší v okamžiku, kdy mu právě mizí pod plátnem,
+   * a v místě, kde ho člověk doopravdy čte, by pohasínal. Ostření by pracovalo
+   * přesně proti čtenáři.
+   */
+  const mid = y + vh * (document.documentElement.classList.contains('staged') ? 0.71 : 0.5)
 
   for (let i = 0; i < cols.length; i++) {
     const el = cols[i]
@@ -153,15 +166,32 @@ function progressFromScroll(y: number): number {
   return FACE_COUNT - 1
 }
 
-export function initScroll(reducedMotion: boolean): () => void {
+/**
+ * `simple` = omezený pohyb NEBO stroj bez WebGL (tier 'off').
+ * V obou případech se scroll nechá prohlížeči: Lenis je choreografické leštidlo
+ * pro scénu, a bez scény by byl jen vrstva JS navíc mezi kolečkem a stránkou —
+ * přesně na stroji, který si žádnou vrstvu navíc nemůže dovolit.
+ */
+export function initScroll(simple: boolean): () => void {
   measure()
 
-  /* Ostření je POHYB, ne obsah. Při omezeném pohybu tedy nejede vůbec a text
-     zůstane v plné síle — nikdy se neschovává, jen se přestane hýbat. */
-  choreo = !reducedMotion
+  /* ★ Sekce se po doběhnutí fontů o pár px přeskládají. Preloader sice po loadu
+     scény volá remeasure(), ale fonty umí dotéct AŽ PO modelu (cache) — a bez
+     scény preloader neexistuje vůbec. Tohle je pojistka pro oba případy. */
+  const onFonts = () => {
+    measure()
+    if (lenis) {
+      snap?.destroy()
+      snap = buildSnap(lenis)
+    }
+  }
+  document.fonts?.ready.then(onFonts)
 
-  // Při omezeném pohybu Lenis vůbec nespouštíme — nechá se nativní scroll.
-  if (reducedMotion) {
+  /* Ostření je POHYB, ne obsah. V jednoduchém režimu tedy nejede vůbec a text
+     zůstane v plné síle — nikdy se neschovává, jen se přestane hýbat. */
+  choreo = !simple
+
+  if (simple) {
     const onScroll = () => {
       scrollState.progress = progressFromScroll(window.scrollY)
       scrollState.velocity = 0
@@ -282,12 +312,18 @@ function emitLanding(i: number): void {
   bus.emit('face:land', i)
 }
 
-/** Kotvy z navigace a lišty. Funguje i bez Lenisu (omezený pohyb). */
+/** Kotvy z navigace a lišty. Funguje i bez Lenisu (jednoduchý režim). */
 export function scrollToSection(id: string): void {
   const el = document.getElementById(id)
   if (!el) return
-  if (lenis) lenis.scrollTo(el, { duration: 1.1 })
-  else el.scrollIntoView({ behavior: 'auto', block: 'start' })
+  if (lenis) {
+    lenis.scrollTo(el, { duration: 1.1 })
+    return
+  }
+  /* Nativní fallback: plynule tam, kde si uživatel pohyb nezakázal. Nativní
+     smooth scroll jede na compositoru — bezpečný i pro stroj bez WebGL. */
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
 }
 
 export function remeasure(): void {

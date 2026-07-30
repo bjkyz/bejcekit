@@ -13,7 +13,7 @@ import { sceneState } from '../lib/scene-state'
  * vlastní kusovník. Právě tam žije povinná CC-BY atribuce, takže se z právní
  * povinnosti stane to jediné místo, kde si metafora přístroje smí mrknout okem.
  */
-export default function Status({ tier }: { tier: string }) {
+export default function Status() {
   const [, tick] = useState(0)
 
   // 8 Hz. Panel nepotřebuje 60 fps a re-render celého HUD by byl plýtvání.
@@ -26,6 +26,9 @@ export default function Status({ tier }: { tier: string }) {
   const s = SECTIONS[i]
   const transit = sceneState.transit
   const next = Math.min(i + 1, SECTIONS.length - 1)
+  /* Ze sceneState, ne z propu: governor umí patro za běhu snížit a panel
+     nesmí ukazovat kvalitu, která už dávno neběží. */
+  const tier = sceneState.tier
 
   return (
     <aside className="status" aria-hidden="true">
@@ -50,7 +53,9 @@ export default function Status({ tier }: { tier: string }) {
       <Row k="Odezva" v="Do 24 hodin" />
 
       <div className="status__meta">
-        {sceneState.fps} fps · tier {tier} · meshopt · model cc-by m. murdock
+        {tier === 'off'
+          ? 'statický režim · 3d vypnuto'
+          : `${sceneState.fps} fps · tier ${tier} · meshopt · model cc-by m. murdock`}
       </div>
     </aside>
   )

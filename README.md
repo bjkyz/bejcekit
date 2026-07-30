@@ -4,7 +4,7 @@
 se žhavým reaktorem uvnitř; scroll ji otáčí po stěnách a každá stěna je jedna
 sekce webu.
 
-**Lighthouse (desktop): 97 / 100 / 100 / 100** (výkon, přístupnost, best practices, SEO).
+**Lighthouse (desktop): 100 / 100 / 100 / 100** (výkon, přístupnost, best practices, SEO).
 
 ## Spuštění
 
@@ -111,7 +111,33 @@ v patičce sekce 05 a ve stavovém panelu. Neodstraňuj ji z estetických důvod
 ## Výkon
 
 Celá stránka váží **877 kB** (376 kB gz JS+CSS + 501 kB model), ale na kritické
-cestě je jen **79 kB gz** — three.js se načítá až po vykreslení textu.
+cestě je jen **~80 kB gz** — three.js se načítá až po vykreslení textu.
+
+- **CSS je inline v `index.html`** (viz `inlineCss` ve `vite.config.ts`): 5.6 kB gz
+  nestojí za render-blokující request.
+- **3D se importuje až po `load` + idle** (`useArmed` v `App.tsx`), ne hned po
+  hydrataci — vyhodnocení three.js jinak blokovalo překreslení textu a Chrome ho
+  počítal do LCP (naměřeno 6.4 s místo 2.6 s).
+- **`font-display: optional`**: překreslení po výměně fontu je nový LCP kandidát;
+  preloadovaný font první paint skoro vždy stihne, a když ne, jedna návštěva
+  pojede na systémovém písmu.
+
+### Odstupňovaná kvalita (staré PC, slabé mobily)
+
+O kvalitě 3D rozhodují dvě vrstvy v `src/lib/quality.ts` a `src/three/Scene.tsx`:
+
+1. **Detekce před startem** — `failIfMajorPerformanceCaveat` odhalí softwarové
+   WebGL (SwiftShader na PC s blocklistovanou grafikou → 3D se vůbec nezapne),
+   renderer string odhalí staré integrované Intel GPU (počet jader CPU o grafice
+   neříká nic), Save-Data / 2G vypne 3D úplně.
+2. **Governor za běhu** — měří fps a sestupuje po žebříku: DPR ↓ → `high→mid`
+   (sklo bez backside, FBO 256², bez MSAA) → `mid→low` (sklo fejkem, bez
+   composeru) → **3D pryč** (web zůstane, viz `SceneBoundary`). Každý sestup se
+   pamatuje 7 dní (`localStorage`), takže příští návštěva začne rovnou na patře,
+   které stroj utáhl. Nahoru se vrací jen DPR — patra ne, ať governor neosciluje.
+
+Bez WebGL jede i scroll nativně (Lenis se nespouští) a stavový panel poctivě
+hlásí „statický režim".
 
 Vědomě tu **není GSAP ani troika** (drei `<Text>`). GSAP obsluhoval tři drobnosti
 za 30 kB gz, troika byl celý font engine kvůli šesti ASCII nápisům. Obojí nahradilo
@@ -130,5 +156,7 @@ pár řádků v `src/lib/spring.ts` a canvas textura.
 ## Co ještě doplnit
 
 - IČO do `CONTACT_ROWS` v `src/content/sections.ts`.
-- `og:image` (náhledový obrázek pro sdílení na sociálních sítích).
 - Ověřit odkazy na LinkedIn a GitHub — jsou odhadnuté.
+
+(`og:image` už je hotový: `public/og.png` + meta v `index.html`. Přegenerovat jde
+ze šablony v repu úpravou `public/og.png` — 1200×630, tmavé pozadí, krychle.)

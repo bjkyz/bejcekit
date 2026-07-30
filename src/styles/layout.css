@@ -5,9 +5,10 @@
    plátno je VŽDY pointer-events:none, výjimky se opt-innou.
    ═══════════════════════════════════════════════════════════ */
 
-/* Šířku/výšku nastavuje Scene.tsx z documentElement.clientWidth/Height — na mobilu
-   se layoutový viewport (podle kterého se sází `inset: 0`) liší od viditelného
-   a plátno by bylo širší než obrazovka. Tady jen kotva a fallback. */
+/* Šířku/výšku nastavuje Scene.tsx přes lib/stage.ts — na mobilu se layoutový
+   viewport (podle kterého se sází `inset: 0`) liší od viditelného a plátno by bylo
+   širší než obrazovka; a v režimu jeviště navíc není celé okno, ale jen horní pás.
+   Tady je jen kotva a fallback. */
 .canvas-layer {
   position: fixed;
   top: 0;
@@ -20,6 +21,61 @@
 }
 .canvas-layer canvas {
   display: block;
+}
+
+/* ═══════════ JEVIŠTĚ (úzký displej) ═══════════
+   Třídu `is-staged` sází Scene.tsx, `staged` na <html> lib/stage.ts. Obojí ze
+   stejného měření, takže se breakpoint nikde nepíše ručně podruhé.
+
+   ★ TOHLE JE CELÁ OPRAVA MOBILU. Plátno vyskočí NAD text a zabere horní pás.
+   Pozadí plátna je neprůhledné (VOID = --bg-0), takže sekce, která je na telefonu
+   vyšší než okno, může svůj text klidně poslat nahoru — prostě za jevištěm zmizí.
+   Dřív šel text PŘES rozsvícené hrany krychle a nadpis vypadal jako rozbitý render. */
+html.staged .canvas-layer {
+  height: var(--stage-h);
+  z-index: var(--z-stage);
+  /* Neprůhledné pozadí je NOSNÁ VLASTNOST, ne kosmetika: právě za ním text mizí.
+     WebGL kreslí VOID (= --bg-0) samo, tohle je pojistka pro snímek, ve kterém
+     plátno ještě nic nevykreslilo. */
+  background: var(--bg-0);
+}
+
+/* ★ PODKLAD A HRANA JEVIŠTĚ JSOU ČISTÉ CSS — schválně žádný React.
+   Scéna se importuje až po load+idle (viz useArmed v App.tsx), takže mezi prvním
+   vykreslením a mountem plátna je okno v řádu vteřin. Kdyby podklad pásu nesl až
+   canvas-layer, text by v tom okně viditelně vjížděl do prázdné rezervy nahoře.
+   Pseudo-elementy na <html> existují od PRVNÍHO snímku spolu s třídou `staged`.
+
+   ::before = neprůhledný pás (za ním text mizí, i než se plátno narodí).
+   ::after  = spodní hrana: nahoře navazuje na pozadí pásu a dolů mizí do ztracena,
+   takže se text pod jevištěm ROZPLYNE, místo aby ho hrana uťala jako gilotina. */
+html.staged::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--stage-h);
+  z-index: var(--z-stage);
+  pointer-events: none;
+  background: var(--bg-0);
+}
+html.staged::after {
+  content: '';
+  position: fixed;
+  top: var(--stage-h);
+  left: 0;
+  right: 0;
+  height: 4rem;
+  z-index: var(--z-stage);
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--bg-0) 0%,
+    rgba(8, 9, 10, 0.92) 34%,
+    rgba(8, 9, 10, 0.55) 64%,
+    rgba(8, 9, 10, 0) 100%
+  );
 }
 
 main {
@@ -228,12 +284,39 @@ main {
     padding: var(--sp-sec-top) var(--gutter) var(--sp-sec-bottom);
   }
   .section__col {
-    /* čitelnost přes 3D: jemný závoj přesně pod textem, ne přes celou plochu */
+    /* čitelnost přes 3D: jemný závoj přesně pod textem, ne přes celou plochu.
+       ★ Platí UŽ JEN pro telefon na šířku, kde jeviště není a text tedy pořád
+       leží přes stroj. V režimu jeviště se vypíná — viz níž. */
     background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.92) 100%);
     padding: 1.5rem 1.25rem 1.25rem;
     margin: 0 -1.25rem;
     border-radius: 4px;
   }
+}
+
+/* ═══════════ SEKCE V REŽIMU JEVIŠTĚ ═══════════
+   Text a stroj se přestali překrývat, takže VŠECHNO, co ten překryv řešilo, jde ven.
+   Tohle je ta „čistota": ne nová vrstva navíc, ale tři vrstvy pryč.
+
+     • závoj pod textem      — není přes co prosvítat
+     • závoj pod navigací    — text se k navigaci nedostane, schová ho jeviště
+     • zarovnání na spodek   — text teď začíná pod jevištěm a teče dolů
+
+   Sekce si místo pro jeviště rezervuje odsazením. Protože --stage-h je na desktopu
+   0 px, tenhle calc() se tam sám vynuluje a pravidlo je bez efektu — proto smí být
+   mimo média dotaz a nemusí duplikovat breakpoint. */
+html.staged .section {
+  align-items: start;
+  padding-top: calc(var(--stage-h) + 1.75rem);
+}
+html.staged .section__col {
+  background: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+html.staged .nav::before {
+  content: none;
 }
 
 /* ── TELEFON NA ŠÍŘKU ──────────────────────────────────────

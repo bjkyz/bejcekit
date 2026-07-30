@@ -39,6 +39,14 @@ export default function Lights() {
         <Lightformer form="rect" intensity={1.8} color="#bfe9f2" position={[0, 4, 3]} scale={[8, 4, 1]} />
         <Lightformer form="rect" intensity={1.1} color="#4fd8e8" position={[-5, 0, 2]} scale={[4, 6, 1]} />
         <Lightformer form="rect" intensity={0.8} color="#52aeff" position={[5, -1, -3]} scale={[5, 5, 1]} />
+        {/* ★ ČTVRTÝ, ÚZKÝ A OSTRÝ — a stojí schválně MIMO OSY stěn (4.5, 3.5, −4.5).
+            Odlesk na skle je funkcí ODRAZU vektoru pohledu, takže se při obletu sune
+            po skořápce ZHRUBA DVOJNÁSOBNOU rychlostí než kamera. Je to tedy druhá věc
+            (po prachu), na které je pohyb kamery vidět — a tady přímo na povrchu stroje.
+            Kdyby seděl na ose některé stěny, na té stanici by ztuhl přesně uprostřed
+            a vypadal by jako vada v materiálu.
+            frames={1} → prostředí se peče JEDNOU. Za snímek to tedy nestojí nic. */}
+        <Lightformer form="rect" intensity={1.4} color="#b8f5ff" position={[4.5, 3.5, -4.5]} scale={[3, 3, 1]} />
       </Environment>
 
       <pointLight ref={rim} color={RIM} intensity={5} position={[-4, 2.5, 3]} distance={16} decay={2} />

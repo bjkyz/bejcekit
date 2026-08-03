@@ -5,10 +5,9 @@
    plátno je VŽDY pointer-events:none, výjimky se opt-innou.
    ═══════════════════════════════════════════════════════════ */
 
-/* Šířku/výšku nastavuje Scene.tsx přes lib/stage.ts — na mobilu se layoutový
-   viewport (podle kterého se sází `inset: 0`) liší od viditelného a plátno by bylo
-   širší než obrazovka; a v režimu jeviště navíc není celé okno, ale jen horní pás.
-   Tady je jen kotva a fallback. */
+/* Šířku nastavuje Scene.tsx (viz tam) — na mobilu se layoutový viewport, podle
+   kterého se sází `inset: 0`, liší od viditelného a plátno by bylo širší než
+   obrazovka. Tady je jen kotva a fallback. */
 .canvas-layer {
   position: fixed;
   top: 0;
@@ -18,69 +17,39 @@
   z-index: var(--z-canvas);
   pointer-events: none; /* jinak spolkne každý klik na každý odkaz nad sebou */
   overflow: hidden;
+  /* ★ ZTLUMENÍ PRO ÚZKÝ DISPLEJ. Na desktopu je token 1 a tohle je bez efektu.
+     Viz --canvas-dim v tokens.css: pod 1024 px leží text přes celý stroj a hrany
+     krychle by mu jinak prosvítaly skrz písmena.
+     Opacita na FIXNÍ vrstvě, která se nepřekresluje — kompozitor ji vyřídí
+     jedním násobením, žádný repaint na snímek. */
+  opacity: var(--canvas-dim);
 }
 .canvas-layer canvas {
   display: block;
 }
 
-/* ═══════════ JEVIŠTĚ (úzký displej) ═══════════
-   Třídu `is-staged` sází Scene.tsx, `staged` na <html> lib/stage.ts. Obojí ze
-   stejného měření, takže se breakpoint nikde nepíše ručně podruhé.
-
-   ★ TOHLE JE CELÁ OPRAVA MOBILU. Plátno vyskočí NAD text a zabere horní pás.
-   Pozadí plátna je neprůhledné (VOID = --bg-0), takže sekce, která je na telefonu
-   vyšší než okno, může svůj text klidně poslat nahoru — prostě za jevištěm zmizí.
-   Dřív šel text PŘES rozsvícené hrany krychle a nadpis vypadal jako rozbitý render. */
-html.staged .canvas-layer {
-  height: var(--stage-h);
-  z-index: var(--z-stage);
-  /* Neprůhledné pozadí je NOSNÁ VLASTNOST, ne kosmetika: právě za ním text mizí.
-     WebGL kreslí VOID (= --bg-0) samo, tohle je pojistka pro snímek, ve kterém
-     plátno ještě nic nevykreslilo. */
-  background: var(--bg-0);
-}
-
-/* ★ PODKLAD A HRANA JEVIŠTĚ JSOU ČISTÉ CSS — schválně žádný React.
-   Scéna se importuje až po load+idle (viz useArmed v App.tsx), takže mezi prvním
-   vykreslením a mountem plátna je okno v řádu vteřin. Kdyby podklad pásu nesl až
-   canvas-layer, text by v tom okně viditelně vjížděl do prázdné rezervy nahoře.
-   Pseudo-elementy na <html> existují od PRVNÍHO snímku spolu s třídou `staged`.
-
-   ::before = neprůhledný pás (za ním text mizí, i než se plátno narodí).
-   ::after  = spodní hrana: nahoře navazuje na pozadí pásu a dolů mizí do ztracena,
-   takže se text pod jevištěm ROZPLYNE, místo aby ho hrana uťala jako gilotina. */
-html.staged::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--stage-h);
-  z-index: var(--z-stage);
-  pointer-events: none;
-  background: var(--bg-0);
-}
-html.staged::after {
-  content: '';
-  position: fixed;
-  top: var(--stage-h);
-  left: 0;
-  right: 0;
-  height: 4rem;
-  z-index: var(--z-stage);
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    var(--bg-0) 0%,
-    rgba(8, 9, 10, 0.92) 34%,
-    rgba(8, 9, 10, 0.55) 64%,
-    rgba(8, 9, 10, 0) 100%
-  );
-}
-
 main {
   position: relative;
   z-index: var(--z-main);
+}
+
+/* ★ ZÁVOJ MEZI STROJEM A TEXTEM.
+   Sedí uvnitř stohu <main> (z-index: -1), takže leží NAD plátnem a POD veškerým
+   obsahem — přesně tam, kde má být. Žádný další prvek v DOM.
+
+   Proč pseudo-element na <main> a ne samostatná vrstva: <main> existuje od prvního
+   renderu, kdežto plátno se mountuje až po load+idle. Závoj tedy nikdy nemůže
+   dorazit později než obraz, který má krotit.
+
+   Na desktopu je --veil nula, takže se vykreslí průhledný obdélník; ten kompozitor
+   zahodí. Skutečná práce začíná až pod 1024 px. */
+main::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: rgb(8 9 10 / var(--veil));
 }
 
 /* ── SEKCE ──────────────────────────────────────────────── */
@@ -137,18 +106,26 @@ main {
   position: relative;
   isolation: isolate;
 }
+/* ★ KRYTÍ ZVEDNUTO Z 0.72 NA 0.9 — A JE TO OPRAVA, NE ZESÍLENÍ EFEKTU.
+   Naměřeno na snímcích 1440×900: přes odstavec sekce 00 i 05 šly rozsvícené hrany
+   krychle a PROSVÍTALA skrz ně cedule ze stěny („IDENT", „KONTAKT"). Text tím
+   dostal za sebe vlastní nápis, jen rozmazaný — vypadalo to jako chyba renderu.
+   Při 0.72 zbylo z hrany pořád ~28 % jasu, což je nad textem moc.
+   Náběh je zároveň plošší (plató do 45 %), takže se závoj nekuželí do špičky
+   a spodní řada s tlačítky je krytá stejně jako nadpis nahoře. */
 .section--center .section__col::before {
   content: '';
   position: absolute;
-  inset: -5rem -8rem;
+  inset: -6rem -9rem;
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(
-    56% 50% at 50% 50%,
-    rgba(8, 9, 10, 0.72) 0%,
-    rgba(8, 9, 10, 0.55) 48%,
-    rgba(8, 9, 10, 0.24) 70%,
-    transparent 84%
+    72% 66% at 50% 50%,
+    rgba(8, 9, 10, 0.9) 0%,
+    rgba(8, 9, 10, 0.86) 52%,
+    rgba(8, 9, 10, 0.62) 72%,
+    rgba(8, 9, 10, 0.24) 86%,
+    transparent 96%
   );
 }
 /* Boční sloupce potřebují závoj taky — text přebíhá přes hranu krychle a bez
@@ -159,29 +136,45 @@ main {
   position: relative;
   isolation: isolate;
 }
+/* ★ ZÁVOJ MUSÍ DRŽET PŘES CELÝ TEXT A MIZET AŽ ZA NÍM.
+   Dřív klesal lineárně od 0.84 k nule přes celou svou šířku, takže na VNITŘNÍ
+   hraně sloupce — tedy přesně tam, kde text začíná a kde stojí krychle — zbývalo
+   jen ~0.3. Naměřeno na snímku 1440×900 (sekce INFRA): svislá hrana krychle šla
+   napříč odstavcem i odrážkami a rozsvícený rohový stud seděl na popisku
+   „CO DOSTANETE". Krytí teď drží plnou sílu přes celou míru řádku a do ztracena
+   jde teprve v přesahu ZA textem, kde už není co chránit.
+   Přesah je 5rem místo 3.5rem, aby ten dojezd měl kde proběhnout; při span 6
+   na 1025px končí závoj na 984 px v okně širokém 1025, takže se nikam nevejde. */
 .section--left .section__col::before,
 .section--right .section__col::before {
   content: '';
   position: absolute;
-  inset: -2rem -3.5rem;
+  inset: -2.5rem -5rem;
   z-index: -1;
   pointer-events: none;
 }
+/* ★★ DOJEZD SE MĚŘÍ V rem OD HRANY, NE V PROCENTECH ŠÍŘKY.
+   Procenta znamenají, že se náběh mění se šířkou sloupce: na 1025px vycházel
+   práh plné síly někam doprostřed textu, takže na PRVNÍ znaky každého řádku
+   zbylo krytí ~0.3 a hrana krychle jimi prosvítala. `calc(100% - 5rem)` naopak
+   říká to, co doopravdy chceme: „drž plnou sílu všude, kde je text, a mizni
+   teprve v tom přesahu za ním". Přesah je 5rem, tedy přesně inset výš —
+   ★ když se změní jedno, MUSÍ se změnit i druhé. */
 .section--left .section__col::before {
   background: linear-gradient(
     to right,
-    rgba(8, 9, 10, 0.84) 0%,
-    rgba(8, 9, 10, 0.7) 50%,
-    rgba(8, 9, 10, 0.3) 80%,
+    rgba(8, 9, 10, 0.9) 0,
+    rgba(8, 9, 10, 0.9) calc(100% - 5rem),
+    rgba(8, 9, 10, 0.55) calc(100% - 2rem),
     transparent 100%
   );
 }
 .section--right .section__col::before {
   background: linear-gradient(
     to left,
-    rgba(8, 9, 10, 0.84) 0%,
-    rgba(8, 9, 10, 0.7) 50%,
-    rgba(8, 9, 10, 0.3) 80%,
+    rgba(8, 9, 10, 0.9) 0,
+    rgba(8, 9, 10, 0.9) calc(100% - 5rem),
+    rgba(8, 9, 10, 0.55) calc(100% - 2rem),
     transparent 100%
   );
 }
@@ -316,46 +309,42 @@ main {
     margin-left: 0;
     margin-right: 0;
   }
+  /* ★ TEXT STOJÍ VE STŘEDU OKNA, PŘES CELÝ STROJ.
+     Dřív se sázel na spodní hranu (`align-items: end`), protože horní pás patřil
+     jevištěm zabranému 3D. Bez jeviště je celé okno k dispozici a text patří tam,
+     kde ho oko hledá — doprostřed. Stroj mu prosvítá za zády po celé ploše. */
   .section {
-    /* Text dolů, krychle nahoře zůstane vidět. Horní odsazení kryje navigaci,
-       spodní pilulku s tečkami — a k tomu bezpečnou zónu (home indicator). */
-    align-items: end;
+    align-items: center;
     padding: var(--sp-sec-top) var(--gutter) var(--sp-sec-bottom);
   }
+
+  /* ★ ŽÁDNÁ DESKA POD TEXTEM. Sloupec měl na mobilu vlastní tmavé pozadí
+     s odsazením a záporným marginem — čtecí panel položený na scénu. Vypadalo to
+     jako karta nalepená přes render a rozbíjelo to celý dojem „text v prostoru".
+     Kontrast teď drží ztlumené plátno a rovnoměrný závoj (viz --canvas-dim
+     a --veil v tokens.css), tedy vrstvy POD textem, ne krabice kolem něj.
+
+     Zbývá jediné: jemné zatemnění přímo za sloupcem, aby nejsvětlejší místo stroje
+     nepodlézalo písmena. Mizí do ztracena na všechny strany, takže nemá viditelný
+     okraj a nečte se jako panel. */
   .section__col {
-    /* čitelnost přes 3D: jemný závoj přesně pod textem, ne přes celou plochu.
-       ★ Platí UŽ JEN pro telefon na šířku, kde jeviště není a text tedy pořád
-       leží přes stroj. V režimu jeviště se vypíná — viz níž. */
-    background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.92) 100%);
-    padding: 1.5rem 1.25rem 1.25rem;
-    margin: 0 -1.25rem;
-    border-radius: 2px; /* jediná 4px v jinak 2px systému */
+    position: relative;
+    isolation: isolate;
   }
-}
-
-/* ═══════════ SEKCE V REŽIMU JEVIŠTĚ ═══════════
-   Text a stroj se přestali překrývat, takže VŠECHNO, co ten překryv řešilo, jde ven.
-   Tohle je ta „čistota": ne nová vrstva navíc, ale tři vrstvy pryč.
-
-     • závoj pod textem      — není přes co prosvítat
-     • závoj pod navigací    — text se k navigaci nedostane, schová ho jeviště
-     • zarovnání na spodek   — text teď začíná pod jevištěm a teče dolů
-
-   Sekce si místo pro jeviště rezervuje odsazením. Protože --stage-h je na desktopu
-   0 px, tenhle calc() se tam sám vynuluje a pravidlo je bez efektu — proto smí být
-   mimo média dotaz a nemusí duplikovat breakpoint. */
-html.staged .section {
-  align-items: start;
-  padding-top: calc(var(--stage-h) + 1.75rem);
-}
-html.staged .section__col {
-  background: none;
-  padding: 0;
-  margin: 0;
-  border-radius: 0;
-}
-html.staged .nav::before {
-  content: none;
+  .section__col::after {
+    content: '';
+    position: absolute;
+    inset: -2.5rem calc(var(--gutter) * -1);
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      74% 58% at 50% 50%,
+      rgba(8, 9, 10, 0.72) 0%,
+      rgba(8, 9, 10, 0.55) 46%,
+      rgba(8, 9, 10, 0.24) 72%,
+      transparent 88%
+    );
+  }
 }
 
 /* ── TELEFON NA ŠÍŘKU ──────────────────────────────────────

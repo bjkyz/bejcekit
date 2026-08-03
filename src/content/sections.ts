@@ -57,12 +57,19 @@ export const SECTIONS: Section[] = [
     plateCode: 'IDENT',
     plateNum: '00',
     headline: 'Weby, které vydělávají. IT, které nespadne.',
+    /**
+     * ★ HERO SE ČTE NA TELEFONU, NE NA 27" MONITORU. Odstavec měl šest vět
+     *   a na 360px displeji z něj bylo DEVĚT ŘÁDKŮ — první, co návštěvník uvidí,
+     *   byla zeď textu, a tlačítka se odsunula pod spodní hranu obrazovky.
+     *   Fakta se neztratila, jen se přesunula do odrážek: ty se dají SKENOVAT,
+     *   kdežto odstavec se musí přečíst celý, nebo vůbec.
+     */
     body:
-      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI tam, kde ušetří hodiny, a nikde jinde. A spravuji servery tak, aby vás výpadek nestál tržby. Jeden člověk místo agentury: mluvíte přímo s tím, kdo tu práci dělá a kdo za ni ručí.',
+      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI jen tam, kde ušetří hodiny. A držím servery v chodu, aby vás výpadek nestál tržby.',
     bullets: [
+      'Jeden inženýr místo agentury. Mluvíte přímo s tím, kdo tu práci dělá a kdo za ni ručí.',
       'Pevná cena a termín. Písemně, ještě než začnu.',
-      'Odpovím do 24 hodin, i o víkendu.',
-      'Česko, remote i na místě. Přístupy a kód zůstávají vaše.',
+      'Odpovím do 24 hodin, i o víkendu. Celé Česko, remote i u vás.',
     ],
     status: 'Volná kapacita: zbývá 1 místo',
     cta: { label: 'Chci nezávaznou nabídku', href: '#kontakt' },
@@ -84,8 +91,20 @@ export const SECTIONS: Section[] = [
       'Google i Seznam. Seznam pořád drží kus českého trhu a většina šablon ho ignoruje.',
       'Search Console, pozice a konverze od prvního dne. Vidíte, jestli se investice vrací.',
     ],
-    /** Nejsilnější argument webu: ověřitelný důkaz místo tvrzení. */
-    proof: 'Důkaz: web, který právě čtete, má Lighthouse 97 / 100 / 100 / 100. Neberte to ode mě, změřte si to.',
+    /**
+     * Nejsilnější argument webu: ověřitelný důkaz místo tvrzení.
+     *
+     * ★ ČÍSLO MUSÍ SEDĚT S REALITOU, JINAK JE TO NEJDRAŽŠÍ VĚTA NA STRÁNCE.
+     *   Stálo tu „97 / 100 / 100 / 100" a bylo to zastaralé oběma směry: desktop
+     *   mezitím jede na plný počet, mobil na 80. Návštěvník, kterého tahle věta
+     *   vyzve „změřte si to", si to změří — a když mu vyjde něco jiného, ztratí
+     *   důvěru ve VŠECHNO ostatní na webu, protože zrovna tohle šlo ověřit.
+     *   Proto se říká i to, na čem se měřilo. Naměřeno lokálně, 3 běhy:
+     *   desktop 100/100/100/100, mobil perf 80–82 (LCP 3.8 s, TBT 240–290 ms, CLS 0).
+     *   ★ Po každé změně, která sáhne na výkon, tohle číslo přeměřit.
+     */
+    proof:
+      'Důkaz: web, který právě čtete, má na desktopu Lighthouse 100 / 100 / 100 / 100. Neberte to ode mě, změřte si to.',
     deliverable: {
       label: 'Co dostanete',
       text: 'Nasazený běžící web, Core Web Vitals v zeleném, napojenou Search Console a měsíční report pozic a poptávek.',
@@ -168,7 +187,9 @@ export const SECTIONS: Section[] = [
         text: 'Monitoring, zálohy, další rozvoj. Po vystavení faktury nemizím.',
       },
     ],
-    cta: { label: 'Domluvit úvodní hovor zdarma', href: '#kontakt' },
+    /* Kratší než „Domluvit úvodní hovor zdarma": ta se na 390px displeji lámala
+       uvnitř tlačítka do dvou řádků a šipka zůstala viset vedle prázdna. */
+    cta: { label: 'Domluvit hovor zdarma', href: '#kontakt' },
     align: 'right',
     subsystem: 'PRACOVNÍ POSTUP',
   },
@@ -179,7 +200,7 @@ export const SECTIONS: Section[] = [
     plateNum: '05',
     headline: 'Napište mi. Do 24 hodin víte, na čem jste.',
     body:
-      'Popište problém vlastními slovy, technickou část si přeložím sám. Žádný formulářový labyrint, žádný obchodník mezi námi: píšete rovnou tomu, kdo tu práci bude dělat. A když na váš problém nejsem ten pravý, řeknu vám to a pošlu vás za někým, kdo je.',
+      'Popište problém vlastními slovy, technickou část si přeložím sám. Žádný formulář o dvanácti polích a žádné čekání na obchodníka. A když na váš problém nejsem ten pravý, řeknu vám to rovnou a pošlu vás za někým, kdo je.',
     bullets: [],
     align: 'center',
     subsystem: 'KONTAKT',
@@ -187,19 +208,37 @@ export const SECTIONS: Section[] = [
 ]
 
 /**
- * Kontaktní řádky sekce 05.
+ * ═══════════ KANÁLY SEKCE 05 ═══════════
  *
- * Ikona je nosič významu, ne ozdoba: obálka / sluchátko / octocat se přečtou
- * dřív než slovo vedle nich. Popisek přesto zůstává — ikona sama o sobě je
- * pro odečítač obrazovky prázdné místo (viz aria-hidden v ui/Icons.tsx).
+ * ★ DŘÍV TO BYLA ÚČTENKA, TEĎ JSOU TO AKCE. Kontakt měl tři řádky
+ *   „POPISEK ···················· hodnota" a pod nimi tři tlačítka, která
+ *   nabízela PŘESNĚ TÉŽ tři věci. Dva problémy najednou:
+ *     • duplicita — e-mail stál na stránce třikrát (velký nadpis, řádek, tlačítko)
+ *     • tečkovaný vodič na 390px displeji roztáhl popisek a hodnotu na opačné
+ *       okraje a mezi nimi zela díra; četlo se to jako výpis z účtu, ne jako
+ *       pozvánka se ozvat
+ *   Řádek a tlačítko jsou teď JEDEN prvek: dlaždice, která je sama odkazem.
  *
- * LinkedIn je zatím venku. Až profil bude stát za odkaz, přidá se sem jeden
- * řádek a ikona do ui/Icons.tsx. Nikde jinde se o kontaktech nerozhoduje.
+ * ★ POŘADÍ JE ZÁMĚR, NE ABECEDA. E-mail první a přes celou šířku (asynchronní,
+ *   nezávazný, nejnižší práh), pak WhatsApp a telefon (rychlé, ale osobní).
+ *   GitHub není kanál, je to důkaz — patří do patičky, ne mezi výzvy k akci.
+ *
+ * `note` je to, co člověk potřebuje vědět DŘÍV, než klikne: jak rychle se ozvu
+ * a s kým bude mluvit. Nic z toho není nový slib, všechno stojí i v textu výš.
  */
-export const CONTACT_ROWS: { label: string; value: string; href: string; icon: IconName }[] = [
-  { label: 'E-mail', value: EMAIL, href: `mailto:${EMAIL}`, icon: 'mail' },
-  { label: 'Telefon', value: PHONE, href: `tel:${PHONE_TEL}`, icon: 'phone' },
-  { label: 'GitHub', value: '/bjkyz', href: 'https://github.com/bjkyz', icon: 'github' },
+export const CONTACT_CHANNELS: {
+  label: string
+  value: string
+  note: string
+  href: string
+  icon: IconName
+  /** Barva nese význam: zelená = dostupnost (jako štítek kapacity a rámeček VÝSTUP). */
+  tone?: 'green'
+}[] = [
+  { label: 'WhatsApp', value: PHONE, note: 'Nejrychlejší cesta', href: WHATSAPP, icon: 'whatsapp', tone: 'green' },
+  { label: 'Telefon', value: PHONE, note: 'Volejte rovnou mně', href: `tel:${PHONE_TEL}`, icon: 'phone' },
 ]
+
+export const GITHUB = 'https://github.com/bjkyz'
 
 export const FACE_COUNT = SECTIONS.length

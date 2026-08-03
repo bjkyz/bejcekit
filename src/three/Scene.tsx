@@ -260,11 +260,11 @@ export default function Scene({
    * se vykreslovala do jeho středu — a na displeji tím pádem utekla doprava
    * a byla useknutá. (Přesně proto „na mobilu nebyla vidět".)
    *
-   * ★★ VÝŠKU NAOPAK NESAHÁME. Tu vlastní CSS (--stage-h: 42svh, viz lib/stage.ts):
-   *   svh se na rozdíl od clientHeight nemění při vysouvání mobilní URL lišty,
-   *   takže se pás při rolování nedýchá a odsazení sekcí pod ním nikam neposkakuje.
-   *   Kdyby si výšku počítalo CSS zvlášť a JS zvlášť, rozejdou se — a krychle
-   *   vyleze textu do řádku přesně ve chvíli, kdy někdo scrolluje.
+   * ★★ VÝŠKU NAOPAK NESAHÁME — tu drží CSS na `height: 100%` fixní vrstvy.
+   *   Kdyby se dopočítávala z clientHeight, měnila by se při každém vysunutí
+   *   mobilní URL lišty: plátno by se při rolování „dýchalo" a krychle by
+   *   pod prstem poskakovala. Layout na výšce plátna nikde nevisí (viz
+   *   lib/stage.ts), takže není co dopočítávat.
    *
    * R3F si velikost plátna bere z tohohle obalu, takže se tím zároveň mění poměr
    * stran, se kterým počítá odstup kamery v Rig.tsx.

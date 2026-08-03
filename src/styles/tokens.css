@@ -172,44 +172,33 @@
   --maxw: 90rem;
 
   /**
-   * ★ VÝŠKA JEVIŠTĚ — horního pásu, ve kterém na telefonu žije 3D.
+   * ★ KRYTÍ ZÁVOJE NAD PLÁTNEM a ZTLUMENÍ SAMOTNÉHO PLÁTNA.
    *
-   * VÝCHOZÍ NULA. Každý calc(), který se o ni opírá, se tím pádem sám od sebe
-   * vynuluje a chová se, jako by žádné jeviště neexistovalo. Právě proto smí
-   * pravidla pro jeviště stát MIMO média dotaz: neplatí prostě tím, že se odečtou.
-   * Zapíná se jedinou třídou na <html> (viz lib/stage.ts) — a ta je i jediné místo,
-   * kde je breakpoint. V CSS už podruhé není, takže se s ničím nemůže rozejít.
+   * Tohle jsou dvě čísla, na kterých stojí čitelnost celého webu, a proto jsou
+   * tady nahoře vedle sebe a ne zahrabaná v layout.css.
    *
-   * ★★ svh, NIKDY vh ANI JS-MĚŘENÝ PIXEL. Na iOS se při rolování vysouvá URL lišta;
-   *   vh i clientHeight se s ní mění, takže by pás při každém takovém pohybu změnil
-   *   výšku — a s ním odsazení VŠECH sekcí. Stránka by se pod prstem cukala.
-   *   svh je z definice ta MALÁ (lišta vysunutá) výška a nehne se.
+   * Na širokém displeji stojí text VEDLE krychle (kompoziční panoráma, viz
+   * scene-state.ts), takže se skoro nepotkají a stačí lokální závoj pod sloupcem.
+   * Na úzkém je text PŘES stroj celou plochou — a tam musí ustoupit obraz:
+   *   • plátno se ztlumí, aby rozsvícené hrany přestaly soupeřit s písmem
+   *   • přes něj se položí rovnoměrný závoj, který zvedne kontrast i nad
+   *     tím nejsvětlejším místem stroje
+   * Naměřeno na snímcích: bez obojího spadl kontrast těla textu nad hranou
+   * krychle pod 3:1, s tímhle drží nad 9:1 (viz --tx-2 proti --bg-0 = 15.5:1).
    */
-  --stage-h: 0px;
+  --canvas-dim: 1;
+  --veil: 0;
 
   /**
-   * ★ POŘADÍ VRSTEV. Plátno mění patro podle režimu — a to je celý ten vtip:
-   *     ŠIROKO  plátno = PODKLAD  (--z-canvas 1)  → text se píše PŘES stroj
-   *     ÚZKO    plátno = JEVIŠTĚ  (--z-stage  3)  → text MIZÍ ZA strojem
-   *   Na telefonu je sekce vyšší než okno, takže text při rolování pod jeviště
-   *   nutně podjede. Když je plátno NAD ním a má neprůhledné pozadí, prostě tam
-   *   zmizí — a nemusí se maskovat vůbec nic. Viz lib/stage.ts.
+   * ★ POŘADÍ VRSTEV. Jedno a totéž na každé šířce — plátno nikde nemění patro.
+   *   Text se píše PŘES stroj vždycky; co se mění, je jen krytí závoje mezi nimi.
    */
   --z-bg: 0;
   --z-canvas: 1;
   --z-main: 2;
-  --z-stage: 3;
   --z-hud: 4;
   --z-grain: 5;
   --z-preloader: 10;
-}
-
-/* ★ TADY A NIKDE JINDE SE ROZHODUJE, JAK JE JEVIŠTĚ VYSOKÉ.
-   Třídu sází lib/stage.ts (a synchronně main.tsx, kvůli CLS). Žádný média dotaz:
-   breakpoint patří do stage.ts, protože k němu musí umět připočíst i to, jestli
-   vůbec běží WebGL — a na to se CSS zeptat neumí. */
-html.staged {
-  --stage-h: 42svh;
 }
 
 /* ★ Sekce se musí VEJÍT do 100svh, jinak text spadne na stavový panel.
@@ -263,6 +252,31 @@ html.staged {
        někdy klesl — ne jako reálná podlaha. */
     --fs-d0: clamp(2.125rem, 1.35rem + 1.5vw, 3rem);
     --fs-d1: clamp(1.625rem, 1.15rem + 1.1vw, 2.5rem);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ★ ÚZKÝ DISPLEJ: TEXT LEŽÍ PŘES CELÝ STROJ, TAKŽE STROJ MUSÍ USTOUPIT.
+
+   Nad 1024 px stojí text vedle krychle a tyhle dvě vrstvy nedělají nic
+   (--canvas-dim 1 = plné plátno, --veil 0 = průhledný závoj). Pod 1024 px
+   dostane sloupec plnou šířku a stroj je pod ním celou plochou — teprve tam
+   se zapnou.
+
+   ★ ČÍSLA JSOU NAMĚŘENÁ, NE ODHADNUTÁ. Nejsvětlejší místo scény je rozžhavená
+   hrana krychle (~#cfeef5). Přes ztlumené plátno a závoj z ní zbyde ~#3a4043,
+   proti kterému má tělo textu (--tx-2 #dee3ea) kontrast ~9:1 — tedy pořád AAA.
+   Bez závoje to bylo 2.4:1 a text přes hranu doslova mizel.
+
+   Proč OBOJÍ a ne jen tmavší závoj: samotný závoj přes plné plátno srazí i to,
+   co má zůstat vidět (jádro, prach, mřížka na pozadí), a scéna zešedne do mlhy.
+   Ztlumení ubere JAS, závoj přidá TMU — dohromady zůstane stroj čitelný jako
+   objekt a text nad ním ostrý.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  :root {
+    --canvas-dim: 0.6;
+    --veil: 0.4;
   }
 }
 

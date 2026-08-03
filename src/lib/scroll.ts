@@ -64,19 +64,11 @@ function focusPass(y: number): void {
   if (!choreo) return
   const vh = window.innerHeight
 
-  /**
-   * ★ OHNISKO NENÍ VE STŘEDU OKNA, KDYŽ HORNÍ PÁS ZABÍRÁ JEVIŠTĚ.
-   *
-   * Ostří se podle vzdálenosti od ohniska, a to bylo natvrdo v půlce okna. V režimu
-   * jeviště je ale horních 42 % okna PLÁTNO — text tam vůbec nesmí být. Čtecí zóna
-   * je tedy spodních 58 % a její střed leží na 0.42 + 0.58/2 = 0.71 výšky okna.
-   *
-   * Bez téhle korekce míří ohnisko doprostřed okna, tedy skoro na spodní hranu
-   * jeviště: text by byl nejostřejší v okamžiku, kdy mu právě mizí pod plátnem,
-   * a v místě, kde ho člověk doopravdy čte, by pohasínal. Ostření by pracovalo
-   * přesně proti čtenáři.
-   */
-  const mid = y + vh * (document.documentElement.classList.contains('staged') ? 0.71 : 0.5)
+  /* Ohnisko je střed okna, na každé šířce stejně: text stojí přes celou obrazovku
+     a plátno pod ním, takže žádná část okna není pro text zakázaná. (Dokud tu byl
+     režim jeviště, muselo se ohnisko posouvat na 0.71 výšky — jinak text vrcholil
+     v ostrosti přesně ve chvíli, kdy mizel pod horním pásem.) */
+  const mid = y + vh * 0.5
 
   for (let i = 0; i < cols.length; i++) {
     const el = cols[i]

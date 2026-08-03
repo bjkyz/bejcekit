@@ -8,7 +8,6 @@ import { SECTIONS } from './content/sections'
 import { detectTier } from './lib/quality'
 import { useReducedMotion } from './lib/hooks'
 import { initScroll } from './lib/scroll'
-import { fitsStage, markStage, STAGE_MQ } from './lib/stage'
 import { sceneState } from './lib/scene-state'
 
 /**
@@ -65,25 +64,25 @@ function useArmed(enabled: boolean): boolean {
 }
 
 /**
- * STOH VRSTEV:
+ * STOH VRSTEV — na KAŽDÉ šířce stejný, žádné patro se nikde nepřehazuje:
  *    0  .bg-field     — mřížka + záře, fixed
- *    1  .canvas-layer — WebGL, aria-hidden, pointer-events:none        ← ŠIROKO
+ *    1  .canvas-layer — WebGL, aria-hidden, pointer-events:none
+ *    2  main::before  — ZÁVOJ: drží kontrast textu nad rozsvícenými hranami
  *    2  <main>        — VEŠKERÝ obsah, skutečný sémantický DOM
- *    3  .canvas-layer — totéž plátno, ale jako JEVIŠTĚ nad textem      ← ÚZKO
- *       .stage-edge   — hrana, do které se text pod jevištěm rozplyne
  *    4  .hud          — navigace, lišta, stav
  *    5  .grain
  *   10  preloader
  *
- * ★ PLÁTNO MĚNÍ PATRO. Na širokém displeji je PODKLAD (text se píše přes stroj),
- *   na úzkém JEVIŠTĚ (text mizí za strojem). Rozhoduje o tom lib/stage.ts a je to
- *   ta jediná změna, kvůli které mobil přestal vypadat rozbitě: sekce je na telefonu
- *   vyšší než okno, takže text NUTNĚ podjede pod 3D — a jde jen o to, jestli se
- *   při tom bude míhat přes rozsvícené hrany krychle, nebo za nimi čistě zmizí.
+ * ★ PLÁTNO JE VŽDYCKY PODKLAD. Text se přes stroj píše — na 4K monitoru i na
+ *   telefonu. Dřív se na úzkém displeji vyzvedlo NAD text do horního pásu
+ *   („jeviště"), aby se čitelnost vyřešila zakrytím; stálo to ale půlku
+ *   obrazovky a mobil vypadal jako jiný, chudší web. Čitelnost teď drží
+ *   ztlumené plátno + závoj (viz lib/stage.ts a layout.css), takže je to
+ *   všude jeden a týž web.
  *
- * Když plátno smažeš, zbude kompletní, čitelný a indexovatelný web se službami
- * (--stage-h spadne na nulu a odsazení sekcí se samo vynulují). To je celý smysl
- * téhle architektury: identita webu žije v DOM, ne v pipeline.
+ * Když plátno smažeš, zbude kompletní, čitelný a indexovatelný web se službami —
+ * layout na 3D nikde nevisí, ani jedním pixelem odsazení. To je celý smysl téhle
+ * architektury: identita webu žije v DOM, ne v pipeline.
  */
 export default function App() {
   const reduced = useReducedMotion()
@@ -96,8 +95,7 @@ export default function App() {
   const [sceneFailed, setSceneFailed] = useState(false)
   const onSceneError = useCallback(() => setSceneFailed(true), [])
   const showScene = tier !== 'off' && !sceneFailed
-  /* Jeviště se rezervuje podle showScene (synchronně, kvůli CLS) — ale samotný
-     import 3D čeká, až má prohlížeč hotovo. Viz useArmed. */
+  /* Import 3D čeká, až má prohlížeč hotovo. Viz useArmed. */
   const armed = useArmed(showScene)
 
   /* Bez WebGL jede i scroll NATIVNĚ (žádný Lenis): na stroji, který neutáhne
@@ -120,33 +118,11 @@ export default function App() {
     if (!showScene) sceneState.fps = 0
   }, [tier, showScene])
 
-  /**
-   * ★ JEVIŠTĚ MUSÍ ZŮSTAT PRAVDIVÉ PO CELOU DOBU BĚHU.
-   *
-   * main.tsx ho sází jednou, ještě před prvním renderem (kvůli CLS). Jenže obě věci,
-   * na kterých stojí, se za běhu MĚNÍ:
-   *   • velikost okna  — otočení telefonu, změna okna na tabletu
-   *   • existence scény — WebGL kontext padne dvakrát a scéna se vzdá (SceneBoundary),
-   *                       nebo si uživatel v systému zapne omezený pohyb
-   *
-   * Kdyby po zmizelé scéně zůstala třída viset, sekce by si dál rezervovaly 42 %
-   * obrazovky pro 3D, které tam není: nahoře by zela prázdná díra. Web má bez krychle
-   * vypadat kompletně, ne rozbitě — to je celá teze téhle architektury.
-   *
-   * sceneState.staged je totéž číslo pro useFrame smyčky (Rig si podle něj sází
-   * kompozici). Nikdy React state — čte se to 60×/s.
-   */
-  useEffect(() => {
-    const sync = () => {
-      const on = showScene && fitsStage()
-      markStage(on)
-      sceneState.staged = on
-    }
-    sync()
-    const mq = window.matchMedia(STAGE_MQ)
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [showScene])
+  /* ★ TŘÍDA `staged` A JEJÍ SYNCHRONIZACE JSOU PRYČ. Layout se o existenci ani
+     o velikost 3D nezajímá (viz lib/stage.ts): plátno je podklad, sekce si na
+     něj nic nerezervují, a nemá se tedy co rozejít, když scéna za běhu zmizí.
+     Ubyla tím celá jedna třída chyb — dřív se musela hlídat změna okna
+     I pád scény, jinak zůstala na <html> viset rezerva na 3D, které tam není. */
 
   return (
     <>
@@ -161,9 +137,6 @@ export default function App() {
           <Suspense fallback={null}>
             <Scene tier={tier} dragRef={dragRef} onFail={onSceneError} />
           </Suspense>
-          {/* Podklad a spodní hranu jeviště kreslí čisté CSS (html.staged::before/::after,
-              viz layout.css) — musí existovat i v okně mezi prvním renderem a mountem
-              scény, takže nesmí viset na tomhle stromě. */}
         </SceneBoundary>
       )}
 

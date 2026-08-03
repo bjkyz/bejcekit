@@ -146,6 +146,13 @@
     min-width: 44px;
     justify-content: center;
   }
+  /* ★ Býk je 30 px široký, takže značka měla naměřeno 30×44 — na výšku cíl
+     stačil, na šířku ne. Hitbox se roztáhne doprava do prázdna vedle loga,
+     samotná silueta zůstane přilepená k levému okraji (justify: start). */
+  .nav__mark {
+    min-width: 44px;
+    justify-content: flex-start;
+  }
 }
 
 /* ── ROHOVÉ ZNAČKY ──────────────────────────────────────────
@@ -163,17 +170,6 @@
   transition: --bracket 400ms var(--e-out-expo);
 }
 
-/* ★ V REŽIMU JEVIŠTĚ RÁMUJÍ ZNAČKY JEVIŠTĚ, NE OKNO.
-   Na desktopu je rám kolem celé obrazovky přístrojová ozdoba. Na telefonu, kde
-   3D žije v horním pásu a text pod ním, by rám kolem CELÉHO okna oba dva sválel
-   do jedné krabice a rozdíl mezi „průzorem do stroje" a „textem" by zmizel.
-   Sražený na jeviště dělá přesně to, co má: čte se jako průzor. A protože jsou to
-   tytéž čtyři značky, které se během přeletu rozpínají, zůstává i ta vazba na pohyb.
-   Žádná nová vrstva — jen jinam posazená. */
-html.staged .frame {
-  bottom: auto;
-  height: calc(var(--stage-h) - 2.5rem);
-}
 .frame.is-transit {
   --bracket: 22px;
 }

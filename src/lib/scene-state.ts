@@ -19,14 +19,6 @@ export const sceneState = {
   transit: false,
   fps: 60,
   tier: 'high' as Tier,
-  /**
-   * Běží 3D v režimu jeviště (horní pás nad textem, viz lib/stage.ts)?
-   * Píše App, čte Rig. Mutace, ne React state — čte se to 60×/s.
-   *
-   * Rig se na to NESMÍ ptát přes matchMedia ani clientWidth: obojí je čtení layoutu
-   * a v useFrame smyčce by to každý snímek vynutilo reflow.
-   */
-  staged: false,
   /** Zážeh jádra. Preloader ho vystřelí na 6 AŽ po doparsování GLB; Core ho pak
       tlumí zpět k nule. Mesh, který ještě neexistuje, nejde zapálit — proto se
       to nedělá shaderem v preloaderu, ale rampou světla po loadu. */

@@ -1,8 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
-import { detectTier } from './lib/quality'
-import { fitsStage, markStage } from './lib/stage'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -12,26 +10,18 @@ import './styles/sections.css'
 import './styles/hud.css'
 
 /**
- * ★ JEVIŠTĚ SE SÁZÍ SYNCHRONNĚ, JEŠTĚ PŘED PRVNÍM RENDEREM. Tohle není optimalizace,
- *   tohle je jediné správné místo.
+ * ★ TADY SE UŽ NIC NEMĚŘÍ A NIC NESÁZÍ — a je to výhra, ne opomenutí.
  *
- * Na úzkém displeji si sekce rezervují horní pás pro 3D (padding-top: --stage-h).
- * Scéna se ale načítá LÍNĚ — její kód dorazí až dávno po tom, co se vykreslí text.
- * Kdyby tu třídu sázel až on, stalo by se tohle:
+ * Dřív se tu synchronně, ještě před prvním renderem, sázela třída `staged`:
+ * na telefonu si sekce rezervovaly horní pás obrazovky pro 3D (padding-top).
+ * Muselo to být tady a ne ve scéně, protože scéna se načítá líně a rezerva
+ * dodaná až po jejím mountu by byla skokem o ~350 px, tedy učebnicový CLS.
  *
- *     1. snímek:  sekce se vysází BEZ rezervy, nadpis je nahoře
- *     ~800 ms:    domountuje se scéna, naskočí --stage-h
- *     další sn.:  VŠECHNY sekce poskočí o ~350 px dolů
- *
- * To je učebnicový Cumulative Layout Shift — a zrovna tenhle web se Core Web Vitals
- * ohání v sekci 01 jako svým hlavním důkazem. Rozbít si CLS kvůli 3D dekoraci by
- * bylo to nejtrapnější, co se tady může stát.
- *
- * detectTier() je synchronní a levný (matchMedia + probe na WebGL2 kontext), takže
- * se odpověď zná dřív, než React vůbec začne. Když WebGL není nebo je zapnutý
- * omezený pohyb, scéna nebude — a jeviště se tedy nerezervuje vůbec.
+ * Režim jeviště je pryč (viz lib/stage.ts): plátno je teď VŽDYCKY podklad pod
+ * textem a žádnou rezervu si na něj nikdo nedělá. Tím zmizel i celý ten problém
+ * — layout se o existenci 3D vůbec nezajímá, takže není co posunout.
+ * CLS 0 už není vyladěné, je STRUKTURÁLNÍ.
  */
-markStage(detectTier() !== 'off' && fitsStage())
 
 /* StrictMode ZŮSTÁVÁ. R3F v9 ho konečně dědí z react-dom, takže odhalí latentní
    double-mount chyby, které byly dřív tiše skryté. Neřeš je vypnutím StrictMode —

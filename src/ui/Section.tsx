@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
-import { CONTACT_ROWS, EMAIL, PHONE, PHONE_TEL, SECTIONS, WHATSAPP, type Section as S } from '../content/sections'
+import { CONTACT_CHANNELS, EMAIL, GITHUB, SECTIONS, type Section as S } from '../content/sections'
 import { useReveal } from '../lib/hooks'
 import Kicker from './Kicker'
 import MagneticCTA from './MagneticCTA'
 import GrabPlate from './GrabPlate'
 import Icon from './Icons'
+import Mark from './Mark'
 
 const LAST = SECTIONS.length - 1
 
@@ -147,87 +148,123 @@ function ProcessSteps({ steps }: { steps: { title: string; text: string }[] }) {
   )
 }
 
+/**
+ * ═══════════ SEKCE 05: KANÁLY MÍSTO ÚČTENKY ═══════════
+ *
+ * Hierarchie je záměr, ne mřížka:
+ *   1. E-MAIL přes celou šířku — nejnižší práh, nezávazné, asynchronní.
+ *      Je to zároveň jediný VYPLNĚNÝ prvek na celém webu, protože je to
+ *      jediná akce, kvůli které tahle stránka existuje.
+ *   2. WhatsApp a telefon vedle sebe — rychlé, ale osobní. Půlová váha.
+ *   3. GitHub až v patičce — důkaz, ne výzva k akci.
+ *
+ * ★ KOPÍROVÁNÍ JE VLASTNÍ TLAČÍTKO, NE PŘEPSANÝ KLIK NA ODKAZ.
+ *   Dřív klik na e-mail místo otevření pošty TIŠE KOPÍROVAL do schránky.
+ *   Na telefonu je to přesně obráceně, než člověk čeká: klepne na adresu,
+ *   protože chce psát, a nestane se nic viditelného. Odkaz teď dělá to, co
+ *   slibuje (mailto:), a kopírka stojí vedle jako samostatný, popsaný cíl.
+ */
 function ContactBlock() {
   const [copied, setCopied] = useState(false)
-  const wrap = useRef<HTMLSpanElement>(null)
   const timer = useRef<number | null>(null)
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current) }, [])
 
-  const copy = async (e: React.MouseEvent) => {
-    // Ctrl/Cmd+klik ať pořád otevře poštovního klienta.
-    if (e.metaKey || e.ctrlKey) return
-    e.preventDefault()
+  const copy = async () => {
     try {
       await navigator.clipboard.writeText(EMAIL)
       setCopied(true)
       if (timer.current) clearTimeout(timer.current)
-      timer.current = window.setTimeout(() => setCopied(false), 1400)
+      timer.current = window.setTimeout(() => setCopied(false), 1600)
     } catch {
-      window.location.href = `mailto:${EMAIL}` // clipboard bez HTTPS/permission
+      /* Bez HTTPS nebo bez oprávnění schránka není. Vybrat adresu pak musí
+         uživatel sám, takže se aspoň nesmí tvářit, že se něco povedlo. */
+      setCopied(false)
     }
   }
 
   return (
-    <>
-      <span className="magnetic" ref={wrap}>
-        <a
-          href={`mailto:${EMAIL}`}
-          className={`email-link${copied ? ' is-copied' : ''}`}
-          onClick={copy}
-          aria-label={`Zkopírovat e-mail ${EMAIL}`}
-        >
-          {copied ? 'ZKOPÍROVÁNO ✓' : EMAIL}
-        </a>
-      </span>
+    <div className="contact">
+      <a className="contact-primary reveal" style={delay(3, 6)} href={`mailto:${EMAIL}`}>
+        <span className="contact-primary__k">
+          <Icon name="mail" size={15} />
+          E-mail
+        </span>
+        <span className="contact-primary__v">{EMAIL}</span>
+        <span className="contact-primary__n">Odpovím do 24 hodin, i o víkendu.</span>
+        <span className="contact-primary__go" aria-hidden="true">
+          →
+        </span>
+      </a>
 
-      <ul className="contact-rows reveal" style={delay(3, 6)}>
-        {CONTACT_ROWS.map((r) => (
-          <li key={r.label}>
+      {/* aria-live: bez něj je „Zkopírováno" čistě vizuální zpětná vazba a pro
+          odečítač obrazovky se po stisku nestane vůbec nic. */}
+      <button type="button" className={`copy-btn reveal${copied ? ' is-copied' : ''}`} style={delay(3.3, 6)} onClick={copy}>
+        <Icon name={copied ? 'check' : 'copy'} size={14} />
+        <span aria-live="polite">{copied ? 'Zkopírováno' : 'Kopírovat adresu'}</span>
+      </button>
+
+      <ul className="channels">
+        {CONTACT_CHANNELS.map((c, i) => (
+          <li key={c.label} className="reveal" style={delay(3.7 + i * 0.3, 6)}>
             <a
-              className="contact-row"
-              href={r.href}
-              /* Ikona je aria-hidden a tečky taky, takže odečítači obrazovky by
-                 z řádku „GitHub … /bjkyz" zbylo jen „/bjkyz". Jméno odkazu se
-                 proto skládá ručně a nezávisí na tom, co je zrovna vidět. */
-              aria-label={`${r.label}: ${r.value}`}
-              target={r.href.startsWith('http') ? '_blank' : undefined}
-              rel={r.href.startsWith('http') ? 'noreferrer' : undefined}
+              className={`channel${c.tone ? ` channel--${c.tone}` : ''}`}
+              href={c.href}
+              /* Ikona i šipka jsou aria-hidden, takže by z odkazu zbylo jen číslo.
+                 Jméno se skládá ručně a nezávisí na tom, co je zrovna vidět. */
+              aria-label={`${c.label}: ${c.value}. ${c.note}`}
+              target={c.href.startsWith('http') ? '_blank' : undefined}
+              rel={c.href.startsWith('http') ? 'noreferrer' : undefined}
             >
-              <span className="contact-row__ico" aria-hidden="true">
-                <Icon name={r.icon} size={16} />
+              <span className="channel__k">
+                <Icon name={c.icon} size={15} />
+                {c.label}
               </span>
-              <span className="contact-row__k">{r.label}</span>
-              <span className="contact-row__dots" aria-hidden="true" />
-              <span className="contact-row__v">{r.value}</span>
+              <span className="channel__v">{c.value}</span>
+              <span className="channel__n">{c.note}</span>
             </a>
           </li>
         ))}
       </ul>
-
-      {/* Tři cesty, jak se ozvat — každá pro jiný typ člověka. Žádný formulář.
-          WhatsApp je zelený (stav/dostupnost), telefon je tichý ghost:
-          barva se tu používá k rozlišení, ne k ozdobě. */}
-      <div className="cta-row reveal" style={delay(4, 6)}>
-        <MagneticCTA href={`mailto:${EMAIL}`} label="Napsat e-mail" variant="solid" />
-        <MagneticCTA href={WHATSAPP} label="WhatsApp" variant="green" icon="whatsapp" />
-        <MagneticCTA href={`tel:${PHONE_TEL}`} label={`Zavolat ${PHONE}`} variant="ghost" icon="phone" />
-      </div>
-    </>
+    </div>
   )
 }
 
 function Footer() {
   return (
     <footer className="footer reveal" style={delay(5, 6)}>
-      <p>© {new Date().getFullYear()} Jiří Bejček · bejcek.it · Postaveno v Reactu a three.js.</p>
+      {/* ★ ZNAČKA SE VRACÍ AŽ TADY. V navigaci je býk sám (viz ui/Mark.tsx), takže
+          jméno webu musí mít někde v dokumentu i psanou podobu — pro člověka, který
+          si ho chce opsat, i pro to, aby se lockup „býk + bejcek.it" vůbec někde
+          ukázal celý. Patička je na to správné místo: nekřičí a je vždycky nakonec. */}
+      <p className="footer__mark">
+        <Mark size={24} />
+        <span>
+          bejcek<b>.it</b>
+        </span>
+      </p>
+
+      {/* GitHub NENÍ kontaktní kanál, je to důkaz — proto stojí tady a ne mezi
+          výzvami k akci nahoře. Kdo si chce ověřit, že ten člověk opravdu píše kód,
+          ho najde; komu jde o poptávku, tomu nepřekáží. */}
+      {/* Jen dvě položky, ne čtyři: při čtyřech se řádek na 1920 zlomil za třetí
+          a na konci prvního řádku zůstala viset osiřelá oddělovací tečka. */}
+      <p className="footer__links">
+        <a href={GITHUB} target="_blank" rel="noreferrer">
+          <Icon name="github" size={14} />
+          github.com/bjkyz
+        </a>
+        <span aria-hidden="true">·</span>
+        <span>© {new Date().getFullYear()} Jiří Bejček</span>
+      </p>
+
       {/* ★ CC BY 4.0 ATRIBUCE. Není to zdvořilost, ale podmínka licence, a musí
           obsahovat VŠECHNY ČTYŘI věci: název díla, autora, licenci s odkazem
           a informaci, že dílo bylo UPRAVENO. Model jsme upravili (přebarvené
           materiály, překomprimovaná geometrie), takže bez posledního bodu by
           atribuce byla neúplná a licence porušená. Neodstraňovat, nezkracovat. */}
-      <p>
-        3D model{' '}
+      <p className="footer__legal">
+        Postaveno v Reactu a three.js. 3D model{' '}
         <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf" target="_blank" rel="noreferrer">
           „Primary Ion Drive“
         </a>{' '}

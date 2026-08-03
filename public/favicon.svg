@@ -1,6 +1,15 @@
+<!-- ★ Značka webu: silueta býka (Bejček → býček). Zdroj tvaru je src/ui/Mark.tsx,
+     tenhle soubor je jeho statická kopie pro záložku prohlížeče. Když se změní
+     jeden, MUSÍ se překreslit i druhý — jinak má web dvě různá loga.
+     Rohy sahají až k okraji plochy: na 16 px je právě jejich rozpětí to jediné,
+     co značku odliší od kolečka. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="6" fill="#08090A"/>
-  <path d="M8 10.5 16 6.5l8 4v11l-8 4-8-4v-11Z" fill="none" stroke="#4FD8E8" stroke-width="1.6" stroke-linejoin="round"/>
-  <circle cx="16" cy="16" r="6" fill="none" stroke="#4FD8E8" stroke-opacity=".35" stroke-width="1"/>
-  <circle cx="16" cy="16" r="3" fill="#4FD8E8"/>
+  <g transform="translate(1.6 5.2) scale(0.3600)" fill="#4FD8E8">
+    <path d="M31.5 18.5C24 15 13.5 15.5 6 3c3.5 11 8 18 24.5 22Z"/>
+    <path d="M48.5 18.5C56 15 66.5 15.5 74 3c-3.5 11-8 18-24.5 22Z"/>
+    <path d="M29.8 26.5c-5.8-.9-11.2.5-14.8 4.3 4 2.8 10 3 14.6 1.6Z"/>
+    <path d="M50.2 26.5c5.8-.9 11.2.5 14.8 4.3-4 2.8-10 3-14.6 1.6Z"/>
+    <path d="M31 19.5c1.6-3.7 4.7-4.9 9-4.9s7.4 1.2 9 4.9c1.6 3.9 2 8.9 1.4 13.9-.6 5.2-2.2 9.8-4.5 12.8-1.7 2.3-3.7 3.4-5.9 3.4s-4.2-1.1-5.9-3.4c-2.3-3-3.9-7.6-4.5-12.8-.6-5-.2-10 1.4-13.9Z"/>
+  </g>
 </svg>

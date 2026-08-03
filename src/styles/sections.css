@@ -354,102 +354,200 @@
   font-weight: 600;
 }
 
-/* ── KONTAKT ─────────────────────────────────────────────── */
-.email-link {
-  display: inline-block;
-  font-family: var(--font-sans);
-  font-size: var(--fs-d2);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: var(--tx-1);
+/* ── KONTAKT ──────────────────────────────────────────────────
+   ★ TADY JE JEDINÉ MÍSTO NA WEBU, KDE OBSAH STOJÍ NA DESKÁCH.
+   Ve zbytku stránky je text položený rovnou do prostoru a podklad mu dělá
+   nanejvýš měkký závoj — krabice kolem textu je jinak nejrychlejší způsob,
+   jak z webu udělat administraci. Sekce 05 je výjimka a má důvod:
+     • je to JEDINÁ konverzní obrazovka; dlaždice je cíl, do kterého se dá
+       trefit prstem, ne řádek, který se musí trefit na písmeno
+     • dlaždice sama nese slib (`__n`), takže se nemusí opakovat v textu
+     • kamera je nad sekcí 05 nejblíž (ORBIT_RADIUS 9.6) a stroj tu svítí
+       nejvíc; deska je jediný podklad, který kontrast udrží spolehlivě
+   Rám je vlasový a poloměr 3px — pořád je to přístroj, ne karta z Material UI. */
+.contact {
   margin-top: 2rem;
-  position: relative;
-  white-space: nowrap;
-}
-.email-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -0.1em;
-  height: 2px;
   width: 100%;
-  background: var(--neon-2);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 500ms var(--e-out-expo);
-}
-.email-link:hover::after {
-  transform: scaleX(1);
-}
-.email-link:hover {
-  color: var(--neon-1);
-}
-.email-link.is-copied {
-  color: var(--neon-2);
+  max-width: 40rem;
+  display: grid;
+  gap: 0.625rem;
 }
 
-.contact-rows {
-  margin-top: 2.5rem;
-  display: grid;
-  gap: 0.5rem;
-  max-width: 32rem;
-  width: 100%;
-}
-.contact-row {
-  display: grid;
-  /* ikona · popisek · tečky · hodnota */
-  grid-template-columns: auto auto 1fr auto;
-  gap: 0.75rem;
-  align-items: baseline;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono); /* jinak zdědí --lh-body 1.65 z <body> */
+/* ★ JEDINÝ VYPLNĚNÝ PRVEK CELÉHO WEBU. Vyplněná plocha je nejsilnější vizuální
+   signál, jaký stránka má, a smí ho dostat jen jedna věc — jinak přestane
+   znamenat cokoli. Dostává ho e-mail, protože je to akce s nejnižším prahem:
+   nezávazná, asynchronní, bez toho, aby na někoho hned mluvil živý člověk. */
+/* ★ ZAROVNÁNÍ DOLEVA, I KDYŽ JE SEKCE VYCENTROVANÁ.
+   `.section--center` dědí text-align: center až sem, a uvnitř desky to vypadalo
+   rozbitě: popisek „E-MAIL" seděl vlevo (je to inline-flex, ten se nevycentruje),
+   adresa uprostřed a slib pod ní zase uprostřed — tři různé levé hrany v jednom
+   rámečku. Deska je vlastní blok obsahu, ne pokračování vycentrovaného odstavce. */
+.contact-primary,
+.channel {
+  text-align: left;
 }
 
-/* ★ IKONA SEDÍ NA ÚČAŘÍ, NE VE STŘEDU ŘÁDKU.
-   `align-items: baseline` na gridu srovná <span> podle jeho účaří — jenže span
-   s jediným <svg> uvnitř žádné účaří nemá a spadne o pár pixelů níž než text
-   vedle. Proto je obal `inline-flex` (dostane vlastní účaří ze svého boxu)
-   a svg se doladí posunem o 0.15em. Bez toho řádek viditelně kulhá. */
-.contact-row__ico {
+.contact-primary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.15rem 1rem;
+  padding: 1.15rem 1.35rem;
+  border: 1px solid var(--neon-2);
+  border-radius: 3px;
+  background: rgba(79, 216, 232, 0.07);
+  transition:
+    background-color var(--d-hover) var(--e-ui),
+    border-color var(--d-hover) var(--e-ui);
+}
+.contact-primary:hover {
+  background: rgba(79, 216, 232, 0.14);
+  border-color: var(--neon-1);
+}
+.contact-primary__k {
+  grid-column: 1;
   display: inline-flex;
-  color: var(--tx-3);
-  transition: color var(--d-hover) var(--e-ui);
-}
-.contact-row__ico svg {
-  transform: translateY(0.15em);
-}
-.contact-row__k {
-  color: var(--tx-3);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
   font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--neon-2);
 }
-.contact-row__dots {
-  border-bottom: 1px dotted var(--tx-4); /* ornament — smí být pod AA */
-  transform: translateY(-0.25em);
+.contact-primary__v {
+  grid-column: 1;
+  font-family: var(--font-sans);
+  /* ★ Vlastní stupeň, ne --fs-d2 (36px). Adresa je dlouhá a při 36px se na
+     390px displeji lámala doprostřed slova. 20 → 26px je pořád zdaleka
+     největší text sekce a přitom se vejde na jeden řádek i na telefonu. */
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--tx-1);
+  overflow-wrap: anywhere;
 }
-.contact-row__v {
+/* --tx-2, ne --tx-3: podklad desky je azurově přisvícený (rgba(79,216,232,.07)),
+   takže tichá šedá na něm ztrácí. A hlavně je to JEDINÝ slib, který u hlavní akce
+   stojí — „odpovím do 24 hodin" má člověk přečíst dřív, než klikne, ne po tom. */
+.contact-primary__n {
+  grid-column: 1;
+  margin-top: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-mono);
   color: var(--tx-2);
+}
+.contact-primary__go {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  font-size: 1.25rem;
+  color: var(--neon-2);
+  transition: transform var(--d-lift) var(--e-out-expo);
+}
+.contact-primary:hover .contact-primary__go {
+  transform: translateX(4px);
+}
+
+/* Kopírka je záměrně tichá: je to pohodlí pro toho, kdo si adresu chce odnést
+   jinam, ne konkurence pro hlavní akci nad ní. */
+.copy-btn {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.1rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-3);
   transition: color var(--d-hover) var(--e-ui);
 }
-a.contact-row:hover .contact-row__v,
-a.contact-row:hover .contact-row__ico,
-a.contact-row:focus-visible .contact-row__v,
-a.contact-row:focus-visible .contact-row__ico {
+.copy-btn:hover {
+  color: var(--tx-1);
+}
+.copy-btn.is-copied {
+  color: var(--green);
+}
+
+.channels {
+  display: grid;
+  /* auto-fit + minmax: dvě dlaždice vedle sebe, dokud se vejdou; pod ~30rem
+     spadnou pod sebe samy. Žádný média dotaz — o zlomu rozhoduje obsah. */
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+  gap: 0.625rem;
+  margin-top: 0.375rem;
+}
+.channel {
+  display: grid;
+  gap: 0.15rem;
+  height: 100%;
+  padding: 0.95rem 1.15rem;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  background: rgba(19, 22, 25, 0.5);
+  transition:
+    border-color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui);
+}
+.channel:hover {
+  border-color: var(--neon-2);
+  background: rgba(79, 216, 232, 0.06);
+}
+.channel__k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-3);
+  transition: color var(--d-hover) var(--e-ui);
+}
+.channel:hover .channel__k {
   color: var(--neon-2);
+}
+.channel__v {
+  font-family: var(--font-sans);
+  font-size: var(--fs-bullet);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--tx-1);
+}
+/* --tx-3 (6.1:1), ne --tx-4: na dlaždici to není ornament, ale rozdíl mezi
+   „WhatsApp" a „telefon" — tedy důvod, proč si člověk vybere jeden z nich. */
+.channel__n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-mono);
+  color: var(--tx-3);
+}
+/* Zelená = dostupnost. Táž barva jako štítek kapacity a rámeček VÝSTUP —
+   nese význam, ne náladu (viz tokens.css). */
+.channel--green .channel__k {
+  color: var(--green);
+}
+.channel--green:hover {
+  border-color: var(--green-line);
+  background: var(--green-bg);
+}
+.channel--green:hover .channel__k {
+  color: var(--green);
 }
 
 .footer {
   /* ★ MÍRA: patička byla nejdelší řádek na webu (naměřeno 123 znaků na 1024px).
      Je to sice drobné písmo a atribuce, ale CC BY se má dát přečíst. */
   max-width: var(--measure-wide);
-  margin: 4rem auto 0;
+  margin: 3.5rem auto 0;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line-1);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  line-height: 1.75;
+  line-height: 1.7;
   color: var(--tx-4); /* ornament */
   text-align: center;
   text-wrap: pretty;
@@ -459,6 +557,35 @@ a.contact-row:focus-visible .contact-row__ico {
 }
 .footer a:hover {
   color: var(--neon-2);
+}
+.footer__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--tx-2);
+  font-size: var(--fs-mono);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.footer__mark b {
+  color: var(--neon-2);
+  font-weight: 600;
+}
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+  margin-top: 0.6rem;
+}
+.footer__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.footer__legal {
+  margin-top: 0.75rem;
 }
 
 /* ── ÚCHOP (jen sekce 00) ──────────────────────────────────
@@ -509,6 +636,29 @@ a.contact-row:focus-visible .contact-row__ico {
   }
 }
 
+/* ── ÚZKÝ DISPLEJ: ZAROVNÁNÍ JDE ZA TEXTEM ─────────────────
+   Pod 1024 px dostane sloupec plnou šířku a layout.css mu přepne text doleva.
+   Všechno, co se řídilo podle `.section--center`, musí jít s ním — jinak zůstane
+   uprostřed viset řada tlačítek pod textem, který začíná u levého okraje.
+   Naměřeno na 390px: hero mělo odstavec vlevo a obě CTA vycentrovaná, takže
+   levá hrana stránky měla tři různé pozice pod sebou. */
+@media (max-width: 1024px) {
+  .section--center .cta-row {
+    justify-content: flex-start;
+  }
+
+  /* ★ VISUTÁ ODRÁŽKA. `.bullets--plain` je v běžném toku (mřížka by na
+     vycentrované sekci rozhodila odstup značky od textu, viz výš), takže se
+     tečka chová jako první znak odstavce — a druhý řádek se pod ni podlomil
+     až k levému okraji. Na centrovaném desktopu to nebylo vidět, na levém
+     zarovnání ano: text pod tečkou „vylezl" o půl em ven ze sloupce.
+     Odsazení + záporný text-indent dá klasický visutý odstavec. */
+  .bullets--plain .bullet {
+    padding-left: 1.15em;
+    text-indent: -1.15em;
+  }
+}
+
 /* ── TELEFON: STAŽENÉ ROZESTUPY ────────────────────────────
    Tyhle marginy jsou psané napevno, ne přes proměnnou — takže je výškové
    dotazy v tokens.css nikdy nezmenšily, ať se stahovalo cokoli jiného.
@@ -528,61 +678,55 @@ a.contact-row:focus-visible .contact-row__ico {
   .step {
     padding: 0.7rem 0;
   }
-  .email-link {
-    margin-top: 1.25rem;
-    /* `white-space: nowrap` výš je na desktopu správně, na 390px displeji ale
-       z e-mailu dělá jeden nezlomitelný token, který přeteče sloupec. */
-    white-space: normal;
-    overflow-wrap: anywhere;
+  .contact {
+    margin-top: 1.375rem;
   }
-  .contact-rows {
-    margin-top: 1.5rem;
+  .contact-primary {
+    padding: 1rem 1.1rem;
   }
-  /* Ikona přibyla jako čtvrtý sloupec a na 390px displeji je každý pixel drahý.
-     Tečkovaná spojnice je ČISTÝ ORNAMENT — jde ven jako první a řádek tím
-     dostane zpátky mezeru i svůj gap. Nosné (ikona, popisek, hodnota) zůstává. */
-  .contact-row {
-    grid-template-columns: auto auto 1fr;
-    gap: 0.6rem;
+
+  /* ★ TLAČÍTKA PŘES CELOU ŠÍŘKU. Na 390px displeji stály dvě CTA pod sebou,
+     každé jinak široké podle délky svého popisku — levá hrana seděla, pravá
+     poskakovala. Stejná šířka je klidnější a hlavně se do ní líp trefí palec.
+     `.magnetic` je jen zvětšená zásahová plocha (padding 20px / margin -20px),
+     takže width: 100% na něm dá tlačítku uvnitř přesně šířku sloupce. */
+  .cta-row {
+    width: 100%;
   }
-  .contact-row__dots {
-    display: none;
+  .cta-row .magnetic {
+    display: block;
+    width: 100%;
   }
-  .contact-row__v {
-    justify-self: end;
-    overflow-wrap: anywhere;
+  .cta-row .btn {
+    width: 100%;
+    justify-content: center;
   }
   .footer {
-    margin-top: 2rem;
+    margin-top: 2.25rem;
     padding-top: 1rem;
   }
 }
 
 /* ── DOTYKOVÉ CÍLE ─────────────────────────────────────────
-   Kontaktní řádky měly 17 px na výšku: trefit e-mail nebo telefon prstem
-   byla loterie — a přitom je to JEDINÁ konverzní akce celého webu.
    Apple i Google chtějí 44×44. Zvětšuje se to jen na dotyku; na myši by
-   ty výšky rozhodily vertikální rytmus, který je jinak v pořádku. */
+   ty výšky rozhodily vertikální rytmus, který je jinak v pořádku.
+
+   ★ Kontaktní dlaždice žádné minimum nepotřebují: mají svislé odsazení
+   0.95–1.15rem a tři řádky obsahu, takže vycházejí na 78–96 px. Právě proto
+   nahradily řádky s tečkovaným vodičem, které měly 17 px — trefit tehdy
+   e-mail prstem byla loterie, a přitom je to JEDINÁ konverzní akce webu. */
 @media (pointer: coarse) {
   .btn {
     min-height: 48px;
     padding: 0.85rem 1.25rem;
   }
-  .contact-row {
+  .copy-btn {
     min-height: 44px;
-    align-items: center;
-  }
-  /* Řádek se tu centruje, ne účaří — doladění na účaří (výš) by ikonu
-     naopak shodilo z osy. */
-  .contact-row__ico svg {
-    transform: none;
-  }
-  .email-link {
-    padding: 0.5rem 0;
   }
   /* I atribuce CC-BY je odkaz, na který někdo klikne — a měla 33 px. */
   .footer a {
-    display: inline-block;
-    padding: 0.75rem 0;
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
   }
 }

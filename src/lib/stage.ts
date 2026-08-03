@@ -1,75 +1,42 @@
 /**
  * ★ JEDINÝ ZDROJ PRAVDY O TOM, KDE NA OBRAZOVCE ŽIJE 3D.
  *
- * ═══════════ DVA REŽIMY, NE JEDEN ROZBITÝ ═══════════
+ * ═══════════ JEDEN REŽIM, NE DVA ═══════════
  *
- * ŠIROKO: plátno je PODKLAD. Kryje celé okno, leží POD textem (--z-canvas < --z-main)
- *   a text se přes stroj píše. Sloupec je úzký (5 z 12), takže krychli po straně
- *   zbývá půlka okna a nic si nelezou do cesty.
+ * Plátno je VŽDYCKY PODKLAD: kryje celé okno a leží POD textem
+ * (--z-canvas < --z-main). Ať je displej jakkoli široký, stroj je pozadí
+ * a text se přes něj píše.
  *
- * ÚZKO: plátno je JEVIŠTĚ. Zabírá horní pás obrazovky a leží NAD textem
- *   (--z-stage > --z-main). Text mu tím pádem nemůže vlézt do záběru: sekce je na
- *   telefonu vyšší než okno, takže při rolování MUSÍ pod jeviště podjet — a tady
- *   prostě zmizí za jeho neprůhledným pozadím, místo aby se přes rozsvícené hrany
- *   krychle míhala jako duch. To je celý ten trik.
+ * ★★ DŘÍV TU BYL DRUHÝ REŽIM („jeviště") A ŠEL VEN.
+ *   Na telefonu se 3D zvedlo NAD text a zabralo horní pás obrazovky; text
+ *   začínal až pod ním. Řešilo to sice čitelnost, ale za cenu, kterou nikdo
+ *   nechtěl zaplatit: krychle byla schovaná v pruhu jako náhledový obrázek,
+ *   textu zbyla spodní půlka okna a mobil vypadal jako jiný, chudší web.
+ *   Kdo přišel z desktopu, poznal to na první pohled.
  *
- *   Proč vůbec pás a ne celá plocha: na 390px displeji stojí text přes CELOU šířku
- *   (grid-column: 1 / -1), takže krychli není kam uhnout. Před tímhle krychle textem
- *   doslova PROŘÍZLA — zářící hrany šly napříč nadpisem a četlo se to jako rozbité
- *   vykreslování, ne jako režie.
+ *   Čitelnost se místo toho řeší tam, kde vzniká — v obraze pod textem:
+ *     • plátno se na úzkém displeji ZTLUMÍ (viz .canvas-layer v layout.css),
+ *       takže rozsvícené hrany krychle přestanou soupeřit s písmem
+ *     • mezi plátno a text se položí ZÁVOJ (main::before), který drží kontrast
+ *       i nad tím nejsvětlejším místem stroje
+ *     • krychle se na úzkém displeji sází jako CELOPLOŠNÉ POZADÍ (viz Rig.tsx),
+ *       ne jako objekt, který se musí celý vejít
+ *   Tři vrstvy stylu místo druhého layoutu. Web je pak na telefonu tentýž web.
  *
- * ═══════════ KDO CO VLASTNÍ ═══════════
- *
- * ★ VÝŠKU JEVIŠTĚ VLASTNÍ CSS (--stage-h: 42svh), NE TENHLE SOUBOR. Schválně:
- *
- *   1. ŽÁDNÝ CLS. Scéna se načítá LÍNĚ, takže její useEffect přijde až dávno po
- *      prvním vykreslení. Kdyby výšku pásu psal až on, sekce by se poprvé vysázely
- *      BEZ rezervovaného místa a při mountu scény by o 350 px poskočily. To je
- *      učebnicový layout shift — a zrovna tenhle web se Core Web Vitals ohání
- *      v sekci 01 jako důkazem. Třída `staged` se proto sází SYNCHRONNĚ v main.tsx
- *      ještě před prvním renderem a výška je ve statickém stylesheetu. Nula posunů.
- *
- *   2. svh, NE clientHeight. Na iOS se při rolování vysouvá a zasouvá URL lišta
- *      a clientHeight se s ní mění. Pás počítaný z něj by při každém takovém pohybu
- *      změnil výšku, a s ním i odsazení VŠECH sekcí — stránka by se pod prstem
- *      cukala. `svh` je z definice ta MALÁ (lišta vysunutá) výška a nehne se.
- *
- * Tenhle soubor tedy vlastní JEDINOU věc: rozhodnutí ANO/NE. To je ta hodnota,
- * kterou CSS samo spočítat neumí (potřebuje k ní vědět, jestli vůbec běží WebGL).
+ * Zbyla tu proto jediná hodnota: šířka, od které si text a stroj přestanou
+ * lézt do cesty a můžou stát vedle sebe.
  */
 
 /**
- * ★ BREAKPOINT ŽIJE TADY A NIKDE JINDE.
+ * ★ ŠÍŘKA, OD KTERÉ STOJÍ TEXT VEDLE STROJE.
  *
- * CSS ho nepotřebuje: pravidla visí na třídě `staged`, ne na média dotazu. Díky
- * tomu se nemůže rozejít — neexistuje druhá kopie, se kterou by se rozcházel.
+ * Nad ní: sloupec zabírá půlku mřížky, krychle uhne kompozičním panorámatem
+ * do té druhé (ORBIT_PAN v scene-state.ts) a nikdo nikomu nepřekáží.
+ * Pod ní: sloupec má plnou šířku a krychli není kam uhnout — je z ní pozadí.
  *
- * Podmínka na výšku (560 px) vyhazuje TELEFON NA ŠÍŘKU. 42 % z 390 px je 164 px;
- * do takového pásu se krychle nevejde a textu pod ním nezbyde kde být. Tam se
- * plátno vrací na podklad a layout.css sype text do úzkého sloupce vlevo.
- * Krychle ustoupí, slovo dostane přednost.
+ * Čte to Rig.tsx (jestli zapnout panoráma a jak daleko postavit kameru)
+ * a layout.css (kde tatáž hodnota stojí jako `max-width: 1024px`).
+ * ★ Když se tohle číslo změní, MUSÍ se změnit i tam. Jsou to dvě kopie jedné
+ *   hranice — CSS se JS zeptat neumí a media query se z proměnné nesází.
  */
-export const STAGE_MQ = '(max-width: 1024px) and (min-height: 560px)'
-
-/** ★ Musí souhlasit s breakpointem šířky výš. Čte to Rig (panoráma) a layout.css. */
 export const SIDE_BY_SIDE = 1024
-
-/** Má scéna běžet v režimu jeviště? Jen o velikosti okna — o WebGL rozhoduje volající. */
-export function fitsStage(): boolean {
-  return window.matchMedia(STAGE_MQ).matches
-}
-
-/**
- * Přepne třídu na <html>. Odtud si ji berou VŠECHNA pravidla, která se o jeviště
- * opírají: jeho výška, patro plátna, odsazení sekcí, rohové značky, vypnuté závoje.
- *
- * ★ MUSÍ SE UMĚT I VYPNOUT. Jeviště existuje jen tehdy, když existuje scéna — a ta
- * umí zmizet za běhu: WebGL kontext se dvakrát ztratí (viz MAX_RESTORES ve Scene.tsx),
- * uživatel si zapne omezený pohyb, scéna spadne do SceneBoundary. Kdyby po ní zbyla
- * třída `staged`, sekce by si dál rezervovaly odsazení na 3D, které tam už není:
- * nahoře by zela díra přes 42 % obrazovky a web by vypadal rozbitě přesně ve chvíli,
- * kdy měl naopak elegantně ustoupit.
- */
-export function markStage(on: boolean): void {
-  document.documentElement.classList.toggle('staged', on)
-}

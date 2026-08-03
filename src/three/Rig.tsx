@@ -39,21 +39,29 @@ const HALF_FOV = MathUtils.degToRad(FOV / 2)
     radiusem (9.6) — na běžném displeji tudíž nikdy nezabere a rozpětí stanic platí. */
 const FIT_SPAN_WIDE = 5.6
 
-/** JEVIŠTĚ: tady podlaha naopak vládne, protože pás je malý a krychle v něm musí mít
-    vzduch nahoře (navigace) i dole (hrana jeviště). 7.4 → silueta zabere 57 % výšky
-    pásu, kolem dokola zbývá ~30 px. Kompozici tu dělá pás, ne rozpětí radiusů. */
-const FIT_SPAN_STAGED = 7.4
-
 /**
- * ★ NAVIGACE STOJÍ V JEVIŠTI. Krychle se proto neusadí do jeho geometrického středu,
- *   ale do středu toho, co z něj po navigaci ZBYDE.
+ * ★ ÚZKO: KRYCHLE JE POZADÍ, NE EXPONÁT — A TO MĚNÍ CELÝ VÝPOČET ODSTUPU.
  *
- * Lišta má 24 px odsazení + 44px dotykový cíl + 24 px = ~92 px a leží NAD plátnem
- * (--z-hud > --z-stage). Bez téhle korekce si sedne krychli přesně na temeno: horní
- * rohové study mizí za „bejcek.it" a objekt vypadá useknutý shora.
- * Posun dolů = půlka té výšky, protože se tím střed volné plochy trefí přesně.
+ * Vzorec výš („vejdi se na výšku i na šířku") je pro objekt, kolem kterého má být
+ * vzduch. Na telefonu je poměr stran 0.46, takže „vejít se na šířku" znamená
+ * odstup r ≈ 19 — krychle by se scvrkla na placku uprostřed obrazovky a vypadala
+ * by jako vzdálený náhled, ne jako stroj, přes který se píše text.
+ *
+ * Na úzkém displeji se proto neptáme, jak daleko couvnout, aby se objekt vešel,
+ * ale JAKOU ČÁST ŠÍŘKY MÁ ZABRAT. Odtud se odstup dopočítá zpátky:
+ *
+ *     viditelná šířka = 2·tan(fov/2)·r·poměr stran
+ *     r = (hrana / podíl) / (2·tan(fov/2)·poměr stran)
+ *
+ * 0.82 = stěna krychle zabere 82 % šířky displeje. Uprostřed přeletu se silueta
+ * roztáhne na stěnovou úhlopříčku (×√2), takže tam krychle okraje mírně přeteče —
+ * a to je záměr: pozadí se ořezávat SMÍ, dokonce má. Právě přetečení dělá rozdíl
+ * mezi „obrázkem na stránce" a „prostorem, ve kterém stránka stojí".
  */
-const STAGE_NAV_PX = 92
+const NARROW_WIDTH_FRACTION = 0.82
+
+/** Hrana krychle ve světových jednotkách. Viz three/Cube.tsx. */
+const CUBE_EDGE = 3
 
 /** Parallax: posun kamery do strany. Dost na hloubku, málo na nevolnost. */
 const PARALLAX = 0.12
@@ -114,42 +122,33 @@ export default function Rig({ parallax }: { parallax: boolean }) {
     let r = MathUtils.lerp(ORBIT_RADIUS[i], ORBIT_RADIUS[i + 1], t)
 
     /* ★ ODSTUP PODLE POMĚRU STRAN. FOV 35° je VERTIKÁLNÍ, takže na úzkém plátně
-       je vodorovné zorné pole užší než svislé a krychle by se po stranách UŘÍZLA.
-       Vzdálenost se proto dopočítává z poměru stran, nikdy z konstanty.
+       je vodorovné zorné pole užší než svislé.
 
-       Na mobilu je plátno JEVIŠTĚ (horní pás, viz lib/stage.ts), takže sem chodí
-       poměr toho PÁSU (~390×354, tedy 1.10) — ne poměr celého telefonu (0.46).
-       To je mimochodem druhá polovina opravy mobilu: při poměru 0.46 musela kamera
-       couvat až na r ≈ 14, aby se krychle vešla na šířku, a stroj se scvrkl.
-       V pásu se vejde při r ≈ 11.7 a zůstane velký a čitelný i na 390px displeji. */
-    const staged = sceneState.staged
+       ŠIROKO se krychle musí celá VEJÍT (je to exponát, kolem kterého má být vzduch),
+       ÚZKO má naopak šířku VYPLNIT (je to pozadí pod textem) — viz NARROW_WIDTH_FRACTION.
+       Obě větve končí u tvrdé podlahy odstupu; ta širokoúhlá je schválně tak nízko,
+       aby na běžném displeji nikdy nezabrala a rozpětí stanic ze scene-state.ts platilo. */
     const aspect = size.width / Math.max(1, size.height)
-    const span = staged ? FIT_SPAN_STAGED : FIT_SPAN_WIDE
-    const needed = span / (2 * Math.tan(HALF_FOV) * Math.min(aspect, 1))
+    const wide = size.width > SIDE_BY_SIDE
+    const needed = wide
+      ? FIT_SPAN_WIDE / (2 * Math.tan(HALF_FOV) * Math.min(aspect, 1))
+      : CUBE_EDGE / NARROW_WIDTH_FRACTION / (2 * Math.tan(HALF_FOV) * aspect)
     if (r < needed) r = needed
 
     // Kamera sedí PŘESNĚ na normále stěny, ve vzdálenosti r. Bez alokace.
     cam.position.set(0, 0, r).applyQuaternion(orbit)
 
     /* ── 3. KOMPOZICE: uhni krychlí textu ──────────────────── */
-    /* Panoráma platí jen tam, kde text stojí VEDLE krychle. V režimu jeviště má text
-       plnou šířku a sedí POD plátnem — uhýbat do strany před textem, který žádnou
-       stranu nemá, by krychli jen bezdůvodně vystrčilo z osy jeviště. */
-    const wide = size.width > SIDE_BY_SIDE
+    /* Panoráma platí jen tam, kde text stojí VEDLE krychle (viz SIDE_BY_SIDE).
+       Na úzkém displeji má text plnou šířku a krychle je pozadí pod ním — uhýbat
+       do strany před textem, který žádnou stranu nemá, by stroj jen bezdůvodně
+       vystrčilo z osy a jedna hrana by vyjela z obrazu víc než druhá. */
     const p0 = ORBIT_PAN[i]
     const p1 = ORBIT_PAN[i + 1]
 
     let yaw = wide ? MathUtils.lerp(p0.yaw, p1.yaw, t) : 0
     let pitch = wide ? MathUtils.lerp(p0.pitch, p1.pitch, t) : 0
     const roll = wide ? MathUtils.lerp(p0.roll, p1.roll, t) : 0
-
-    /* Uhnout navigaci, která stojí v horním pruhu jeviště (viz STAGE_NAV_PX).
-       Úhel se počítá ze VZDÁLENOSTI, ne z konstanty — posun na obrazovce tak zůstane
-       stejný, ať je kamera jakkoli daleko a ať má telefon jakoukoli výšku. */
-    if (staged) {
-      const unitsPerPx = (2 * Math.tan(HALF_FOV) * r) / size.height
-      pitch += Math.atan2((STAGE_NAV_PX / 2) * unitsPerPx, r)
-    }
 
     /* ── 4. POSUN KAMERY: parallax myši + klidový drift ────── */
     /* ★ SKUTEČNÝ PARALLAX = POSUN KAMERY, ne jen natočení. Kdyby se kamera jen

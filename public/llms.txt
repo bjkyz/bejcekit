@@ -7,15 +7,15 @@ Klíčová fakta:
 - Kontakt: bejcek.jirka@gmail.com, telefon a WhatsApp +420 607 706 102
 - Působnost: Česko, remote i na místě; přístupy a kód zůstávají klientovi
 - Proces: analýza zdarma, pevná cena a termín písemně, týdenní iterace, provoz a monitoring po nasazení
-- Web je jednostránková aplikace; všechny sekce jsou kotvy na https://bejcek.it/
+- Web je jednostránková aplikace; všechny sekce jsou kotvy na __SITE_ORIGIN__/
 
 ## Služby
 
-- [Weby a SEO](https://bejcek.it/#web): weby s SEO od prvního řádku, Core Web Vitals v zeleném, Search Console a měsíční report pozic
-- [IT infrastruktura](https://bejcek.it/#infra): správa serverů, monitoring 24/7, testované zálohy, Proxmox, Linux, Docker, Microsoft 365
-- [AI a automatizace](https://bejcek.it/#ai): AI asistenti nad firemními daty (RAG), vytěžování dokumentů, n8n workflow, propočet návratnosti před stavbou
-- [Pracovní postup](https://bejcek.it/#proces): čtyři kroky od analýzy po provoz, žádné překvapení na faktuře
-- [Kontakt](https://bejcek.it/#kontakt): e-mail, WhatsApp, telefon; odpověď do 24 hodin
+- [Weby a SEO](__SITE_ORIGIN__/#web): weby s SEO od prvního řádku, Core Web Vitals v zeleném, Search Console a měsíční report pozic
+- [IT infrastruktura](__SITE_ORIGIN__/#infra): správa serverů, monitoring 24/7, testované zálohy, Proxmox, Linux, Docker, Microsoft 365
+- [AI a automatizace](__SITE_ORIGIN__/#ai): AI asistenti nad firemními daty (RAG), vytěžování dokumentů, n8n workflow, propočet návratnosti před stavbou
+- [Pracovní postup](__SITE_ORIGIN__/#proces): čtyři kroky od analýzy po provoz, žádné překvapení na faktuře
+- [Kontakt](__SITE_ORIGIN__/#kontakt): e-mail, WhatsApp, telefon; odpověď do 24 hodin
 
 ## Odkazy
 

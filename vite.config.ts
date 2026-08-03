@@ -1,7 +1,71 @@
-import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+
+/**
+ * ★★ JEDINÉ MÍSTO NA CELÉM WEBU, KDE JE NAPSANÁ JEHO ADRESA.
+ *
+ * Kanonická adresa se v projektu opakovala DVANÁCTKRÁT ve čtyřech souborech:
+ * index.html (canonical, og:url, og:image, JSON-LD url a image), sitemap.xml,
+ * robots.txt a llms.txt (sedm odkazů na kotvy sekcí). Při stěhování domény se
+ * na jedno z těch míst zaručeně zapomene — a zrovna u kanonické adresy je
+ * zapomenuté místo drahé: `<link rel="canonical">` mířící jinam, než web
+ * doopravdy stojí, říká Googlu „pravá verze je jinde". Když to jinde
+ * neodpovídá, nemusí se web zaindexovat vůbec.
+ *
+ * Přesně tohle se stalo: všech dvanáct míst ukazovalo na https://bejcek.it/,
+ * jenže ta doména nebyla (a k 2026-08-03 pořád není) zaregistrovaná — whois
+ * hlásí AVAILABLE a NXDOMAIN i z 1.1.1.1 a 8.8.8.8. Web přitom běžel na
+ * https://bejcekit.vercel.app.
+ *
+ * ★ AŽ SE DOMÉNA KOUPÍ, MĚNÍ SE JEN TENHLE ŘÁDEK. Nic jiného. Bez lomítka na konci.
+ */
+const SITE_ORIGIN = 'https://bejcekit.vercel.app'
+
+/** Soubory v public/ se kopírují doslova, takže se v nich token nahrazuje až nad dist/. */
+const ORIGIN_FILES = ['sitemap.xml', 'robots.txt', 'llms.txt']
+const TOKEN = /__SITE_ORIGIN__/g
+
+/**
+ * Dosadí SITE_ORIGIN za `__SITE_ORIGIN__`.
+ *
+ * index.html jde přes transformIndexHtml, protože ten běží i v dev režimu —
+ * placeholder se tedy nikdy neukáže v prohlížeči. Statické soubory z public/
+ * Vite kopíruje beze změny, ty se proto přepisují až v closeBundle nad hotovým
+ * dist/ (stejný postup jako inlineCss níž a ze stejného důvodu).
+ *
+ * ★ configureServer NENÍ kosmetika: bez něj by `npm run dev` servíroval
+ *   robots.txt a sitemap.xml s doslovným „__SITE_ORIGIN__" a vypadalo by to
+ *   jako rozbitý build. Dev se musí chovat stejně jako produkce, jinak se
+ *   rozdíl dřív nebo později pošle ven.
+ */
+function siteOrigin(): Plugin {
+  return {
+    name: 'site-origin',
+    transformIndexHtml(html) {
+      return html.replace(TOKEN, SITE_ORIGIN)
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const name = (req.url ?? '').split('?')[0].replace(/^\//, '')
+        if (!ORIGIN_FILES.includes(name)) return next()
+        const file = resolve(process.cwd(), 'public', name)
+        if (!existsSync(file)) return next()
+        res.setHeader('Content-Type', name.endsWith('.xml') ? 'application/xml' : 'text/plain; charset=utf-8')
+        res.end(readFileSync(file, 'utf8').replace(TOKEN, SITE_ORIGIN))
+      })
+    },
+    closeBundle() {
+      const dist = resolve(process.cwd(), 'dist')
+      for (const name of ORIGIN_FILES) {
+        const file = resolve(dist, name)
+        if (!existsSync(file)) continue
+        writeFileSync(file, readFileSync(file, 'utf8').replace(TOKEN, SITE_ORIGIN))
+      }
+    },
+  }
+}
 
 /**
  * ★ CSS SE INLINUJE DO index.html. Celý stylesheet má ~5.6 kB gz — MÉNĚ než jedna
@@ -35,7 +99,10 @@ function inlineCss(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), inlineCss()],
+  /* ★ siteOrigin PŘED inlineCss. Oba sahají na dist/index.html v closeBundle;
+     siteOrigin ho ale mění přes transformIndexHtml (tedy dřív, než se soubor
+     vůbec zapíše), takže inlineCss už čte hotovou adresu a nemá co přepsat. */
+  plugins: [react(), siteOrigin(), inlineCss()],
   // Keeps the dev server from re-optimising (and full-reloading) mid-session.
   optimizeDeps: {
     include: ['three', '@react-three/fiber', '@react-three/drei', 'postprocessing'],

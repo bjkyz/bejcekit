@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
 import { CONTACT_CHANNELS, EMAIL, GITHUB, SECTIONS, type Section as S } from '../content/sections'
 import { useReveal } from '../lib/hooks'
+import { revealDelay as delay } from '../lib/reveal'
 import Kicker from './Kicker'
 import MagneticCTA from './MagneticCTA'
 import GrabPlate from './GrabPlate'
@@ -10,8 +11,8 @@ import Mark from './Mark'
 
 const LAST = SECTIONS.length - 1
 
-/** Zpoždění revealu — pevný CELKOVÝ rozptyl, ne 80ms × N (to je při 8 položkách plazení). */
-const delay = (i: number, n: number) => ({ '--reveal-delay': `${(i / Math.max(1, n)) * 360}ms` }) as React.CSSProperties
+/* Zpoždění revealu žije v lib/reveal.ts — sdílí ho i karty projektů, aby obě
+   stránky nastupovaly stejným rytmem. */
 
 export default function Section({
   s,
@@ -247,9 +248,13 @@ function Footer() {
       {/* GitHub NENÍ kontaktní kanál, je to důkaz — proto stojí tady a ne mezi
           výzvami k akci nahoře. Kdo si chce ověřit, že ten člověk opravdu píše kód,
           ho najde; komu jde o poptávku, tomu nepřekáží. */}
-      {/* Jen dvě položky, ne čtyři: při čtyřech se řádek na 1920 zlomil za třetí
-          a na konci prvního řádku zůstala viset osiřelá oddělovací tečka. */}
+      {/* Tři položky. Čtvrtá by řádek na 1920 zlomila za třetí a na konci
+          prvního řádku by zůstala viset osiřelá oddělovací tečka — proto tu
+          nejsou žádné další odkazy a proto se sem projekty vešly jen výměnou
+          za nic. Je to druhá cesta na /projekty pro toho, kdo dorolloval až sem. */}
       <p className="footer__links">
+        <a href="/projekty">Projekty</a>
+        <span aria-hidden="true">·</span>
         <a href={GITHUB} target="_blank" rel="noreferrer">
           <Icon name="github" size={14} />
           github.com/bjkyz

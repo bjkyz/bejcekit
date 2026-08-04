@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="cs" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="__SITE_ORIGIN__/projekty" />
+
+    <title>Projekty a reference · bejcek.it | Weby, které běží</title>
+    <meta
+      name="description"
+      content="Hotové weby od Jiřího Bejčka: Super Advokát, Advokátní kancelář Tutter, SLYX Fashions. Živé odkazy a technické údaje odečtené přímo z běžících webů."
+    />
+    <meta name="author" content="Jiří Bejček" />
+    <meta name="theme-color" content="#08090a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:url" content="__SITE_ORIGIN__/projekty" />
+    <meta property="og:site_name" content="bejcek.it" />
+    <meta property="og:title" content="Projekty a reference · bejcek.it" />
+    <meta
+      property="og:description"
+      content="Weby, které běží. Ne obrázky v prezentaci. Živé odkazy a ověřitelné technické údaje."
+    />
+    <meta property="og:image" content="__SITE_ORIGIN__/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="bejcek.it · projekty a reference" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!--
+      ★ SCHEMA.ORG: `CollectionPage` + `ItemList`, NE `Project`.
+        `Project` je v schema.org podtyp **Organization** (sourozenec FundingAgency),
+        tedy „organizovaný podnik". Použít ho na položku portfolia by Googlu řeklo,
+        že každá reference je firma – což není drobnost, ale nepravdivé tvrzení
+        ve strukturovaných datech.
+
+        Weby jsou `CreativeWork` s `url`; `creator` míří přes `@id` na tentýž
+        ProfessionalService, který je popsaný na úvodní stránce, takže se obě
+        stránky slepí do jedné entity a ne do dvou konkurenčních.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "@id": "__SITE_ORIGIN__/projekty#page",
+        "url": "__SITE_ORIGIN__/projekty",
+        "name": "Projekty a reference · bejcek.it",
+        "description": "Hotové weby od Jiřího Bejčka s živými odkazy a ověřitelnými technickými údaji.",
+        "inLanguage": "cs",
+        "about": { "@id": "__SITE_ORIGIN__/#identity" },
+        "mainEntity": {
+          "@type": "ItemList",
+          "name": "Realizované weby",
+          "itemListOrder": "https://schema.org/ItemListOrderAscending",
+          "numberOfItems": 4,
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "CreativeWork",
+                "name": "Super Advokát",
+                "url": "https://www.superadvokat.com",
+                "description": "Právní služby online s pevnou cenou předem. Next.js, předrenderované stránky z CDN, strukturovaná data LegalService, hreflang.",
+                "creator": { "@id": "__SITE_ORIGIN__/#identity" },
+                "inLanguage": "cs"
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "item": {
+                "@type": "CreativeWork",
+                "name": "Advokátní kancelář Tutter",
+                "url": "https://aktutter.cz",
+                "description": "Prezentace pražské advokátní kanceláře s praxí od roku 1991. Nuxt, časté dotazy ve strukturovaných datech, hreflang.",
+                "creator": { "@id": "__SITE_ORIGIN__/#identity" },
+                "inLanguage": "cs"
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "item": {
+                "@type": "CreativeWork",
+                "name": "SLYX Fashions",
+                "url": "https://slyx.com",
+                "description": "Značkový web americké dílny na latexovou módu. Vue, GSAP, video hero, Cloudflare.",
+                "creator": { "@id": "__SITE_ORIGIN__/#identity" },
+                "inLanguage": "en"
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "item": {
+                "@type": "CreativeWork",
+                "name": "bejcek.it",
+                "url": "__SITE_ORIGIN__/",
+                "description": "Portfolio se 3D scénou počítanou v prohlížeči. React, TypeScript, three.js, Lighthouse 100/100/100/100 na desktopu.",
+                "creator": { "@id": "__SITE_ORIGIN__/#identity" },
+                "inLanguage": "cs"
+              }
+            }
+          ]
+        }
+      }
+    </script>
+
+    <!-- Drobečky: bez nich Google v SERPu ukáže holou URL místo cesty webem. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Úvod", "item": "__SITE_ORIGIN__/" },
+          { "@type": "ListItem", "position": 2, "name": "Projekty", "item": "__SITE_ORIGIN__/projekty" }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Stejný důvod jako na úvodu: web je klientsky renderovaný, takže bez JS
+         je #root prázdný. Reference i kontakt musí být dosažitelné i tak. -->
+    <noscript>
+      <div style="max-width: 40rem; margin: 0 auto; padding: 4rem 1.5rem; color: #dee3ea; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1 style="color: #f7f8f8; font-size: 1.75rem">Projekty · bejcek.it</h1>
+        <p>Weby, které jsem postavil a které běží:</p>
+        <ul style="padding-left: 1.25rem">
+          <li><a href="https://www.superadvokat.com" style="color: #52aeff">Super Advokát</a> – právní služby online s cenou předem</li>
+          <li><a href="https://aktutter.cz" style="color: #52aeff">Advokátní kancelář Tutter</a> – prezentace kanceláře v Praze</li>
+          <li><a href="https://slyx.com" style="color: #52aeff">SLYX Fashions</a> – značkový web módní dílny, USA</li>
+          <li><a href="/" style="color: #52aeff">bejcek.it</a> – tento web, 3D scéna v prohlížeči</li>
+        </ul>
+        <p>
+          Jiří Bejček, IT a AI inženýr.<br />
+          E-mail: <a href="mailto:bejcek.jirka@gmail.com" style="color: #52aeff">bejcek.jirka@gmail.com</a><br />
+          Telefon: <a href="tel:+420607706102" style="color: #52aeff">+420 607 706 102</a>
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/projekty.tsx"></script>
+  </body>
+</html>

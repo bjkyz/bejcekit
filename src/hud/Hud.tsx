@@ -20,7 +20,11 @@ export default function Hud() {
 }
 
 function Nav({ active }: { active: number }) {
-  const links = SECTIONS.slice(1, 5)
+  /* Jen tři služby, ne čtyři: PROCES ustoupil odkazu na PROJEKTY. Pátá položka
+     by řádek na 1280px displeji přetáhla přes značku, a proces je věc, kterou
+     člověk čte až když ho zaujme práce — kdežto reference jsou to, kvůli čemu
+     na web přišel. Na PROCES se pořád dá skočit pravou lištou i scrollem. */
+  const links = SECTIONS.slice(1, 4)
   return (
     <nav className="nav" aria-label="Hlavní navigace">
       {/* ★ ZNAČKA JE OBRÁZEK, NE SLOVO — a proto potřebuje jméno pro odečítač
@@ -42,6 +46,12 @@ function Nav({ active }: { active: number }) {
             {s.plateCode}
           </a>
         ))}
+        {/* ★ SKUTEČNÝ ODKAZ NA JINOU STRÁNKU, TAKŽE ŽÁDNÝ preventDefault.
+            Ostatní položky jsou kotvy a musí projít přes Lenis (jinak by skočily
+            natvrdo); tahle je navigace pryč z dokumentu a patří prohlížeči. */}
+        <a className="nav__link" href="/projekty">
+          PROJEKTY
+        </a>
       </div>
       <a className="nav__cta" href="#kontakt" onClick={anchor('kontakt')}>
         Napište mi

@@ -1,10 +1,19 @@
 # bejcek.it · „Jednotka 06"
 
 3D scroll-driven web pro nezávislého IT inženýra. Uprostřed je skleněná krychle
-se žhavým reaktorem uvnitř; scroll ji otáčí po stěnách a každá stěna je jedna
-sekce webu.
+se žhavým reaktorem uvnitř; kamera ji podle scrollu obíhá po stěnách a každá
+stěna je jedna sekce webu.
 
-**Lighthouse (desktop): 100 / 100 / 100 / 100** (výkon, přístupnost, best practices, SEO).
+Web má **dvě stránky** (vícestránkový build, žádný router):
+
+| URL | Soubor | Co to je |
+|---|---|---|
+| `/` | `index.html` → `src/main.tsx` → `App.tsx` | úvod s krychlí, šest sekcí |
+| `/projekty` | `projekty.html` → `src/projekty.tsx` → `ProjectsPage.tsx` | reference, 3D karty, **bez WebGL a bez Lenisu** |
+
+**Lighthouse (desktop): 100 / 100 / 100 / 100** na obou stránkách (výkon,
+přístupnost, best practices, SEO), agentic-browsing 100. Mobil: `/projekty` 96,
+`/` 79–83. Naměřeno lokálně na `npm run preview`.
 
 ## Spuštění
 
@@ -28,9 +37,14 @@ npx vercel --prod   # produkce
 Nebo přes web: naimportuj repozitář na vercel.com, framework se detekuje sám
 (build `npm run build`, výstup `dist`).
 
-**Po prvním nasazení uprav doménu na dvou místech:**
+**Doména je na JEDINÉM místě: konstanta `SITE_ORIGIN` ve `vite.config.ts`.**
+Do souborů se dosazuje za token `__SITE_ORIGIN__` (plugin `siteOrigin`, funguje
+i v dev režimu). Až se koupí `bejcek.it`, mění se jen ten jeden řádek — nikde
+jinde adresa napsaná není. Nový soubor v `public/`, který má obsahovat adresu,
+se ale musí přidat do pole `ORIGIN_FILES`, jinak v produkci zůstane doslovný token.
 
-- `public/robots.txt` a `public/sitemap.xml` (obojí obsahuje `https://bejcek.it/`)
+Čisté URL (`/projekty` místo `/projekty.html`) dělá `cleanUrls: true` ve
+`vercel.json`. Žádný rewrite k tomu potřeba není — je to opravdový soubor.
 
 CSP v `vercel.json` je záměrně přísná (`default-src 'self'`) — web nedělá jediný
 požadavek na cizí doménu, takže si to může dovolit. Když někdy přidáš analytiku
@@ -40,12 +54,23 @@ nebo externí skript, musíš ho do CSP doplnit, jinak ho prohlížeč zablokuje
 
 | Chci změnit | Soubor |
 |---|---|
-| **Texty, služby, kontakty, telefon** | `src/content/sections.ts` — jediný soubor s obsahem |
+| **Texty, služby, kontakty, telefon** | `src/content/sections.ts` — jediný soubor s obsahem úvodu |
+| **Projekty a reference** | `src/content/projects.ts` + snímky v `public/projects/` |
 | Barvy, písma, rozestupy, časování | `src/styles/tokens.css` — jediný zdroj pravdy |
-| Pozice kamery po sekcích | `src/lib/scene-state.ts` (`CAM_KEYS`) |
+| Vzhled karet projektů | `src/styles/projects.css`, pohyb v `src/lib/tilt.ts` |
+| Pozice a odstup kamery po sekcích | `src/lib/scene-state.ts` (`ORBIT_RADIUS`, `ORBIT_PAN`) |
+| Adresa webu | `SITE_ORIGIN` ve `vite.config.ts` (jediné místo) |
 
 **Pořadí služeb** se mění přeuspořádáním pole v `sections.ts`. Do `src/lib/faces.ts`
 nesahej — tam je pořadí dané geometrií krychle (viz níž).
+
+**★ DO `SECTIONS` NEPŘIDÁVEJ SEDMOU POLOŽKU.** Pole je 1:1 svázané s geometrií
+krychle: šest stěn, šest sekcí. Sedmá položka scénu nezhorší, ale **shodí** —
+`FACE_TRANSFORMS[6]` je `undefined`, `FacePlates` na to sáhne při renderu,
+`SceneBoundary` výjimku chytí a 3D zmizí z webu úplně. A i kdyby ne, `Choreo`
+klampuje polohu na dráze na pět, takže by kamera na posledních dvou sekcích
+zamrzla. Nový obsah tedy patří na **vlastní stránku** (jako `/projekty`), ne
+do `SECTIONS`.
 
 ## Co je potřeba vědět, než do toho sáhneš
 
@@ -98,6 +123,25 @@ Za každým bodem je chyba, která se těžko hledá. Všechny už se jednou sta
 - **Žádné dlouhé pomlčky (—) v textech.** V češtině se skoro nepoužívají a jsou to
   nejnápadnější stopy po strojově psaném textu.
 
+- **`projects.css` — na `.pcard` nikdy `overflow: hidden` ani `backdrop-filter`.**
+  Obojí podle specifikace zplošťuje 3D scénu, takže `transform-style: preserve-3d`
+  se tiše zahodí a hloubka vrstev uvnitř karty přestane fungovat. Ořezává se až
+  na `.pcard__screen`, která žádné 3D potomky nemá.
+
+- **`projects.css` — hloubku dělá obrazovka couvající dozadu, ne text jedoucí dopředu.**
+  `transform` z prvku udělá containing block pro absolutně pozicované potomky.
+  Kdyby ho měl `.pcard__body`, natažený zásahový obdélník odkazu (`.pcard__link::after`)
+  by kryl jen text a **klik do obrázku, tedy do dvou třetin karty, by nikam nevedl.**
+
+- **`.reveal` a naklápění karty nesmí být na jednom prvku.** `.reveal.is-in` má
+  `transform: none` se specificitou (0,2,0) a přebilo by rotaci na `.pcard` (0,1,0).
+  Karta by se nehnula, JS by přitom spokojeně počítal a v konzoli by nebylo nic.
+  Reveal proto sedí na `.pgrid__cell`.
+
+- **`inlineCss` ve `vite.config.ts` projíždí všechna HTML v `dist/`.** Kdyby znal
+  jen `index.html`, druhá stránka by jako jediná držela render-blokující `<link>`
+  na CSS soubor, který tentýž plugin o řádek níž smaže — tedy stránka úplně bez stylů.
+
 ## Licence 3D modelu
 
 Model `public/models/core.v2.glb` je **„Primary Ion Drive" od Mikea Murdocka,
@@ -110,11 +154,19 @@ v patičce sekce 05 a ve stavovém panelu. Neodstraňuj ji z estetických důvod
 
 ## Výkon
 
-Celá stránka váží **877 kB** (376 kB gz JS+CSS + 501 kB model), ale na kritické
+Úvodní stránka váží se vším **~880 kB** (JS+CSS + 501 kB model), ale na kritické
 cestě je jen **~80 kB gz** — three.js se načítá až po vykreslení textu.
 
-- **CSS je inline v `index.html`** (viz `inlineCss` ve `vite.config.ts`): 5.6 kB gz
+`/projekty` je podstatně lehčí: **~71 kB gz JS** (React + sdílený chunk + vlastní
+kód) a čtyři snímky po 27–70 kB, načítané líně. **Three.js ani Lenis si nebere
+vůbec** — kdyby projekty byly jen další sekcí úvodu, platil by za ně i návštěvník,
+který se k referencím nikdy nedostane.
+
+- **CSS je inline v obou HTML** (viz `inlineCss` ve `vite.config.ts`): ~7.6 kB gz
   nestojí za render-blokující request.
+- **Snímky projektů jsou WebP 1440×900** vyrobené headless Chromem přes CDP
+  (`Page.captureScreenshot` s `format: 'webp'`). V `<img>` mají povinné
+  `width`/`height` a kontejner `aspect-ratio`, takže při dotečení nemají co posunout.
 - **3D se importuje až po `load` + idle** (`useArmed` v `App.tsx`), ne hned po
   hydrataci — vyhodnocení three.js jinak blokovalo překreslení textu a Chrome ho
   počítal do LCP (naměřeno 6.4 s místo 2.6 s).
@@ -147,7 +199,13 @@ pár řádků v `src/lib/spring.ts` a canvas textura.
 
 - Veškerý obsah je v reálném sémantickém DOM. **Vypni WebGL a zbude kompletní,
   indexovatelný web se službami** — plátno je `aria-hidden`.
-- `prefers-reduced-motion` vypne 3D i Lenis a vykreslí obsah staticky.
+- `prefers-reduced-motion` vypne 3D, Lenis i naklápění karet a vykreslí obsah
+  staticky. Nic přitom nezmizí: karta jen stojí rovně a snímek se nenechá ztlumený.
+- **Karty projektů: „natažený odkaz".** Odkazem je jen jméno projektu (odečítač
+  obrazovky tedy slyší krátké smysluplné jméno, ne dvě stě znaků popisu), ale jeho
+  `::after` se roztáhne přes celou kartu, takže myš i prst mohou klikat kamkoli.
+  Focus z klávesnice rozsvítí celou kartu přes `:focus-within`, aby měl uživatel
+  klávesnice stejnou zpětnou vazbu jako uživatel myši.
 - Scroll je **skutečný scroll dokumentu**, žádné scroll-jacking. Klávesnice,
   Cmd+F i `#kotvy` fungují.
 - Povinný snap se zapíná, jen když se každá sekce vejde do okna; jinak `proximity`.
@@ -155,8 +213,12 @@ pár řádků v `src/lib/spring.ts` a canvas textura.
 
 ## Co ještě doplnit
 
-- IČO do `CONTACT_ROWS` v `src/content/sections.ts`.
-- Ověřit odkazy na LinkedIn a GitHub — jsou odhadnuté.
+- IČO do kontaktní sekce v `src/content/sections.ts`.
+- **Další projekty do `src/content/projects.ts`.** Ke každému nový snímek do
+  `public/projects/` (WebP 1440×900). Pole `outcome` je nepovinné schválně:
+  patří tam jen měřitelný výsledek, který klient smí zveřejnit a který umíš
+  doložit. `facts` jsou výhradně věci odečtené z živého webu — portfolio je
+  jediné místo, kde se dá lhát nepoznatelně, a proto se tam nelže vůbec.
 
 (`og:image` už je hotový: `public/og.png` + meta v `index.html`. Přegenerovat jde
 ze šablony v repu úpravou `public/og.png` — 1200×630, tmavé pozadí, krychle.)

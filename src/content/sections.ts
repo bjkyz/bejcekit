@@ -73,7 +73,15 @@ export const SECTIONS: Section[] = [
     ],
     status: 'Volná kapacita: zbývá 1 místo',
     cta: { label: 'Chci nezávaznou nabídku', href: '#kontakt' },
-    ghostCta: { label: 'Prohlédnout služby', href: '#web' },
+    /**
+     * ★ DRUHÉ TLAČÍTKO VEDE NA PROJEKTY, NE NA SLUŽBY.
+     *   „Prohlédnout služby" nabízelo přesně to, co udělá scroll dolů i pravá
+     *   lišta, tedy třetí cestu k témuž. Odkaz na reference je oproti tomu jediný
+     *   způsob, jak se z úvodu dostat na /projekty — a na telefonu ten úplně
+     *   jediný, protože odkazy v horní navigaci jsou pod 800 px schované.
+     *   Hotová práce je navíc silnější argument než seznam slibů pod ní.
+     */
+    ghostCta: { label: 'Prohlédnout projekty', href: '/projekty' },
     align: 'center',
     subsystem: 'IDENTIFIKACE',
   },

@@ -68,7 +68,7 @@ function siteOrigin(): Plugin {
 }
 
 /**
- * ★ CSS SE INLINUJE DO index.html. Celý stylesheet má ~5.6 kB gz — MÉNĚ než jedna
+ * ★ CSS SE INLINUJE DO HTML. Celý stylesheet má ~6 kB gz — MÉNĚ než jedna
  * síťová otočka na pomalém mobilu. Jako samostatný <link> je render-blokující:
  * prohlížeč na něj čeká s prvním vykreslením ~150–300 ms, které HTML o 7 kB
  * větší vůbec nestojí. HTML se stejně cachuje s max-age=0, takže se tím nic
@@ -77,6 +77,13 @@ function siteOrigin(): Plugin {
  * Dělá se to v closeBundle nad hotovým dist/ — Rolldown (Vite 8) volá
  * transformIndexHtml dřív než generateBundle, takže elegantnější cesta přes
  * bundle hooky tiše vyrobila HTML bez stylů. Tohle je hloupé a neprůstřelné.
+ *
+ * ★★ PROJÍŽDÍ VŠECHNA HTML V dist/, NE JEN index.html.
+ *   Dokud byl web jednostránkový, stačila jedna napevno napsaná cesta. Od chvíle,
+ *   kdy přibyla /projekty, by to tiše znamenalo, že druhá stránka jako JEDINÁ
+ *   drží render-blokující <link> na CSS — jenže ten soubor mezitím tenhle plugin
+ *   z dist/assets SMAZAL. Výsledek by nebyl pomalejší web, ale web ÚPLNĚ BEZ
+ *   STYLŮ, a to jen na jedné podstránce. Proto se seznam bere z adresáře.
  */
 function inlineCss(): Plugin {
   return {
@@ -88,11 +95,14 @@ function inlineCss(): Plugin {
       const cssFiles = readdirSync(assets).filter((f) => f.endsWith('.css'))
       if (cssFiles.length === 0) return
       const css = cssFiles.map((f) => readFileSync(resolve(assets, f), 'utf8')).join('')
-      const htmlPath = resolve(dist, 'index.html')
-      const html = readFileSync(htmlPath, 'utf8')
-        .replace(/[ \t]*<link[^>]*rel="stylesheet"[^>]*>\s*/g, '')
-        .replace('</head>', `<style>${css}</style>\n</head>`)
-      writeFileSync(htmlPath, html)
+
+      for (const page of readdirSync(dist).filter((f) => f.endsWith('.html'))) {
+        const htmlPath = resolve(dist, page)
+        const html = readFileSync(htmlPath, 'utf8')
+          .replace(/[ \t]*<link[^>]*rel="stylesheet"[^>]*>\s*/g, '')
+          .replace('</head>', `<style>${css}</style>\n</head>`)
+        writeFileSync(htmlPath, html)
+      }
       for (const f of cssFiles) rmSync(resolve(assets, f))
     },
   }
@@ -111,6 +121,31 @@ export default defineConfig({
   build: {
     target: 'es2022',
     rollupOptions: {
+      /**
+       * ★ VÍCESTRÁNKOVÝ BUILD. Dvě HTML = dva vstupní body a dva nezávislé stromy.
+       *
+       * Projekty by šly udělat i jako sedmá sekce úvodu, ale stály by dvakrát:
+       * na hlavní stránce nejde přidat sekci bez zásahu do geometrie krychle
+       * (šest stěn, šest sekcí — sedmá položka scénu shodí, viz ProjectsPage.tsx),
+       * a hlavně by kotva `#projekty` neměla vlastní URL, titulek ani náhled
+       * pro sdílení. Reference se posílají odkazem, takže URL je požadavek,
+       * ne kosmetika.
+       *
+       * Vercel má `cleanUrls: true`, takže se `dist/projekty.html` naservíruje
+       * na `/projekty`. Žádný rewrite ve vercel.json k tomu není potřeba —
+       * je to opravdový soubor, ne routa SPA.
+       *
+       * ★★ Sdílený kód (React, styly, ui/) skončí ve společném chunku, takže
+       *   se za něj neplatí dvakrát. Naopak three.js zůstane jen tam, kde se
+       *   opravdu importuje — tedy na úvodu. Stránka projektů ho nestáhne.
+       */
+      /* resolve(process.cwd(), …), ne __dirname: tenhle soubor je ESM (package.json
+         má "type": "module"), kde __dirname neexistuje. Stejný postup používají
+         i oba pluginy výš. */
+      input: {
+        index: resolve(process.cwd(), 'index.html'),
+        projekty: resolve(process.cwd(), 'projekty.html'),
+      },
       output: {
         // Vite 8 běží na Rolldownu, který `manualChunks` sice zavolá, ale výsledek
         // si pak přeskupí sám (three končilo slepené v postprocessing chunku).

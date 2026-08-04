@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Jen SKUTEČNÉ URL. Kotvy (#web, #kontakt) sem nepatří: Google fragment z adresy
+  zahodí a záznam pak vyhodnotí jako duplikát úvodní stránky.
+  /projekty je vlastní soubor (dist/projekty.html + cleanUrls), tedy pravá URL.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>__SITE_ORIGIN__/</loc><priority>1.0</priority></url>
+  <url><loc>__SITE_ORIGIN__/projekty</loc><priority>0.8</priority></url>
 </urlset>

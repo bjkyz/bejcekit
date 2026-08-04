@@ -7,7 +7,8 @@ Klíčová fakta:
 - Kontakt: bejcek.jirka@gmail.com, telefon a WhatsApp +420 607 706 102
 - Působnost: Česko, remote i na místě; přístupy a kód zůstávají klientovi
 - Proces: analýza zdarma, pevná cena a termín písemně, týdenní iterace, provoz a monitoring po nasazení
-- Web je jednostránková aplikace; všechny sekce jsou kotvy na __SITE_ORIGIN__/
+- Reference: hotové weby s živými odkazy na __SITE_ORIGIN__/projekty
+- Web má dvě stránky: úvod (__SITE_ORIGIN__/), kde jsou služby kotvami, a projekty (__SITE_ORIGIN__/projekty)
 
 ## Služby
 
@@ -16,6 +17,18 @@ Klíčová fakta:
 - [AI a automatizace](__SITE_ORIGIN__/#ai): AI asistenti nad firemními daty (RAG), vytěžování dokumentů, n8n workflow, propočet návratnosti před stavbou
 - [Pracovní postup](__SITE_ORIGIN__/#proces): čtyři kroky od analýzy po provoz, žádné překvapení na faktuře
 - [Kontakt](__SITE_ORIGIN__/#kontakt): e-mail, WhatsApp, telefon; odpověď do 24 hodin
+
+## Projekty
+
+Hotové weby s živými odkazy. Technické údaje jsou odečtené z běžících webů, ne z prezentace.
+Celý přehled: [__SITE_ORIGIN__/projekty](__SITE_ORIGIN__/projekty)
+
+- [Super Advokát](https://www.superadvokat.com): právní služby online s pevnou cenou předem, advokátní kancelář s praxí od roku 1991. Next.js, předrenderované stránky z CDN (ISR), strukturovaná data LegalService, hreflang, WebP.
+- [Advokátní kancelář Tutter](https://aktutter.cz): prezentace pražské kanceláře, oblasti práva, tým, blog, bezplatná úvodní konzultace. Nuxt, časté dotazy ve strukturovaných datech, hreflang, WebP.
+- [SLYX Fashions](https://slyx.com): značkový web americké dílny na latexovou módu, video hero a animace řízené scrollem. Vue, GSAP, Cloudflare. Anglicky.
+- [bejcek.it](__SITE_ORIGIN__/): tento web, portfolio se 3D scénou počítanou v prohlížeči. React, TypeScript, three.js, Vite. Lighthouse 100/100/100/100 na desktopu, CLS 0, scéna se na slabém stroji sama vzdá.
+
+Zakázky na IT infrastrukturu se nezveřejňují: u serverů, sítí a interních systémů to skoro nikdy nedovolí smlouva. Reference na vyžádání.
 
 ## Odkazy
 

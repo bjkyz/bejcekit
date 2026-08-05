@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -103,7 +103,14 @@ function inlineCss(): Plugin {
           .replace('</head>', `<style>${css}</style>\n</head>`)
         writeFileSync(htmlPath, html)
       }
-      for (const f of cssFiles) rmSync(resolve(assets, f))
+      /* ★★ SOUBORY .css SE NEMAŽOU — SHODILY BY 3D V PRODUKCI. Lazy chunk scény
+         má sdílený stylesheet v preload seznamu (__vitePreload v index chunku):
+         smazaný soubor znamenal na Vercelu 404 → odmítnutý import → SceneBoundary
+         3D vypnul na KAŽDÉ návštěvě. Lokálně to `vite preview` maskoval SPA
+         fallbackem (na chybějící soubor vrátí 200 s HTML a <link> to spolkne),
+         takže se to poznalo až na produkci. Duplikát je levný: soubor se stahuje
+         jednou, až když se probouzí scéna, s immutable cache — kdežto regex nad
+         minifikovaným JS, který by preload seznam čistil, je past na příští build. */
     },
   }
 }

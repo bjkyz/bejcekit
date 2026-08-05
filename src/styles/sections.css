@@ -395,13 +395,20 @@
   padding: 1.15rem 1.35rem;
   border: 1px solid var(--neon-2);
   border-radius: 3px;
-  background: rgba(79, 216, 232, 0.07);
+  /* ★ TÁŽ BARVA, JEN UŽ SKORO NEPRŮHLEDNÁ. Bylo rgba(79,216,232,0.07), což se
+     nad --bg-0 skládá na ≈ #0d1719 — a přesně to je hodnota tady, teď ale
+     s krytím 0.88 místo 0.07. Vizuálně se nezměnilo nic; změnilo se, na čem to
+     stojí. Deska je jediný vyplněný prvek webu a leží PŘÍMO NAD nejsvětlejším
+     místem stroje, takže ji dřív držel jen plošný závoj sekce. Ten teď povolil
+     (viz layout.css), aby byla krychle vidět — a podklad si nese deska sama,
+     tedy tam, kde je ho potřeba, a ne přes celou obrazovku. */
+  background: rgba(13, 23, 25, 0.88);
   transition:
     background-color var(--d-hover) var(--e-ui),
     border-color var(--d-hover) var(--e-ui);
 }
 .contact-primary:hover {
-  background: rgba(79, 216, 232, 0.14);
+  background: rgba(20, 42, 46, 0.92);
   border-color: var(--neon-1);
 }
 .contact-primary__k {
@@ -487,7 +494,9 @@
   padding: 0.95rem 1.15rem;
   border: 1px solid var(--line-2);
   border-radius: 3px;
-  background: rgba(19, 22, 25, 0.5);
+  /* Ze stejného důvodu jako u `.contact-primary` výš: dlaždice si nese podklad
+     sama, aby ho nemusel držet závoj přes celou sekci. Bylo 0.5. */
+  background: rgba(19, 22, 25, 0.82);
   transition:
     border-color var(--d-hover) var(--e-ui),
     background-color var(--d-hover) var(--e-ui);
@@ -588,16 +597,126 @@
   margin-top: 0.75rem;
 }
 
+/* ── PÁS SPECIFIKACÍ (jen sekce 00) ────────────────────────
+   ★ TŘI NÁROKY NA PATĚ OBRAZOVKY MÍSTO TŘÍ ODRÁŽEK UPROSTŘED SLOUPCE.
+   Věcně je to týž obsah (viz `specs` v content/sections.ts), ale dělá dvě věci
+   navíc, které odrážky neuměly:
+     • VÝŠKA. Odrážky stály ~120 px uprostřed sloupce, tedy přesně v místě, kam
+       potřebuje sjet krychle. Pás na patě stojí ~55 px a to místo uvolní —
+       bez něj by rozdělení sekce na pásy (layout.css) nemělo co rozdělovat.
+     • HIERARCHIE. Nárok je verzálkové mono, jeho podmínka sans pod ním. Dá se to
+       přejet očima; tři plné věty pod sebou se musí přečíst celé, nebo vůbec.
+   Vlasová linka nahoře a svislé předěly mezi položkami dělají z bloku přístrojový
+   štítek, ne další seznam. Žádné rámečky ani výplně — deska kolem textu je
+   nejrychlejší způsob, jak z webu udělat administraci (viz sekce 05 v tomhle
+   souboru, jediná povolená výjimka). */
+.hero-spec {
+  flex: none;
+  /* Nad úchopem (z-index 0), který z pásu nad ním přesahuje dolů. Bez tohohle
+     by neviditelná plocha na tažení ležela přes text a kradla mu označování.
+     `isolation` drží vlastní stoh, aby se scrim níž (z-index: -1) nepropadl
+     pod plátno — stejný idiom jako u `.section__col`. */
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  /* ★★ PÁS JE PŘES CELOU ŠÍŘKU, OBSAH V NĚM DRŽÍ MŘÍŽKU. Odsazení se počítá
+     jako přebytek nad `--maxw`, takže sloupce sedí přesně pod textem výš.
+
+     Proč ne prostě `max-width: var(--maxw); margin: auto` jako všude jinde:
+     scrim níž je pseudo-element TOHOHLE prvku, takže by se scvrkl s ním. Na
+     1920 to bylo vidět jako TMAVÝ OBDÉLNÍK s ostrými svislými hranami na
+     x = 176 a 1744 — podlaha, která nedosáhla k okrajům okna. Full-bleed prvek
+     + vnitřní odsazení dá obojí: scrim od hrany k hraně a obsah v mřížce.
+     `max(0px, …)` je povinné — pod 90rem by přebytek vyšel záporně. */
+  width: 100%;
+  padding-inline: max(0px, calc((100% - var(--maxw)) / 2));
+  margin: 1.5rem 0 0;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--line-1);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 2rem;
+  text-align: left;
+}
+/* ★ PODLAHA POD STROJEM. Svislý spád z průhledné do tmavé, tažený až na spodní
+   hranu sekce (proto ten záporný `bottom` o velikost dolního odsazení).
+
+   Dělá dvě věci jednou vrstvou:
+     • ČITELNOST. Pás je jediný text, který stojí pod krychlí, a na úzkém displeji
+       mu padá přesně na rozsvícenou ceduli — naměřeno na 390px: „I o víkendu…"
+       leželo na dolní hraně skla a ztrácelo se. Sloupec výš má na totéž
+       `.section__col::after`; pás je mimo sloupec, takže potřebuje svůj.
+     • KOMPOZICE. Stroj tím dostane pod sebe stín a přestane volně plavat —
+       spodní hrana se zaboří do tmy místo aby se uřízla o patu obrazovky.
+   Nahoře začíná průhledné, takže nemá viditelný okraj a nečte se jako deska. */
+.hero-spec::before {
+  content: '';
+  position: absolute;
+  inset: -1.5rem calc(var(--gutter) * -1) calc(var(--sp-sec-bottom) * -1);
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(8, 9, 10, 0.62) 16%,
+    rgba(8, 9, 10, 0.82) 52%,
+    rgba(8, 9, 10, 0.9) 100%
+  );
+}
+
+.hero-spec__i {
+  padding-left: 1.75rem;
+  border-left: 1px solid var(--line-1);
+}
+.hero-spec__i:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+/* ★ NÁROK JE BÍLÝ, NE AZUROVÝ — a je to úmysl, ne opomenutí.
+   --neon-2 je v tokens.css vyhrazená ZNAČCE: emisi jádra, hranám krychle,
+   aktivnímu ticku a CTA. Tři statické azurové popisky na patě úvodu by v jednom
+   záběru soupeřily přesně s tím jediným azurovým prvkem, na který má člověk
+   kliknout — a barva, která je všude, přestane cokoli znamenat. Verzálkové mono
+   nese „přístrojovost" samo o sobě; hierarchii dělá bílá proti šedé pod ní. */
+.hero-spec__k {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-mono);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-1);
+  margin-bottom: 0.3rem;
+}
+.hero-spec__v {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-3);
+  text-wrap: pretty;
+}
+
 /* ── ÚCHOP (jen sekce 00) ──────────────────────────────────
-   Plocha kryje krychli, ale leží POD textovým sloupcem (z-index 0 vs 1).
-   Kdyby byla nad ním, tiše by textu kradla kliky i označování — a vypadalo by
-   to jako chyba ve stylech. Táhnout jde tedy všude po krychli mimo text. */
+   ★ SÁZÍ SE PODLE PÁSU `.hero-stage`, NE PODLE CELÉ SEKCE (viz ui/Section.tsx).
+   Dřív visel na `.section--hero` a mířil na její střed — jenže tam už krychle
+   není, ta sjela do dolního pásu. Uvnitř pásu sedí sám od sebe tam, kam stroj
+   sjel, a nemusí se nikde opisovat žádný posun v procentech: když se HERO_DROP
+   změní, pás se posune s ním a úchop taky.
+
+   Plocha leží POD textovým sloupcem i pod pásem specifikací (z-index 0 vs 1).
+   Kdyby byla nad nimi, tiše by kradla kliky i označování — a vypadalo by to
+   jako chyba ve stylech. Táhnout jde tedy všude po krychli mimo text.
+
+   `height: max(100%, …)` = vždycky aspoň celý pás, ale na vysokém okně, kde je
+   pás úzký, si vezme rozumné minimum, aby se dalo za co chytit. Šířka je pevná
+   a vycentrovaná, takže z okna nemá jak vyčnívat do stran. */
 .grab-plate {
   position: absolute;
   left: 50%;
   top: 50%;
   width: min(72vmin, 680px);
-  height: min(72vmin, 680px);
+  height: max(100%, min(52vmin, 480px));
   transform: translate(-50%, -50%);
   cursor: grab;
   pointer-events: auto;
@@ -607,13 +726,14 @@
   cursor: grabbing;
 }
 
-/* Nápověda patří DOLŮ pod obsah, ne doprostřed přes odrážky. */
+/* ★ NÁPOVĚDA JE UŽ V BĚŽNÉM TOKU, ne absolutní. Je jediné dítě pásu, které
+   něco zabírá, a pás ji přes `align-items: flex-end` posadí na svou spodní
+   hranu — tedy přesně nad specifikace a pod stroj. Absolutní `bottom: 2.5rem`
+   podle sekce by jí teď skákalo do řádku specifikací. */
 .grab-hint {
-  position: absolute;
-  left: 50%;
-  bottom: 2.5rem;
-  transform: translateX(-50%);
+  position: relative;
   z-index: 2;
+  margin-bottom: 0.5rem;
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -642,6 +762,30 @@
    uprostřed viset řada tlačítek pod textem, který začíná u levého okraje.
    Naměřeno na 390px: hero mělo odstavec vlevo a obě CTA vycentrovaná, takže
    levá hrana stránky měla tři různé pozice pod sebou. */
+/* ★ PÁS SE SKLÁDÁ POD SEBE DŘÍV, NEŽ SE ZAČNE LÁMAT NÁROK.
+   Nárok je verzálkové mono s prokladem 0.12em; „JEDEN INŽENÝR, NE AGENTURA" měří
+   ~247 px. Při třech sloupcích se pod ~860 px šířky okna vejde do ~193 px a zlomí
+   se doprostřed — tři různě vysoké sloupce s useknutými nadpisy. Pod sebou je
+   místa dost a předěly se otočí z svislých na vodorovné. */
+@media (max-width: 860px) {
+  .hero-spec {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .hero-spec__i {
+    padding: 0.7rem 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line-1);
+  }
+  .hero-spec__i:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .hero-spec__k {
+    margin-bottom: 0.15rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .section--center .cta-row {
     justify-content: flex-start;

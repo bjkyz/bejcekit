@@ -43,6 +43,19 @@ main {
 
    Na desktopu je --veil nula, takže se vykreslí průhledný obdélník; ten kompozitor
    zahodí. Skutečná práce začíná až pod 1024 px. */
+/* ★★ DVĚ VRSTVY V JEDNOM PRVKU: VINĚTA + ROVNOMĚRNÝ ZÁVOJ.
+   Vinětu (spád do tmy u okrajů okna) tu chceme ze dvou důvodů a ani jeden není
+   „vypadá to hezky":
+     • POZORNOST. Scéna je nejsvětlejší uprostřed, kde stojí stroj, a nejméně
+       zajímavá u krajů, kde končí prach a mřížka. Bez viněty má obraz po celé
+       ploše stejnou váhu a oko nemá kam jít. Se spádem se střed sám vysune
+       dopředu — týž trik, jakým se svítí na exponát, ne na místnost.
+     • OKRAJE. Rohové značky, pravá lišta a stavový panel leží na scéně u hran.
+       Tmavší okraj jim dá podklad, aniž by kdokoli kreslil další desku.
+   ★ MUSÍ TO BÝT TADY, POD TEXTEM (z-index: -1 uvnitř stohu main), ne v `.grain`
+   nad ním: viněta nad obsahem by ztmavila i písmena v rozích — patičku, atribuci
+   a popisky lišty, tedy přesně ten nejtišší text, který je na kontrast nejcitlivější.
+   Takhle ztmavuje jen obraz a kontrast textu může jedině stoupnout. */
 main::before {
   content: '';
   position: fixed;
@@ -52,7 +65,56 @@ main::before {
   background: rgb(8 9 10 / var(--veil));
 }
 
+/* ★★ VINĚTA JEN NA ŠIROKÉM DISPLEJI — A JE TO ROZHODNUTÍ ZE ZMĚŘENÝCH ČÍSEL.
+   Spád přes celé okno je vrstva, kterou musí prohlížeč VYKRESLIT; na mobilním
+   CPU (Lighthouse škrtí 4×) to stálo ~150 ms TBT navíc, naměřeno střídavým
+   během proti masteru. Na 390px displeji je přitom skoro k nepoznání: okno je
+   malé, takže mezi středem a krajem není dost vzdálenosti, aby se spád projevil,
+   a tonální práci tam stejně odvádí --veil (0.26, viz tokens.css).
+   Na desktopu naopak dělá půlku dojmu — obraz má střed a okraje ustupují do tmy.
+   Platí se tedy tam, kde je to vidět, a neplatí tam, kde není. Práh 1025 px je
+   táž hranice, na které se web láme všude jinde (SIDE_BY_SIDE, lib/stage.ts). */
+@media (min-width: 1025px) {
+  main::before {
+    background:
+      radial-gradient(125% 95% at 50% 46%, transparent 42%, rgba(8, 9, 10, 0.5) 78%, rgba(8, 9, 10, 0.72) 100%),
+      rgb(8 9 10 / var(--veil));
+  }
+}
+
 /* ── SEKCE ──────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   ★★★ ÚVODNÍ SEKCE JE ROZDĚLENÁ NA TŘI PÁSY — A JE TO CELÁ OPRAVA
+   „NA VERCELU NENÍ VIDĚT 3D MODEL".
+
+   Sekce 00 byla jediná, kde text stál UPROSTŘED a byl přitom ŠIRŠÍ NEŽ KRYCHLE
+   (sloupec 8 z 12 ≈ 866 px + přesah závoje proti siluetě ~450 px na 1440×900).
+   Závoj se sází podle SLOUPCE, takže překryl celou krychli bez ohledu na to, jak
+   se ladil: na první obrazovce zbyly jen obrysy hran a rohové study. Ladit krytí
+   byla slepá ulička — historie souboru je toho plná: nahoru „ztratil se 3D model",
+   dolů „textem prosvítá cedule IDENT".
+
+   Příčina není krytí, ale kompozice: dva prvky se pral o TÝŽ střed obrazovky.
+   Řeší se to rozdělením VÝŠKY, ne mícháním průhlednosti:
+
+       ┌───────────────────────────┐
+       │  .section__grid   text    │  drží horní část, závoj jen kolem sebe
+       ├───────────────────────────┤
+       │  .hero-stage      STROJ   │  flex: 1 — sebere všechnu zbylou výšku
+       ├───────────────────────────┤
+       │  .hero-spec       pás     │  tři specifikace na patě, ~55 px
+       └───────────────────────────┘
+
+   Kamera do toho pásu krychli SKUTEČNĚ SVEZE (HERO_DROP v lib/scene-state.ts,
+   pětina výšky okna), takže se text a stroj přestanou překrývat úplně — a teprve
+   pak smí být závoj lehký a stroj svítit naplno. Pás je záměrně PRÁZDNÝ prvek:
+   jediné, co dělá, je že si drží místo.
+
+   ★ Proč flex a ne grid-template-rows: `1fr` uprostřed by pás držel i tehdy, když
+   se obsah do okna nevejde (nízký notebook, telefon na šířku), a text by se sám
+   uřízl. `flex: 1 1 auto` s `min-height: 0` se naopak smrskne na nulu a obsah
+   vyhraje. Pás je luxus, ne konstrukce.
+   ═══════════════════════════════════════════════════════════ */
 .section {
   min-height: 100svh; /* svh, ne vh — vh je pod mobilní URL lištou špatně a skáče */
   display: grid;
@@ -62,6 +124,30 @@ main::before {
      sekce WEB i na 1920×1080. */
   padding: var(--sp-sec-top) var(--gutter) var(--sp-sec-bottom);
   position: relative;
+}
+
+/* ★★ ZÁMĚRNĚ `.section.section--hero`, TEDY SPECIFICITA (0,2,0), NE (0,1,0).
+   `.section` se totiž přepisuje ve DVOU pozdějších média dotazech (mobil a telefon
+   na šířku) a média dotaz specificitu NEZVYŠUJE — o vítězi by tedy rozhodovalo
+   pořadí v souboru a `align-items: center` z mobilního bloku by nám dole přebilo
+   `stretch`. V pružném sloupci znamená `center` zarovnání na PŘÍČNÉ ose, takže by
+   se text i pás specifikací smrskly na šířku svého obsahu a přestaly by držet
+   mřížku. Vyšší specificita to zavírá jednou provždy. */
+.section.section--hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.section--hero .section__grid {
+  flex: none;
+}
+.hero-stage {
+  position: relative; /* ★ úchop uvnitř se sází podle pásu, ne podle sekce */
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .section__grid {
@@ -121,13 +207,70 @@ main::before {
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(
-    62% 58% at 50% 50%,
-    rgba(8, 9, 10, 0.78) 0%,
-    rgba(8, 9, 10, 0.72) 48%,
-    rgba(8, 9, 10, 0.44) 68%,
-    rgba(8, 9, 10, 0.12) 84%,
+    60% 54% at 50% 48%,
+    rgba(8, 9, 10, 0.72) 0%,
+    rgba(8, 9, 10, 0.66) 48%,
+    rgba(8, 9, 10, 0.38) 68%,
+    rgba(8, 9, 10, 0.1) 84%,
     transparent 94%
   );
+}
+/* ★ PLATÍ UŽ JEN PRO SEKCI 05 — úvod má vlastní, mnohem lehčí variantu níž.
+   Krytí povolilo z 0.78 na 0.72 a elipsa se o kousek stáhla, protože největší
+   blok téhle sekce (dlaždice kanálů) si podklad nese SÁM: kontaktní desky mají
+   vlastní pozadí, takže je závoj chránil podruhé a platilo se za to jedinou
+   měnou, kterou tahle scéna má — viditelností stroje.
+   ★★ Kdyby čitelnost přesto klesla, PŘITVRDIT SE MÁ NA DLAŽDICÍCH (viz
+   `.contact-primary` a `.channel` v sections.css), NE tady. Roztahování téhle
+   elipsy je vyšlapaná cesta k „ztratil se 3D model" — stalo se to už dvakrát. */
+
+/* ★★ ÚVOD MÁ ZÁVOJ ZNATELNĚ LEHČÍ NEŽ OSTATNÍ STŘEDOVÉ SEKCE — protože už nemá
+   co krotit. Od rozdělení sekce na pásy (viz `.section--hero` výš) leží krychle
+   POD textem, ve vlastním pásu; nad sloupcem zbývá jen pozadí (mřížka, prach,
+   měkká záře od stroje). Krytí 0.78 tam tedy nechrání text, jen tiskne černou
+   skvrnu přes horní hranu stroje a ubírá scéně hloubku.
+
+   Elipsa je zároveň posazená VÝŠ (těžiště 44 %) a je plošší: chrání řádky textu
+   a k dolní hraně sloupce mizí do ztracena, takže přechod do rozsvíceného pásu
+   je plynulý a nemá viditelnou hranu. */
+.section--hero .section__col::before {
+  inset: -2.5rem -3.5rem;
+  background: radial-gradient(
+    66% 56% at 50% 44%,
+    rgba(8, 9, 10, 0.6) 0%,
+    rgba(8, 9, 10, 0.52) 46%,
+    rgba(8, 9, 10, 0.26) 70%,
+    rgba(8, 9, 10, 0.07) 86%,
+    transparent 96%
+  );
+}
+
+/* ★★ NÍZKÉ OKNO: ZÁVOJ SE VRACÍ K PLNÉ SÍLE, PROTOŽE SE PÁS NEMÁ KDE ROZTÁHNOUT.
+   Rozdělení sekce na pásy stojí a padá s tím, že po textu zbude výška. Krychle
+   zabírá pevných ~46 % výšky okna (silueta 3 jednotky při r = 10.3) BEZ OHLEDU
+   na to, kolik místa zbylo — je to 3D scéna, ta o layoutu nic neví.
+
+   Na 1440×900 vyjde obsah úvodu na ~50 % a pás má z čeho žít. Na 1280×800 ale
+   tentýž obsah zabere ~68 % (písmo se s výškou skoro nemění, okno je o 100 px
+   nižší), `.hero-stage` se smrskne skoro na nulu a horní hrana skla vyjede
+   ZPÁTKY DO TEXTU — naměřeno: vodorovná hrana krychle procházela posledním
+   řádkem odstavce a rozsvícený roh seděl na pilulce kapacity.
+
+   Tam, kde se překryvu nedá vyhnout geometrií, ho musí vyřešit krytí. Práh je
+   860 px schválně: 900px notebook (nejběžnější) zůstane u lehké varianty a do
+   téhle spadnou 800px a 768px displeje, kde je tlačenice reálná. */
+@media (min-width: 1025px) and (max-height: 860px) {
+  .section--hero .section__col::before {
+    inset: -2.25rem -3.75rem;
+    background: radial-gradient(
+      70% 62% at 50% 46%,
+      rgba(8, 9, 10, 0.76) 0%,
+      rgba(8, 9, 10, 0.68) 46%,
+      rgba(8, 9, 10, 0.38) 70%,
+      rgba(8, 9, 10, 0.1) 86%,
+      transparent 96%
+    );
+  }
 }
 /* Boční sloupce potřebují závoj taky — text přebíhá přes hranu krychle a bez
    podkladu tam ztratí kontrast. Gradient mizí směrem do středu, takže krychli
@@ -340,6 +483,22 @@ html:not(.js) .reveal {
     position: relative;
     isolation: isolate;
   }
+  /* ★★ PŘÍSVIT ZESÍLIL A HLAVNĚ SE ROZTÁHL PŘES CELÝ SLOUPEC — protiváha
+     k povolenému plošnému tlumení v tokens.css. Ta dvě místa se musí měnit SPOLU:
+     plošné vrstvy pustily světlo do celé scény (aby byl na mobilu vidět stroj),
+     a tenhle přísvit ho zase sebere přesně tam, kde leží písmena.
+
+     ★ TVAR JE DŮLEŽITĚJŠÍ NEŽ SÍLA JÁDRA. Původní elipsa (78 % × 60 %, plná síla
+     jen do 46 %) chránila POUZE STŘED sloupce; odstavec v jeho horní třetině
+     dostal krytí kolem 0.4. Spočítáno pro nejsvětlejší místo scény (rozžhavená
+     hrana skla ~#cfeef5): tělo textu tam vycházelo na ~6:1 — pořád nad AA, ale
+     pod AAA, které web jinde drží. Roztažením na 88 % × 76 % s plnou silou až do
+     54 % dostane krytí ~0.84 celý text včetně prvního a posledního řádku a poměr
+     se vrací nad 12:1. Dojezd je pořád do ztracena na všechny strany, takže to
+     nemá viditelný okraj a nečte se to jako deska pod textem.
+
+     Stroj tím na mobilu netmavne tam, kde na něm záleží: přísvit visí na SLOUPCI,
+     takže mizí všude, kde text není — v pásu pod úvodem, nad nadpisy i po stranách. */
   .section__col::after {
     content: '';
     position: absolute;
@@ -347,11 +506,11 @@ html:not(.js) .reveal {
     z-index: -1;
     pointer-events: none;
     background: radial-gradient(
-      74% 58% at 50% 50%,
-      rgba(8, 9, 10, 0.72) 0%,
-      rgba(8, 9, 10, 0.55) 46%,
-      rgba(8, 9, 10, 0.24) 72%,
-      transparent 88%
+      88% 76% at 50% 50%,
+      rgba(8, 9, 10, 0.88) 0%,
+      rgba(8, 9, 10, 0.84) 54%,
+      rgba(8, 9, 10, 0.46) 76%,
+      transparent 93%
     );
   }
 }

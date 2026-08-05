@@ -41,8 +41,6 @@ export default function Section({
       className={`section section--${s.align}${isHero ? " section--hero" : ""}`}
       aria-labelledby={`${s.id}-h`}
     >
-      {isHero && !reduced && hasScene && <GrabPlate dragRef={dragRef} />}
-
       <div className="section__grid">
         <div className="section__col">
           <div className="reveal line-mask" style={delay(0, 6)}>
@@ -129,6 +127,35 @@ export default function Section({
           {isContact && <Footer />}
         </div>
       </div>
+
+      {/* ★ VOLNÝ PÁS PRO STROJ. Nemá obsah a je to jeho jediný úkol: roztáhne se
+          o všechno, co zbude z výšky okna, a v tom pásu je vidět krychle — ta do
+          něj sjede kamerou (HERO_DROP, lib/scene-state.ts). Dřív tam stály tři
+          odrážky a stroj se schovával za závojem přímo pod textem.
+
+          ★★ ÚCHOP BYDLÍ TADY, NE NA SEKCI. Plocha na tažení je `position: absolute`
+          a dřív se sázela podle celé sekce, tedy na její střed — jenže tam už
+          krychle není. Uvnitř pásu se sází podle NĚJ, takže sedí přesně tam, kam
+          stroj sjel, a nemusí se nikde opisovat žádný posun v procentech.
+          Nápověda je pak prostě poslední řádek pásu (flex-end), takže nemá jak
+          spadnout do pásu specifikací pod ním. Na dotyku se obojí skrývá
+          (sections.css) a pás jen dýchá. */}
+      {isHero && (
+        <div className="hero-stage" aria-hidden="true">
+          {!reduced && hasScene && <GrabPlate dragRef={dragRef} />}
+        </div>
+      )}
+
+      {isHero && s.specs && (
+        <ul className="hero-spec">
+          {s.specs.map((sp, i) => (
+            <li key={sp.k} className="hero-spec__i reveal" style={delay(5.8 + i * 0.3, 6)}>
+              <span className="hero-spec__k">{sp.k}</span>
+              <span className="hero-spec__v">{sp.v}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

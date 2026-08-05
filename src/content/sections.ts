@@ -29,6 +29,18 @@ export interface Section {
   headline: string
   body: string
   bullets: string[]
+  /**
+   * ★ SPECIFIKACE ÚVODU. Existuje jen na sekci 00 a je to TÝŽ obsah, který tam
+   * dřív stál jako tři odrážky pod sebou — jen posazený do jednoho pásu na patě
+   * obrazovky (viz .hero-spec v sections.css).
+   *
+   * Není to kosmetika. Odrážky stály uprostřed sloupce a užíraly ~120 px svislého
+   * místa PŘESNĚ TAM, kde je za textem stroj; pás na patě stojí ~55 px a uvolní
+   * pětinu okna, do které smí krychle sjet (HERO_DROP, lib/scene-state.ts).
+   * Vedlejší efekt je čitelnost: `k` je nárok, `v` je jeho podmínka, takže se to
+   * dá přejet očima, kdežto tři plné věty pod sebou se musí přečíst celé.
+   */
+  specs?: { k: string; v: string }[]
   /** Ověřitelný důkaz místo tvrzení. Nejsilnější věc, kterou web má. */
   proof?: string
   /** Co klient reálně dostane. Zelený rámeček. */
@@ -73,10 +85,13 @@ export const SECTIONS: Section[] = [
      */
     body:
       'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI jen tam, kde ušetří hodiny. A držím servery v chodu, aby vás výpadek nestál tržby.',
-    bullets: [
-      'Jeden inženýr místo agentury. Mluvíte přímo s tím, kdo tu práci dělá a kdo za ni ručí.',
-      'Pevná cena a termín. Písemně, ještě než začnu.',
-      'Odpovím do 24 hodin, i o víkendu. Celé Česko, remote i u vás.',
+    bullets: [],
+    /* Týž obsah, který tu dřív byl jako tři odrážky uprostřed sloupce.
+       Proč se přestěhoval na patu obrazovky, viz `specs` v rozhraní výš. */
+    specs: [
+      { k: 'Jeden inženýr, ne agentura', v: 'Mluvíte přímo s tím, kdo tu práci dělá a kdo za ni ručí.' },
+      { k: 'Pevná cena a termín', v: 'Písemně, ještě než začnu.' },
+      { k: 'Odpovím do 24 hodin', v: 'I o víkendu. Celé Česko, remote i u vás.' },
     ],
     status: 'Volná kapacita: zbývá 1 místo',
     cta: { label: 'Chci nezávaznou nabídku', href: '#kontakt' },

@@ -55,14 +55,23 @@ function drawPlate(num: string, code: string): HTMLCanvasElement {
 }
 
 /**
- * ★ NA STŘEDOVÝCH SEKCÍCH (00, 05) SE AKTIVNÍ CEDULE TLUMÍ, NE ROZSVĚCÍ.
- * Text tam stojí PŘES střed stěny, přesně přes nápis — cedule na plný jas
- * prosvítala odstavcem jako rozmazaný druhý nápis a jediná obrana byl závoj
- * s krytím 0.9, který ovšem zhasnul celou krychli („ztratil se 3D model").
- * Ztlumení cedule tady, u zdroje, nechá závoj lehký a krychli viditelnou.
- * O informaci nejde: tentýž nápis má sekce v DOM kickeru („[ 00 / IDENT ]").
+ * ★ JAS AKTIVNÍ CEDULE PODLE TOHO, CO PŘED NÍ STOJÍ. Výchozí je 1 (plný jas):
+ * na sekcích 01–04 uhne krychle textu do strany a cedule nemá čemu překážet.
+ *
+ * Výjimky jsou obě STŘEDOVÉ sekce, kde text stojí v ose stěny:
+ *   05 KONTAKT — text jde PŘES nápis celou plochou. Cedule na plný jas jím
+ *      prosvítala jako rozmazaný druhý nadpis a jediná obrana byl závoj s krytím
+ *      0.9, jenže ten zhasnul celou krychli („ztratil se 3D model"). Tlumí se
+ *      proto u zdroje a závoj smí zůstat lehký.
+ *   00 IDENT — ★ TADY SE UŽ TLUMIT NEMUSÍ. Od zavedení HERO_DROP (viz
+ *      lib/scene-state.ts) sjede krychle o pětinu okna dolů, takže stěna i s cedulí
+ *      leží POD textem, ve volném pásu. Držet ji na 0.2 by znamenalo schovávat ji
+ *      před textem, který tam už není — a přišli bychom o jediný nápis, který je
+ *      na první obrazovce vidět uvnitř skla. Dolů se sundá jen tolik, aby nesoupeřil
+ *      s nadpisem v DOM.
+ * O informaci nejde nikde: tentýž nápis má sekce v DOM kickeru („[ 00 / IDENT ]").
  */
-const CENTER_SECTIONS = new Set([0, 5])
+const ACTIVE_OPACITY: Record<number, number> = { 0: 0.5, 5: 0.2 }
 
 function Plate({ i, tier }: { i: number; tier: Tier }) {
   const grp = useRef<Group>(null)
@@ -98,7 +107,7 @@ function Plate({ i, tier }: { i: number; tier: Tier }) {
     const dt = clampDelta(delta)
     const active = sceneState.faceIndex === i
 
-    const activeOpacity = CENTER_SECTIONS.has(i) ? 0.2 : 1
+    const activeOpacity = ACTIVE_OPACITY[i] ?? 1
     if (mat.current) easing.damp(mat.current, 'opacity', active ? activeOpacity : 0.22, 0.25, dt)
 
     /* ★ Na 'low' tieru je skořápka meshPhysicalMaterial s transparent →

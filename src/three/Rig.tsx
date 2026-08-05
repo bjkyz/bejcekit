@@ -139,15 +139,23 @@ export default function Rig({ parallax }: { parallax: boolean }) {
     cam.position.set(0, 0, r).applyQuaternion(orbit)
 
     /* ── 3. KOMPOZICE: uhni krychlí textu ──────────────────── */
-    /* Panoráma platí jen tam, kde text stojí VEDLE krychle (viz SIDE_BY_SIDE).
-       Na úzkém displeji má text plnou šířku a krychle je pozadí pod ním — uhýbat
-       do strany před textem, který žádnou stranu nemá, by stroj jen bezdůvodně
-       vystrčilo z osy a jedna hrana by vyjela z obrazu víc než druhá. */
+    /* ★ VODOROVNÉ panoráma platí jen tam, kde text stojí VEDLE krychle (viz
+       SIDE_BY_SIDE). Na úzkém displeji má text plnou šířku a krychle je pozadí
+       pod ním — uhýbat do strany před textem, který žádnou stranu nemá, by stroj
+       jen bezdůvodně vystrčilo z osy a jedna hrana by vyjela z obrazu víc než druhá.
+       Roll je ze stejného soudku: koření pro kompozici vedle sebe.
+
+       ★★ SVISLÉ panoráma se ale uplatňuje VŠUDE, a je to podstatný rozdíl.
+       Výšku má i telefon — dokonce jí má vzhledem k šířce nejvíc — takže rozdělit
+       okno na „text nahoře, stroj dole" jde právě tam nejlíp. Přesně na tom stojí
+       úvodní sekce (viz HERO_DROP v lib/scene-state.ts): kdyby se pitch na úzkém
+       displeji zahodil spolu s yaw, zůstala by krychle na mobilu uprostřed za
+       textem a celá oprava viditelnosti modelu by platila jen pro desktop. */
     const p0 = ORBIT_PAN[i]
     const p1 = ORBIT_PAN[i + 1]
 
     let yaw = wide ? MathUtils.lerp(p0.yaw, p1.yaw, t) : 0
-    let pitch = wide ? MathUtils.lerp(p0.pitch, p1.pitch, t) : 0
+    let pitch = MathUtils.lerp(p0.pitch, p1.pitch, t)
     const roll = wide ? MathUtils.lerp(p0.roll, p1.roll, t) : 0
 
     /* ── 4. POSUN KAMERY: parallax myši + klidový drift ────── */

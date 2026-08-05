@@ -222,7 +222,15 @@
  */
 @media (min-width: 1025px) and (max-height: 1000px) {
   :root {
-    --fs-d0: clamp(2.25rem, 1.5rem + 1.9vw, 3.75rem);
+    /* ★ ÚVODNÍ NADPIS SMÍ BÝT VĚTŠÍ, PROTOŽE SI TU VÝŠKU SÁM VYDĚLAL.
+       Bylo `1.5rem + 1.9vw` (na 1440×900 = 51 px) a bylo to sražené kvůli tomu,
+       že pod nadpisem stály v sekci 00 ještě tři odrážky. Ty se přestěhovaly do
+       pásu na patě obrazovky (viz `specs` v content/sections.ts) a uvolnily
+       ~120 px; část se vrátí do displeje, zbytek zůstane stroji.
+       ★★ Týká se to JEN sekce 00: `--fs-d0` čte výhradně `.display`, tedy hero H1.
+       Nadpisy ostatních sekcí jedou na `--fs-d1` a ty se nehnuly — ty svou výšku
+       pořád potřebují na odrážky, důkaz, rámeček VÝSTUP a stack. */
+    --fs-d0: clamp(2.25rem, 1.6rem + 2.3vw, 4rem);
     --fs-d1: clamp(1.75rem, 1.3rem + 1.35vw, 3rem);
     /* Nejtěsnější reálný případ: 1440×900 = nejdelší sekce (WEB: nadpis, odstavec,
        4 odrážky, důkaz, rámeček VÝSTUP, 6 chipů a CTA) a k tomu stavový panel. */
@@ -250,7 +258,7 @@
     /* Spodní meze obou clamp() jsou při min-width: 1025px nedosažitelné (v 1025 px
        je preferovaná hodnota už nad nimi). Drží jen jako pojistka, kdyby breakpoint
        někdy klesl — ne jako reálná podlaha. */
-    --fs-d0: clamp(2.125rem, 1.35rem + 1.5vw, 3rem);
+    --fs-d0: clamp(2.125rem, 1.45rem + 1.8vw, 3.4rem);
     --fs-d1: clamp(1.625rem, 1.15rem + 1.1vw, 2.5rem);
   }
 }
@@ -273,10 +281,22 @@
    Ztlumení ubere JAS, závoj přidá TMU — dohromady zůstane stroj čitelný jako
    objekt a text nad ním ostrý.
    ═══════════════════════════════════════════════════════════════ */
+/* ★★ ROVNOVÁHA SE POSUNULA OD PLOŠNÉHO TLUMENÍ K MÍSTNÍMU (2026-08-05).
+   Bylo --canvas-dim 0.6 / --veil 0.4. Obě čísla ale platí na CELÉ PLÁTNO, tedy
+   i tam, kde žádný text není — a po rozdělení úvodu na pásy (layout.css) je
+   takového místa najednou pětina obrazovky. Stroj tam měl jas 0.6 × 0.6 = 0.36,
+   takže z opravy viditelnosti modelu by mobil neviděl skoro nic.
+
+   Tlumit se má TAM, KDE JE PÍSMO, ne všude. Plošné vrstvy proto povolily
+   (0.78 × 0.74 = 0.577, tedy o 60 % víc světla ve volném pásu) a rozdíl si vzal
+   zpátky místní přísvit přímo za sloupcem (`.section__col::after` v layout.css,
+   jádro 0.72 → 0.86). Za textem je výsledek dokonce o něco TMAVŠÍ než dřív
+   (0.577 × 0.14 = 0.081 proti 0.36 × 0.28 = 0.101), takže kontrast neklesl —
+   jen se přestal platit z míst, kde na něm nikomu nezáleželo. */
 @media (max-width: 1024px) {
   :root {
-    --canvas-dim: 0.6;
-    --veil: 0.4;
+    --canvas-dim: 0.78;
+    --veil: 0.26;
   }
 }
 

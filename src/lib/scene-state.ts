@@ -145,8 +145,43 @@ export interface OrbitPan {
   roll: number
 }
 
+/**
+ * ★★ SVISLÝ POSUN SE POČÍTÁ Z PODÍLU VÝŠKY OKNA, NE ODHADEM VE STUPNÍCH.
+ *
+ * Posunout krychli o `f` výšky okna znamená natočit kameru o
+ *     pitch = atan( f · 2·tan(fov/2) )
+ * a protože se viditelná výška i odstup škálují stejným r, JE TO NA ODSTUPU
+ * NEZÁVISLÉ: týž úhel dá týž podíl obrazovky na desktopu i na telefonu, kde má
+ * kamera úplně jiné r (viz NARROW_WIDTH_FRACTION v Rig.tsx). Proto smí obě
+ * větve odstupu sdílet jedno číslo a proto se pitch — na rozdíl od yaw —
+ * uplatňuje i na úzkém displeji.
+ */
+const dropBy = (f: number) => Math.atan(f * 2 * Math.tan((35 / 2) * (Math.PI / 180)))
+
+/**
+ * ★★★ SEKCE 00: KRYCHLE KLESÁ O PĚTINU OKNA — A JE TO CELÁ OPRAVA „NEVIDÍM 3D MODEL".
+ *
+ * Úvod je JEDINÉ místo, kde text stojí uprostřed a je přitom ŠIRŠÍ NEŽ KRYCHLE
+ * (sloupec 8 z 12 ≈ 866 px proti siluetě ~450 px na 1440). Závoj se sází podle
+ * sloupce, takže ať se ladil jakkoli, VŽDYCKY překryl celý stroj — a návštěvník
+ * na první obrazovce viděl jen pár obrysů hran. Ladit krytí bylo léčení příznaku:
+ * ať šlo nahoru nebo dolů, buď zmizel model, nebo se ztratil text.
+ *
+ * Řešení je kompoziční, ne opacitní: text a stroj se rozdělí o VÝŠKU okna.
+ * Text drží horní část, kamera se podívá nahoru a stroj tím sjede do dolní —
+ * do pásu, který layout schválně nechává prázdný (viz .hero-stage v layout.css).
+ * Nepřekrývají se, takže závoj smí být lehký a stroj smí svítit naplno.
+ *
+ * ★ STROP JE DANÝ SPODNÍ HRANOU OKNA, NE VKUSEM. Silueta zabírá při r = 10.3
+ *   zhruba 46 % výšky, tedy ±23 % od svého středu. Posun 0.20 posadil střed na
+ *   71 % a spodní study skončily na 94 % — dolní hrana stroje se otírala o patu
+ *   obrazovky a záře pod ní se ořízla. 0.17 dá střed na 67 % a dno na 90 %,
+ *   takže stroj pod sebou pořád dýchá. Výš než ~0.19 nechoď.
+ */
+export const HERO_DROP = 0.17
+
 export const ORBIT_PAN: OrbitPan[] = [
-  { yaw: 0, pitch: 0, roll: 0 }, //             00 IDENT   — text přes střed, záběr v ose
+  { yaw: 0, pitch: dropBy(HERO_DROP), roll: 0 }, // 00 IDENT — text nahoře, stroj pod ním
   { yaw: 0.125, pitch: -0.02, roll: -0.02 }, //  01 WEB     — text vlevo  → krychle doprava
   { yaw: -0.125, pitch: -0.03, roll: 0.028 }, // 02 INFRA   — text vpravo → krychle doleva
   { yaw: 0.125, pitch: 0.01, roll: -0.016 }, //  03 AI      — text vlevo  → krychle doprava

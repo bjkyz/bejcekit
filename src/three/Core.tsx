@@ -108,9 +108,13 @@ export default function Core({ tier }: { tier: Tier }) {
     // Zážeh z preloaderu: vystřelí na hodnotu a tady se tlumí zpátky k nule.
     easing.damp(sceneState, 'boost', 0, 0.55, dt)
 
-    // Klidový jas: 3.0 všude, 3.8 na AI (03), 4.2 na kontaktu (05).
-    // Kontakt je schválně nejsvětlejší — stroj je nabuzený a čeká na vstup.
-    const idle = i === 3 ? 3.8 : i === 5 ? 4.2 : 3.0
+    /* Klidový jas: 3.0 základ, 4.0 na úvodu (00), 3.8 na AI (03), 4.2 na kontaktu (05).
+       ★ ÚVOD SVÍTÍ VÍC NEŽ ZÁKLAD, protože od HERO_DROP (lib/scene-state.ts) leží
+       stroj ve volném pásu pod textem a je to JEDINÝ obraz, který na první obrazovce
+       nese celou scénu — dřív se tam schovával za závoj a klidový jas 3.0 byl počítaný
+       na to, aby textem neprosvítal. Kontakt zůstává nejsvětlejší: stroj je nabuzený
+       a čeká na vstup. */
+    const idle = i === 0 ? 4.0 : i === 3 ? 3.8 : i === 5 ? 4.2 : 3.0
     const wantEmissive = idle + h * 1.8 + sceneState.boost
 
     for (const m of glow) easing.damp(m, 'emissiveIntensity', wantEmissive, 0.3, dt)

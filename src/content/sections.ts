@@ -49,6 +49,13 @@ export const PHONE = '+420 607 706 102'
 /** tel: a wa.me chtějí číslo bez mezer; wa.me navíc bez '+'. */
 export const PHONE_TEL = '+420607706102'
 export const WHATSAPP = 'https://wa.me/420607706102'
+/**
+ * ★ mailto S PŘEDMĚTEM, ne holá adresa. Prázdný předmět je malé, ale skutečné
+ * tření („co mám napsat do subjectu?") a příchozí mail bez předmětu se navíc
+ * hůř třídí. Jen předmět — předvyplněné TĚLO působí jako formulářový spam
+ * a přepisuje se hůř, než se píše. Kopírovací tlačítko dál kopíruje holý EMAIL.
+ */
+export const MAILTO = `mailto:${EMAIL}?subject=${encodeURIComponent('Poptávka z bejcek.it')}`
 
 export const SECTIONS: Section[] = [
   {

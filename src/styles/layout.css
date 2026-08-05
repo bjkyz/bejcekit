@@ -106,26 +106,27 @@ main::before {
   position: relative;
   isolation: isolate;
 }
-/* ★ KRYTÍ ZVEDNUTO Z 0.72 NA 0.9 — A JE TO OPRAVA, NE ZESÍLENÍ EFEKTU.
-   Naměřeno na snímcích 1440×900: přes odstavec sekce 00 i 05 šly rozsvícené hrany
-   krychle a PROSVÍTALA skrz ně cedule ze stěny („IDENT", „KONTAKT"). Text tím
-   dostal za sebe vlastní nápis, jen rozmazaný — vypadalo to jako chyba renderu.
-   Při 0.72 zbylo z hrany pořád ~28 % jasu, což je nad textem moc.
-   Náběh je zároveň plošší (plató do 45 %), takže se závoj nekuželí do špičky
-   a spodní řada s tlačítky je krytá stejně jako nadpis nahoře. */
+/* ★ ZÁVOJ JE ZPÁTKY LEHKÝ (0.82 jádro, ostřejší dojezd) — krytí 0.9 s obřím
+   přesahem (inset -6rem -9rem, ztráta až v 96 %) sice vyřešilo ceduli „IDENT"
+   prosvítající textem, ale zhasnulo s ní CELOU krychli: elipsa sahala přes celý
+   viewport a z modelu zbyly siluety hran na ~5 % jasu („ztratil se 3D model").
+   Cedule se teď tlumí U ZDROJE (FacePlates: na středových sekcích jede aktivní
+   stěna na 0.3 místo 1.0), takže závoj chrání jen řádky textu a hrany, rohy
+   a sklo krychle KOLEM sloupce svítí naplno. Když text ztrácí kontrast, ztlum
+   ceduli nebo zvedni jádro — NEROZTAHUJ zase elipsu, jinak je model pryč. */
 .section--center .section__col::before {
   content: '';
   position: absolute;
-  inset: -6rem -9rem;
+  inset: -3rem -4rem;
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(
-    72% 66% at 50% 50%,
-    rgba(8, 9, 10, 0.9) 0%,
-    rgba(8, 9, 10, 0.86) 52%,
-    rgba(8, 9, 10, 0.62) 72%,
-    rgba(8, 9, 10, 0.24) 86%,
-    transparent 96%
+    62% 58% at 50% 50%,
+    rgba(8, 9, 10, 0.78) 0%,
+    rgba(8, 9, 10, 0.72) 48%,
+    rgba(8, 9, 10, 0.44) 68%,
+    rgba(8, 9, 10, 0.12) 84%,
+    transparent 94%
   );
 }
 /* Boční sloupce potřebují závoj taky — text přebíhá přes hranu krychle a bez
@@ -230,6 +231,14 @@ main::before {
   transition-delay: var(--reveal-delay, 0ms);
 }
 .reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+/* ★ BEZ JS SE NIC NESCHOVÁVÁ. Obsah je od prerenderu přímo v HTML — skrýt ho
+   smí jen kód, který ho umí zase odhalit. Třídu `js` přidává main.tsx/projekty.tsx
+   jako první věc po startu (inline skript v <head> zakazuje CSP). Specificita
+   (0,2,1) schválně přebíjí `.reveal` i `.reveal.is-in`. */
+html:not(.js) .reveal {
   opacity: 1;
   transform: none;
 }

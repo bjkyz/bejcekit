@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
-import { CONTACT_CHANNELS, EMAIL, GITHUB, SECTIONS, type Section as S } from '../content/sections'
+import { CONTACT_CHANNELS, EMAIL, GITHUB, MAILTO, SECTIONS, type Section as S } from '../content/sections'
 import { useReveal } from '../lib/hooks'
 import { revealDelay as delay } from '../lib/reveal'
 import Kicker from './Kicker'
@@ -186,7 +186,7 @@ function ContactBlock() {
 
   return (
     <div className="contact">
-      <a className="contact-primary reveal" style={delay(3, 6)} href={`mailto:${EMAIL}`}>
+      <a className="contact-primary reveal" style={delay(3, 6)} href={MAILTO}>
         <span className="contact-primary__k">
           <Icon name="mail" size={15} />
           E-mail

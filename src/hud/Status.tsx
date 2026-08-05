@@ -16,19 +16,30 @@ import { sceneState } from '../lib/scene-state'
 export default function Status() {
   const [, tick] = useState(0)
 
+  /* ★ `live` ODDĚLUJE PRVNÍ RENDER OD ŽIVÝCH HODNOT — kvůli hydrataci.
+     sceneState je mutabilní modulový stav: server ho vyrenderuje s výchozími
+     hodnotami, jenže než na klientu dojde na hydrataci téhle (Suspense)
+     hranice, App už ho stihl přepsat — a React #418 pak celý panel zahodí
+     a staví znovu. Dokud `live` není true, kreslí se tu proto KONSTANTY
+     ('off', stěna 00), na serveru i na klientu stejné. Živé hodnoty panel
+     ukáže po mountu — což je i věcně správně: dokud neběží efekt, neběží
+     ani scéna, takže „statický režim" není placeholder, ale pravda. */
+  const [live, setLive] = useState(false)
+
   // 8 Hz. Panel nepotřebuje 60 fps a re-render celého HUD by byl plýtvání.
   useEffect(() => {
+    setLive(true)
     const id = setInterval(() => tick((n) => n + 1), 125)
     return () => clearInterval(id)
   }, [])
 
-  const i = Math.min(sceneState.faceIndex, SECTIONS.length - 1)
+  const i = live ? Math.min(sceneState.faceIndex, SECTIONS.length - 1) : 0
   const s = SECTIONS[i]
-  const transit = sceneState.transit
+  const transit = live && sceneState.transit
   const next = Math.min(i + 1, SECTIONS.length - 1)
   /* Ze sceneState, ne z propu: governor umí patro za běhu snížit a panel
      nesmí ukazovat kvalitu, která už dávno neběží. */
-  const tier = sceneState.tier
+  const tier = live ? sceneState.tier : 'off'
 
   return (
     <aside className="status" aria-hidden="true">

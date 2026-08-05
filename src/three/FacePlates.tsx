@@ -54,6 +54,16 @@ function drawPlate(num: string, code: string): HTMLCanvasElement {
   return c
 }
 
+/**
+ * ★ NA STŘEDOVÝCH SEKCÍCH (00, 05) SE AKTIVNÍ CEDULE TLUMÍ, NE ROZSVĚCÍ.
+ * Text tam stojí PŘES střed stěny, přesně přes nápis — cedule na plný jas
+ * prosvítala odstavcem jako rozmazaný druhý nápis a jediná obrana byl závoj
+ * s krytím 0.9, který ovšem zhasnul celou krychli („ztratil se 3D model").
+ * Ztlumení cedule tady, u zdroje, nechá závoj lehký a krychli viditelnou.
+ * O informaci nejde: tentýž nápis má sekce v DOM kickeru („[ 00 / IDENT ]").
+ */
+const CENTER_SECTIONS = new Set([0, 5])
+
 function Plate({ i, tier }: { i: number; tier: Tier }) {
   const grp = useRef<Group>(null)
   const mat = useRef<MeshBasicMaterial>(null)
@@ -88,7 +98,8 @@ function Plate({ i, tier }: { i: number; tier: Tier }) {
     const dt = clampDelta(delta)
     const active = sceneState.faceIndex === i
 
-    if (mat.current) easing.damp(mat.current, 'opacity', active ? 1 : 0.22, 0.25, dt)
+    const activeOpacity = CENTER_SECTIONS.has(i) ? 0.2 : 1
+    if (mat.current) easing.damp(mat.current, 'opacity', active ? activeOpacity : 0.22, 0.25, dt)
 
     /* ★ Na 'low' tieru je skořápka meshPhysicalMaterial s transparent →
        depthWrite:false, takže zadní cedule NEJSOU zakryté a vykreslily by se

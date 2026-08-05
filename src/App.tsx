@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, startTransition, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
 import Hud from './hud/Hud'
 import Section from './ui/Section'
@@ -86,7 +86,51 @@ function useArmed(enabled: boolean): boolean {
  */
 export default function App() {
   const reduced = useReducedMotion()
-  const tier = useMemo(() => (reduced ? 'off' : detectTier()), [reduced])
+
+  /* ★ TIER SE DETEKUJE AŽ PO MOUNTU — kvůli prerenderu, ne kvůli výkonu.
+     Stránka se od buildu hydratuje z hotového HTML (scripts/prerender.mjs)
+     a hydratace vyžaduje, aby první klientský render byl IDENTICKÝ se
+     serverovým. Jenže detectTier() sahá na window, canvas a localStorage,
+     takže na serveru neexistuje — server kreslí bez scény ('off'). Kdyby
+     klient detekoval hned v prvním renderu, přibyl by mu preloader a úchop,
+     hydratace by nesedla a React by celý strom zahodil a stavěl znovu.
+     Detekce po mountu drží oba renery stejné; scéna stejně startuje až po
+     load+idle (useArmed), takže se reálně nic neodkládá. */
+  /* ★ TIER JE STAV DETEKOVANÝ AŽ PO MOUNTU, výchozí 'off' — kvůli prerenderu.
+     Stránka se od buildu hydratuje z hotového HTML (scripts/prerender.mjs)
+     a hydratace vyžaduje, aby první klientský render byl IDENTICKÝ se
+     serverovým. Jenže detectTier() sahá na window, canvas a localStorage,
+     takže na serveru neexistuje — server kreslí bez scény ('off'). Kdyby
+     klient detekoval hned v prvním renderu, přibyl by mu preloader a úchop,
+     hydratace by nesedla a React by celý strom zahodil a stavěl znovu.
+
+     Časování je rozřezané schválně do TŘÍ kroků (idle → probe → transition):
+     detekce vytváří WebGL kontext, což je na slabém stroji ~stovky ms čistého
+     bloku, a přerender všech sekcí + přepnutí scrollu je druhý takový. V jednom
+     flushi to byl ~390ms balvan přesně mezi FCP a interaktivitou (změřeno
+     v Lighthouse long-tasks). Idle callback to uhne z cesty dokreslování,
+     probe běží jako vlastní úloha a startTransition nechá React renderovat
+     po řezech s yieldy. Uživatel nic nepozná — scéna stejně startuje až po
+     load+idle (useArmed). */
+  const [tier, setTier] = useState<ReturnType<typeof detectTier>>('off')
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+      cancelIdleCallback?: (id: number) => void
+    }
+    const kick = () => {
+      const detected = detectTier()
+      startTransition(() => setTier(detected))
+    }
+    let idleId = 0
+    let timerId = 0
+    if (w.requestIdleCallback) idleId = w.requestIdleCallback(kick, { timeout: 800 })
+    else timerId = window.setTimeout(kick, 150)
+    return () => {
+      if (idleId) w.cancelIdleCallback?.(idleId)
+      if (timerId) clearTimeout(timerId)
+    }
+  }, [])
   const dragRef = useRef<Group>(null)
 
   /* Scéna je bonus, ne podmínka. Když spadne — NEBO ji governor vzdá, protože
@@ -94,7 +138,7 @@ export default function App() {
      i lišta průběhu a zbude čitelný web. Viz SceneBoundary a Governor ve Scene. */
   const [sceneFailed, setSceneFailed] = useState(false)
   const onSceneError = useCallback(() => setSceneFailed(true), [])
-  const showScene = tier !== 'off' && !sceneFailed
+  const showScene = !reduced && tier !== 'off' && !sceneFailed
   /* Import 3D čeká, až má prohlížeč hotovo. Viz useArmed. */
   const armed = useArmed(showScene)
 
@@ -141,12 +185,26 @@ export default function App() {
       )}
 
       <main id="obsah">
-        {SECTIONS.map((s, i) => (
-          <Section key={s.id} s={s} index={i} reduced={reduced} hasScene={showScene} dragRef={dragRef} />
-        ))}
+        {/* ★ SEKCE POD HEROEM MAJÍ VLASTNÍ <Suspense> — KVŮLI HYDRATACI, NE
+            KVŮLI LAZY LOADINGU. Hydratace celé stránky v jednom kuse je jeden
+            ~375ms blok hlavního vlákna přesně mezi FCP a interaktivitou (změřeno
+            v Lighthouse long-tasks; TBT 540 ms). Suspense hranice dělá z každé
+            sekce samostatnou hydratační jednotku: React hero hydratuje hned
+            a zbytek po kouskách s yieldy mezi úlohami. Server přitom fallback
+            nikdy nekreslí — renderToString obsah vyrenderuje synchronně a při
+            hydrataci zůstává serverové HTML na místě, dokud na sekci nedojde. */}
+        {SECTIONS.map((s, i) => {
+          const section = (
+            <Section key={s.id} s={s} index={i} reduced={reduced} hasScene={showScene} dragRef={dragRef} />
+          )
+          return i === 0 ? section : <Suspense key={s.id} fallback={null}>{section}</Suspense>
+        })}
       </main>
 
-      <Hud />
+      {/* Vlastní hydratační jednotka ze stejného důvodu jako sekce výš. */}
+      <Suspense fallback={null}>
+        <Hud />
+      </Suspense>
       <div className="grain" aria-hidden="true" />
 
       {showScene && <Preloader reduced={reduced} />}

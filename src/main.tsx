@@ -1,5 +1,5 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.tsx'
 
 import './styles/fonts.css'
@@ -23,11 +23,30 @@ import './styles/hud.css'
  * CLS 0 už není vyladěné, je STRUKTURÁLNÍ.
  */
 
+/* ★ TŘÍDA `js` ŘÍDÍ SKRÝVÁNÍ `.reveal` PRVKŮ (layout.css). Obsah je od
+   prerenderu v HTML, takže bez JS musí zůstat celý VIDITELNÝ — schovávat smí
+   až kód, který ho umí zase odhalit. Nejde to inline skriptem v <head>:
+   CSP má script-src 'self'. Tady je to nejdřívější povolené místo. */
+document.documentElement.classList.add('js')
+
 /* StrictMode ZŮSTÁVÁ. R3F v9 ho konečně dědí z react-dom, takže odhalí latentní
    double-mount chyby, které byly dřív tiše skryté. Neřeš je vypnutím StrictMode —
    napiš úklidové funkce. (useFrame je bezpečný, R3F ho při unmountu odhlásí.) */
-createRoot(document.getElementById('root')!).render(
+const app = (
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 )
+
+/* ★ HYDRATACE, NE RENDER OD NULY. Produkce má v #root prerenderovaný obsah
+   (scripts/prerender.mjs); hydrateRoot ho převezme bez zahození a překreslení.
+   Dev server žádný prerender nemá, tam se renderuje postaru — proto ta větev.
+
+   ★★ HYDRATACE V SAMOSTATNÉ ÚLOZE (setTimeout 0). Synchronně by se přilepila
+   k vyhodnocení celého ESM grafu (rolldown-runtime + react + hud + index se
+   evaluují v jedné úloze, jakmile doběhne entry) a vznikl by jeden ~400ms blok
+   hlavního vlákna. Obsah je už vykreslený z HTML, takže odklad o jednu otočku
+   fronty nikoho nic nestojí — jen rozetne eval a hydrataci na dvě kratší úlohy. */
+const root = document.getElementById('root')!
+if (root.firstElementChild) setTimeout(() => hydrateRoot(root, app), 0)
+else createRoot(root).render(app)

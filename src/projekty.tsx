@@ -1,5 +1,5 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import ProjectsPage from './ProjectsPage.tsx'
 
 import './styles/fonts.css'
@@ -27,8 +27,15 @@ import './styles/projects.css'
  * role, tlačítka i navigace, takže se obě stránky nemůžou rozejít. `projects.css`
  * je jediný přírůstek a je poslední – přepisovat po něm už nemá co.
  */
-createRoot(document.getElementById('root')!).render(
+/* Třída `js` + hydratace: stejná mechanika a stejné důvody jako v main.tsx. */
+document.documentElement.classList.add('js')
+
+const app = (
   <StrictMode>
     <ProjectsPage />
-  </StrictMode>,
+  </StrictMode>
 )
+
+const root = document.getElementById('root')!
+if (root.firstElementChild) hydrateRoot(root, app)
+else createRoot(root).render(app)

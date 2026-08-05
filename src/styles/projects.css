@@ -158,7 +158,10 @@
   padding: 0.75rem 0.75rem 1.25rem;
 
   transform-style: preserve-3d;
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  /* Zdvih celé karty k oku (6 px) jede ze stejného `--lift` jako zanoření
+     obrazovky — hmota se zvedá, displej do ní zapadá, oba pohyby mají jeden
+     zdroj a jednu pružinu, takže se nemůžou rozejít. */
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(calc(var(--lift, 0) * 6px));
   /* ★ ŽÁDNÁ `transition` NA `transform`. Tlumení řídí pružina v rAF (tilt.ts);
      přechod položený přes ni by dojezd počítal dvakrát a karta by se za rukou
      viditelně opožďovala. Přechod smí být jen na tom, co JS nesahá. */
@@ -170,6 +173,12 @@
 .pcard:focus-within {
   border-color: rgba(79, 216, 232, 0.45);
   background: rgba(19, 22, 25, 0.72);
+}
+/* Obrazovka animuje translateZ každý snímek hoveru; promotion předem jí ušetří
+   rasterizaci uprostřed prvního snímku. Vázané na :hover, ne trvale — trvalá
+   vrstva by obrázku držela paměť a kartě vypnula subpixelové vyhlazování. */
+.pcard:hover .pcard__screen {
+  will-change: transform;
 }
 
 /* Záře karty. Předepsaný idiom celého webu (viz `.btn::after` v sections.css):
@@ -460,6 +469,9 @@
 .page__cta {
   max-width: var(--measure-text);
   margin: clamp(3.5rem, 7vw, 6rem) 0 0;
+  /* Cíl kotvy #poptavka (nav „Napište mi"): bez rezervy by nadpis po skoku
+     zajel pod fixní navigaci. */
+  scroll-margin-top: 7rem;
 }
 .page__cta-row {
   display: flex;

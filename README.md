@@ -12,8 +12,14 @@ Web má **dvě stránky** (vícestránkový build, žádný router):
 | `/projekty` | `projekty.html` → `src/projekty.tsx` → `ProjectsPage.tsx` | reference, 3D karty, **bez WebGL a bez Lenisu** |
 
 **Lighthouse (desktop): 100 / 100 / 100 / 100** na obou stránkách (výkon,
-přístupnost, best practices, SEO), agentic-browsing 100. Mobil: `/projekty` 96,
-`/` 79–83. Naměřeno lokálně na `npm run preview`.
+přístupnost, best practices, SEO), agentic-browsing 100. Mobil: `/projekty` 97,
+`/` 87 (LCP 2,0 s). Naměřeno lokálně na `npm run preview`.
+
+Obě stránky se při buildu **prerenderují do HTML** (`scripts/prerender.mjs`,
+spouští se jako součást `npm run build`): obsah je v `dist/*.html` přímo,
+klient ho jen hydratuje (`hydrateRoot`). První vykreslení tedy nečeká na JS —
+proto LCP 2,0 s místo dřívějších ~3,8 s. Dev server prerender nemá a renderuje
+klasicky (větev v `main.tsx`/`projekty.tsx`).
 
 ## Spuštění
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { PROJECTS } from './content/projects'
-import { EMAIL, GITHUB, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
+import { GITHUB, MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import { tilt } from './lib/tilt'
@@ -93,7 +93,11 @@ export default function ProjectsPage() {
             PROJEKTY
           </a>
         </div>
-        <a className="nav__cta" href="/#kontakt">
+        {/* ★ NA KONTAKT NA TÉHLE STRÁNCE, ne pryč na /#kontakt. Dole je plný
+            blok s e-mailem, WhatsAppem i telefonem — posílat člověka, který se
+            právě dívá na reference, přes load jiné stránky je zbytečně ztracený
+            kontext (a pár procent z nich se cestou ztratí doslova). */}
+        <a className="nav__cta" href="#poptavka">
           Napište mi
         </a>
       </nav>
@@ -131,7 +135,7 @@ export default function ProjectsPage() {
         </ul>
 
         {/* ── VÝZVA K AKCI ─────────────────────────────────────── */}
-        <section className="page__cta" aria-labelledby="page-cta-h">
+        <section className="page__cta" id="poptavka" aria-labelledby="page-cta-h">
           <h2 className="headline reveal" id="page-cta-h" style={revealDelay(0, 3)}>
             Chcete web, který takhle vypadá i funguje?
           </h2>
@@ -140,7 +144,7 @@ export default function ProjectsPage() {
             co to bude stát a kdy to bude hotové.
           </p>
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
-            <a className="btn btn--solid" href={`mailto:${EMAIL}`}>
+            <a className="btn btn--solid" href={MAILTO}>
               <Icon name="mail" size={15} />
               Napsat e-mail
             </a>

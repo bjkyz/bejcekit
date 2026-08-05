@@ -47,6 +47,13 @@ const SMOOTH_IN = 0.09
 /** Návrat do klidu je ZÁMĚRNĚ pomalejší než náběh: rychlý návrat vypadá jako
     odskočení, pomalý jako dojezd hmoty. Stejný trik jako u magnetu. */
 const SMOOTH_OUT = 0.3
+/** ★ HLOUBKA MÁ VLASTNÍ, POMALEJŠÍ NÁBĚH. `--lift` řídí zanoření obrazovky,
+    zdvih karty a odlesk — tedy HMOTU, ne polohu kurzoru. Když jela stejnou
+    konstantou jako sledování ruky (0.09), naskočila celá hloubka prakticky
+    skokem v prvním snímku hoveru a karta „cvakla". Pomalejší náběh nechá
+    vrstvy rozjet se viditelně — to je ten rozdíl mezi efektem a materiálem. */
+const LIFT_IN = 0.22
+const LIFT_OUT = 0.38
 
 /** Pod touhle vzdáleností od cíle se pokládá za dorazené a smyčka se zastaví. */
 const EPS = 0.0015
@@ -106,7 +113,7 @@ export function tilt(grid: HTMLElement): () => void {
       c.ry = damp(c.ry, c.try_, s, dt)
       c.mx = damp(c.mx, c.tmx, s, dt)
       c.my = damp(c.my, c.tmy, s, dt)
-      c.lift = damp(c.lift, c.tl, s, dt)
+      c.lift = damp(c.lift, c.tl, c === active ? LIFT_IN : LIFT_OUT, dt)
 
       const done =
         Math.abs(c.rx - c.trx) < EPS &&
@@ -128,6 +135,12 @@ export function tilt(grid: HTMLElement): () => void {
 
       moving = true
       const st = c.el.style
+      /* ★ `will-change` JEN PO DOBU POHYBU. Nastavuje se s prvním zápisem stylů
+         a mizí s `cssText = ''` v klidu (viz výš). Bez něj prohlížeč povyšuje
+         kartu na kompozitní vrstvu až V PRVNÍM SNÍMKU hoveru — rasterizace
+         mezisnímku je přesně to škubnutí na začátku náklonu. Trvalý will-change
+         by byl zase horší: držel by vrstvu (a rozmazané písmo) napořád. */
+      if (st.willChange !== 'transform') st.willChange = 'transform'
       st.setProperty('--rx', `${c.rx.toFixed(3)}deg`)
       st.setProperty('--ry', `${c.ry.toFixed(3)}deg`)
       st.setProperty('--mx', `${c.mx.toFixed(2)}%`)

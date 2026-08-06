@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { PROJECTS } from './content/projects'
+import { INQUIRY_ANCHOR, PROJECTS } from './content/projects'
 import { GITHUB, MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
@@ -97,29 +97,35 @@ export default function ProjectsPage() {
             blok s e-mailem, WhatsAppem i telefonem — posílat člověka, který se
             právě dívá na reference, přes load jiné stránky je zbytečně ztracený
             kontext (a pár procent z nich se cestou ztratí doslova). */}
-        <a className="nav__cta" href="#poptavka">
+        <a className="nav__cta" href={`#${INQUIRY_ANCHOR}`}>
           Napište mi
         </a>
       </nav>
 
       <main className="page" ref={main}>
-        {/* ── HLAVIČKA STRÁNKY ─────────────────────────────────── */}
+        {/* ── HLAVIČKA STRÁNKY ─────────────────────────────────────
+            ★ Od 2026-08-05 jsou klientské reference pod plombou (NDA), takže
+            hlavička nesmí slibovat „klikněte si na živý web" – místo toho
+            prodává diskrétnost jako službu a říká, jak se detail odemyká.
+            Důvody a pravidla anonymizace: content/projects.ts. */}
         <header className="page__head">
           <p className="kicker label reveal" style={revealDelay(0, 5)}>
             [ PROJEKTY ]
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            Weby, které běží. Ne obrázky v prezentaci.
+            Weby běží naživo. Jména kryje mlčenlivost.
           </h1>
           <p className="body reveal" style={revealDelay(1.2, 5)}>
-            Každý projekt níž je živý web, na který se dá kliknout. Technické údaje u něj nejsou marketing:
-            jsou odečtené přímo z toho běžícího webu, takže si je můžete za dvě minuty ověřit sami.
+            Klientské práce tu visí jen v obrysech: rozmazaný snímek, obor a technická fakta.
+            Víc smlouvy o mlčenlivosti nedovolí. Celé reference ukazuji na schůzce nebo v hovoru,
+            i se jmény a čísly, na která se můžete ptát.
           </p>
           <p className="page__note reveal" style={revealDelay(1.8, 5)}>
-            <span className="page__note-k">Poznámka</span>
-            Zakázky na IT infrastrukturu tu nenajdete. U serverů, sítí a interních systémů zveřejnění
-            skoro nikdy nedovolí smlouva, a co nesmím ukázat, o tom radši mlčím. Reference vám na vyžádání
-            dám i tak.
+            <span className="page__note-k">Proč zámky</span>
+            Diskrétnost není překážka, je součást služby. Stejná smlouva, která dnes kryje tyhle
+            klienty, bude jednou krýt i vás: váš web, vaše čísla, vaše data. Co nesmím pověsit
+            veřejně, ukážu rád osobně. Platí to i pro zakázky na IT infrastrukturu, které tu
+            nevisí vůbec.
           </p>
         </header>
 
@@ -134,14 +140,18 @@ export default function ProjectsPage() {
           ))}
         </ul>
 
-        {/* ── VÝZVA K AKCI ─────────────────────────────────────── */}
-        <section className="page__cta" id="poptavka" aria-labelledby="page-cta-h">
+        {/* ── VÝZVA K AKCI ─────────────────────────────────────────
+            Cíl všech zamčených karet: kliknutí na plombu přistane tady.
+            Nadpis proto musí navázat na to, co člověk právě viděl (zámky),
+            a slíbit odemčení – ne obecné „napište mi". */}
+        <section className="page__cta" id={INQUIRY_ANCHOR} aria-labelledby="page-cta-h">
           <h2 className="headline reveal" id="page-cta-h" style={revealDelay(0, 3)}>
-            Chcete web, který takhle vypadá i funguje?
+            Reference vám ukážu celé. Mezi čtyřma očima.
           </h2>
           <p className="body reveal" style={revealDelay(0.8, 3)}>
-            Napište mi, co potřebujete, vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý,
-            co to bude stát a kdy to bude hotové.
+            Napište mi, co stavíte, vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý,
+            co to bude stát a kdy to bude hotové. A portfolio vám odemknu: weby naživo, jména
+            i výsledky.
           </p>
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
             <a className="btn btn--solid" href={MAILTO}>
@@ -157,6 +167,12 @@ export default function ProjectsPage() {
               {PHONE}
             </a>
           </div>
+          {/* Tichý řádek pod tlačítky: tři důvody, proč se kliknutí nebát.
+              Mono readout přes sdílenou `.label`, ne další tlačítka –
+              je to poznámka, ne nabídka. */}
+          <p className="page__cta-trust label reveal" style={revealDelay(2.2, 3)}>
+            Nezávazně · Odpověď do 24 hodin · Diskrétně
+          </p>
         </section>
 
         {/* ── PATIČKA ──────────────────────────────────────────────

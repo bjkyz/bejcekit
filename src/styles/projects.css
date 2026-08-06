@@ -290,6 +290,56 @@
   );
 }
 
+/* ── PLOMBA NDA ──────────────────────────────────────────────
+   Pečeť přes snímek reference pod mlčenlivostí: jedna destička se štítkem
+   v jazyce přístroje, žádný celoplošný závoj. Okraje snímku mají zůstat
+   vidět – „lehce poznat, co to je" je celý smysl té karty.
+
+   Snímek POD ní je rozmazaný a ztmavený už V SOUBORU (scripts/blur-refs.mjs):
+   ostrý originál nesmí do sítě (CSS blur se dá vypnout jedním kliknutím
+   v devtools) a radiální scrim pod destičkou by jinak stál per-pixel gradient
+   přes celou obrazovku karty při každém rasteru – zapečený do .webp je zdarma.
+
+   Typografii nese sdílená `.label` (mono readout, --tx-3) přímo v className;
+   tady zbývá jen krabička a barvy. Hover signalizují rám karty, záře a snímek –
+   plomba přidává jen rozsvícení zámku, ať se výzva „na vyžádání" čte jako
+   pozvání, ne jako mrtvý zákaz.
+
+   ★ Sedí UVNITŘ `.pcard__screen`: dědí pointer-events: none (nekrade kliky
+   nataženému odkazu). Centruje se vlastním transformem – translateZ by tu
+   stejně nefungoval, screen ořezává přes overflow: hidden, takže je to 2D
+   kontext a hloubka by se tiše zahodila. */
+.pcard__seal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--line-3);
+  border-radius: 2px;
+  background: rgba(8, 9, 10, 0.82);
+  line-height: var(--lh-mono);
+  text-align: center;
+}
+.pcard__seal-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--tx-1);
+}
+.pcard__seal-head .icon {
+  color: var(--neon-3);
+  transition: color var(--d-hover) var(--e-ui);
+}
+.pcard:hover .pcard__seal-head .icon,
+.pcard:focus-within .pcard__seal-head .icon {
+  color: var(--neon-2);
+}
+
 /* ── POPIS ───────────────────────────────────────────────────
    ★ ŽÁDNÝ `transform` NA TOMHLE PRVKU. Hloubku obstarává obrazovka tím, že se
      propadne dozadu (viz `.pcard__screen`); kdyby se místo toho vysunul text
@@ -319,6 +369,24 @@
 }
 .pcard__domain {
   overflow-wrap: anywhere;
+}
+
+/* Štítek „živá ukázka" na každé odemčené kartě. Zelená = stav/dostupnost
+   (týž význam jako štítek kapacity na úvodu); tělo tečky je sdílené se
+   `.status-pill__dot` v sections.css – stylesheet je pro obě stránky společný
+   a je to táž kontrolka, jen v readout řádku místo pilulky.
+   ★ Animace se tu NEspouští hned: karta 04 je na každém viewportu pod ohybem
+   a věčná animace by držela kompozitor v běhu na jinak statické stránce.
+   Tepat začne až s revealem buňky (`.is-in` přidává IntersectionObserver). */
+.pcard__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  color: var(--green);
+}
+.pgrid__cell.is-in .pcard__live-dot {
+  animation: pulse-dot 2.4s var(--e-ui) infinite;
 }
 
 .pcard__name {
@@ -483,6 +551,11 @@
    sem netahám kvůli jednomu efektu), takže potřebují vlastní stisk. */
 .page__cta-row .btn:active {
   transform: scale(0.98);
+}
+/* Tichý řádek důvěry pod tlačítky. Typografii nese sdílená `.label`
+   (poznámka pod čarou, ne třetí vrstva tlačítek); tady zbývá jen odstup. */
+.page__cta-trust {
+  margin-top: 1.1rem;
 }
 
 /* ── TELEFON A TABLET ────────────────────────────────────────── */

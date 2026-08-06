@@ -6,12 +6,15 @@
  * (šířka/výška v em), aby ikona vždycky seděla na účaří textu vedle sebe.
  */
 
-export type IconName = 'mail' | 'phone' | 'github' | 'whatsapp' | 'copy' | 'check' | 'external' | 'back'
+export type IconName = 'mail' | 'phone' | 'github' | 'whatsapp' | 'copy' | 'check' | 'external' | 'back' | 'lock'
 
 const PATHS: Record<IconName, string> = {
   /* Šipka ven z rámečku. Jediný způsob, jak předem říct „tohle otevře cizí web",
      aniž by se to muselo napsat slovy do popisku odkazu. */
   external: 'M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7ZM19 19H5V5h5V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5h-2v5Z',
+  /* Visací zámek s vykrojeným třmenem. Značí referenci pod NDA: kde `external`
+     říká „tohle otevře cizí web", tohle říká „tohle se otevře až na vyžádání". */
+  lock: 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2Z',
   back: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2Z',
   copy: 'M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z',
   check: 'M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z',

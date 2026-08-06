@@ -7,7 +7,7 @@ Klíčová fakta:
 - Kontakt: bejcek.jirka@gmail.com, telefon a WhatsApp +420 607 706 102
 - Působnost: Česko, remote i na místě; přístupy a kód zůstávají klientovi
 - Proces: analýza zdarma, pevná cena a termín písemně, týdenní iterace, provoz a monitoring po nasazení
-- Reference: hotové weby s živými odkazy na __SITE_ORIGIN__/projekty
+- Reference: anonymizované ukázky (NDA) na __SITE_ORIGIN__/projekty, celé reference na vyžádání
 - Web má dvě stránky: úvod (__SITE_ORIGIN__/), kde jsou služby kotvami, a projekty (__SITE_ORIGIN__/projekty)
 
 ## Služby
@@ -20,15 +20,16 @@ Klíčová fakta:
 
 ## Projekty
 
-Hotové weby s živými odkazy. Technické údaje jsou odečtené z běžících webů, ne z prezentace.
-Celý přehled: [__SITE_ORIGIN__/projekty](__SITE_ORIGIN__/projekty)
+Klientské weby běží naživo, ale jejich jména kryje smlouva o mlčenlivosti (NDA). Na webu jsou
+anonymizované: rozmazaný snímek, obor a technická fakta. Celé reference na vyžádání, do 24 hodin.
+Přehled: [__SITE_ORIGIN__/projekty](__SITE_ORIGIN__/projekty)
 
-- [Super Advokát](https://www.superadvokat.com): právní služby online s pevnou cenou předem, advokátní kancelář s praxí od roku 1991. Next.js, předrenderované stránky z CDN (ISR), strukturovaná data LegalService, hreflang, WebP.
-- [Advokátní kancelář Tutter](https://aktutter.cz): prezentace pražské kanceláře, oblasti práva, tým, blog, bezplatná úvodní konzultace. Nuxt, časté dotazy ve strukturovaných datech, hreflang, WebP.
-- [SLYX Fashions](https://slyx.com): značkový web americké dílny na latexovou módu, video hero a animace řízené scrollem. Vue, GSAP, Cloudflare. Anglicky.
-- [bejcek.it](__SITE_ORIGIN__/): tento web, portfolio se 3D scénou počítanou v prohlížeči. React, TypeScript, three.js, Vite. Lighthouse 100/100/100/100 na desktopu, CLS 0, scéna se na slabém stroji sama vzdá.
+- Právní služby s cenou předem: objednávkový web advokátní kanceláře, více jazyků. Next.js, předrenderované stránky z CDN (ISR), strukturovaná data, hreflang, WebP. Pod NDA.
+- Advokátní kancelář, Praha: prezentace kanceláře s poradnou a blogem. Nuxt, časté dotazy ve strukturovaných datech, hreflang, WebP. Pod NDA.
+- Módní značka, USA: značkový web zakázkové dílny, video hero a animace řízené scrollem. Vue, GSAP, Cloudflare. Anglicky. Pod NDA.
+- [bejcek.it](__SITE_ORIGIN__/): tento web, portfolio se 3D scénou počítanou v prohlížeči, jediná veřejná ukázka. React, TypeScript, three.js, Vite. Lighthouse 100/100/100/100 na desktopu, CLS 0, scéna se na slabém stroji sama vzdá.
 
-Zakázky na IT infrastrukturu se nezveřejňují: u serverů, sítí a interních systémů to skoro nikdy nedovolí smlouva. Reference na vyžádání.
+Zakázky na IT infrastrukturu se nezveřejňují vůbec: u serverů, sítí a interních systémů to skoro nikdy nedovolí smlouva. Reference na vyžádání.
 
 ## Odkazy
 

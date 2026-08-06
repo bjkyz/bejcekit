@@ -16,11 +16,40 @@
  *   na prázdný root by znamenal, že se regrese pozná až z horšího Lighthouse
  *   v produkci — přesně ten druh chyby, který nikdo nehledá.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { extname, join, resolve } from 'node:path'
 import { createServer } from 'vite'
 
 const dist = resolve(process.cwd(), 'dist')
+
+/**
+ * ★ POJISTKA NDA. Reference jsou anonymizované (src/content/projects.ts) a
+ * jména klientů NESMÍ do žádného textového souboru v dist/ — ani do HTML,
+ * ani do llms.txt nebo strukturovaných dat. Data to vynucují typem, jenže
+ * `noscript` v projekty.html a llms.txt jsou ručně psané kopie a tenhle
+ * seznam je jediné místo, které je hlídá. Když se jméno objeví, build spadne —
+ * únik pod NDA se má poznat tady, ne od klienta.
+ * Při přidání zamčené reference sem přidej klientovy identifikátory.
+ */
+const NDA_BLOCKLIST = ['superadvokat', 'tutter', 'slyx']
+
+function checkNda(root) {
+  const offenders = []
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name)
+      if (entry.isDirectory()) walk(path)
+      else if (['.html', '.txt', '.xml', '.json', '.js', '.css', '.webmanifest'].includes(extname(entry.name))) {
+        const body = readFileSync(path, 'utf8').toLowerCase()
+        for (const term of NDA_BLOCKLIST) if (body.includes(term)) offenders.push(`${path}: „${term}"`)
+      }
+    }
+  }
+  walk(root)
+  if (offenders.length) {
+    throw new Error(`NDA kontrola: jméno klienta uniklo do buildu –\n  ${offenders.join('\n  ')}`)
+  }
+}
 
 const vite = await createServer({
   server: { middlewareMode: true },
@@ -42,6 +71,8 @@ try {
     writeFileSync(file, html.replace(marker, `<div id="root">${app}</div>`))
     console.log(`prerender: ${page} +${(app.length / 1024).toFixed(1)} kB HTML`)
   }
+  checkNda(dist)
+  console.log('prerender: NDA kontrola čistá')
 } catch (err) {
   console.error('prerender selhal:', err)
   process.exitCode = 1

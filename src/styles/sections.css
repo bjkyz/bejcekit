@@ -64,13 +64,20 @@
   text-transform: uppercase;
   color: var(--green);
 }
-.status-pill__dot {
+/* Tělo kontrolky sdílí i „živá ukázka" na /projekty (`.pcard__live-dot`,
+   projects.css) – je to táž tečka dostupnosti, jen bez pilulky. Animace je
+   tady zvlášť schválně: hero pilulka tepe hned, karta až s revealem buňky,
+   aby věčná animace neběžela pod ohybem (viz projects.css). */
+.status-pill__dot,
+.pcard__live-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--green);
   box-shadow: var(--glow-green);
   flex: none;
+}
+.status-pill__dot {
   animation: pulse-dot 2.4s var(--e-ui) infinite;
 }
 @keyframes pulse-dot {

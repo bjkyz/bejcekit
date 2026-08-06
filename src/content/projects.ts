@@ -1,35 +1,49 @@
 /**
- * ★ OBSAH STRÁNKY /projekty. Jediný soubor, který se sahá při přidání reference.
+ * ★ OBSAH STRÁNKY /projekty. Jediný soubor, který se sahá při přidání reference
+ *   (pojistku, že se jméno klienta nedostane do buildu, drží scripts/prerender.mjs).
  *
  * Platí tu stejná pravidla jako v content/sections.ts:
  *   • ŽÁDNÉ DLOUHÉ POMLČKY (—). Krátká pomlčka (–) nebo dvojtečka.
  *   • Veškerá čeština s diakritikou žije v DOM, ne ve WebGL.
  *
- * ★★ A JEDNO NAVÍC, KTERÉ JE TU DŮLEŽITĚJŠÍ NEŽ VŠECHNO OSTATNÍ:
+ * ★★ REFERENCE JSOU OD 2026-08-05 POD PLOMBOU (`locked`). Klientské zakázky
+ *    kryje mlčenlivost, takže se ukazují jen v obrysech a detail se VYŽÁDÁ.
+ *    Zámek není ústupek, je to obchodní argument: stejná smlouva, která chrání
+ *    tyhle klienty, bude chránit i toho příštího. Z toho plynou dvě pravidla:
  *
- *   KAŽDÉ TVRZENÍ NA KARTĚ MUSÍ JÍT OVĚŘIT KLIKNUTÍM NA ODKAZ.
+ *    1) ZAMČENÁ KARTA NESMÍ KLIENTA PROZRADIT – a hlídá to TYP, ne kázeň.
+ *       `Project` je rozlišený svaz: zamčená větev vůbec nemá kam napsat
+ *       doménu nebo odkaz (`href?: never`) a snímek bere jen anonymní soubor
+ *       (`/projects/ref-*.webp`). K tomu konvence, které typ neuhlídá:
+ *       žádný přesný letopočet ani doslovná fráze z klientova webu (obojí
+ *       najde vyhledávač na první pokus) a snímek jde ven VÝHRADNĚ rozmazaný.
+ *       Rozmazává se SOUBOR (`node scripts/blur-refs.mjs`), ne CSS: ostrý
+ *       originál nesmí do sítě vůbec, filtr v CSS se dá vypnout v devtools
+ *       jedním kliknutím.
  *
- *   Portfolio je jediné místo webu, kde se dá lhát tak, že se to poznat nedá –
- *   nikdo si nevygoogluje, jestli jsi opravdu ušetřil klientovi 30 % nákladů.
- *   Právě proto tu žádná taková čísla nejsou. `facts` jsou výhradně věci
- *   odečtené ze živého webu (hlavičky odpovědi, strukturovaná data, formát
- *   obrázků), tedy to, co si návštěvník může za dvě minuty ověřit sám.
+ *    2) CO JE POD PLOMBOU, MUSÍ BÝT PRAVDA DOLOŽITELNÁ NA SCHŮZCE. Anonymita
+ *       není licence ke lhaní – naopak: `facts` zůstávají věci odečtené z toho
+ *       běžícího webu a na vyžádání se ukážou i s tím webem. Číslo od klienta
+ *       patří do `outcome` jen když ho klient dovolil zveřejnit a jde doložit.
  *
- *   Když k projektu přibude číslo od klienta (tržby, konverze, doba odezvy),
- *   patří do `outcome` – a jen tehdy, když ho klient smí zveřejnit a ty ho
- *   umíš doložit. Nezveřejnitelný výsledek se prostě neuvede. Prázdné pole je
- *   lepší než tvrzení, které při první otázce spadne.
+ *    Jediná karta bez plomby je bejcek.it – web, na kterém návštěvník právě
+ *    stojí, je jediná reference, kterou smí (a musí) jít ověřit klikem.
  */
 
-export interface Project {
-  /** Kotva v DOM a klíč Reactu. */
+/** Kotva poptávkového bloku na /projekty. Čte ji sekce (id), nav i zamčené
+ *  karty; jediné místo, které se mění, kdyby se blok přejmenoval. */
+export const INQUIRY_ANCHOR = 'poptavka'
+
+/** Štítek v readout řádku zamčené karty – místo domény, kterou nést nesmí. */
+export const LOCKED_DOMAIN = 'diskrétní reference'
+
+interface ProjectCore {
+  /** Kotva v DOM a klíč Reactu. ★ U zamčených anonymní (renderuje se do DOM). */
   id: string
   /** Pořadové číslo pro mono readout. Drží se formátu sekcí: '01', '02'… */
   num: string
+  /** U zamčených popis oboru („Advokátní kancelář, Praha"), ne jméno klienta. */
   name: string
-  /** Doména bez protokolu. Je to readout, ne odkaz – čte se jako štítek přístroje. */
-  domain: string
-  href: string
   /** Čím ten web je. Krátká jmenná fráze, ne věta. */
   kind: string
   /** Co to řeší a pro koho. Dvě až tři věty, ne odstavec. */
@@ -37,6 +51,8 @@ export interface Project {
   /**
    * Ověřitelná fakta o nasazení. `k` je popisek, `v` hodnota.
    * ★ Jen to, co jde odečíst ze živého webu. Viz hlavička souboru.
+   * ★ Popisky jednoslovně: lišta `.pcard__fact-k` je 6.5rem široká a dvouslovný
+   *   popisek se v ní zalomí (naměřeno na „Pro vyhledávače").
    */
   facts: { k: string; v: string }[]
   stack: string[]
@@ -53,11 +69,35 @@ export interface Project {
     w: number
     h: number
   }
-  /** Odkaz se otevře v nové kartě jen u cizích domén. */
-  external: boolean
-  /** Tenhle web. Karta pak nese jinou hlavičku ('tento web' místo domény). */
-  self?: boolean
 }
+
+/**
+ * ★ ROZLIŠENÝ SVAZ, NE HROMÁDKA VOLITELNÝCH POLÍ. Dřívější tvar (`href?`,
+ * `external?`, `self?` vedle `locked?`) dovoloval 16 kombinací, z nichž legální
+ * byly tři – včetně té nejdražší chyby: zamčené karty s doménou klienta v datech
+ * (bundle by ji odvezl do prohlížeče, i kdyby ji render nepoužil). Teď je
+ * „zamčená karta s odkazem" chyba překladu, ne revizní položka.
+ *
+ * Co si komponenta ODVODÍ, tady schválně není: cíl zamčené karty
+ * (`#${INQUIRY_ANCHOR}`), štítek místo domény (LOCKED_DOMAIN), štítek „živá
+ * ukázka" (má ho každá odemčená karta) i chování odkazu do ciziny (z tvaru
+ * `href`). Viz ui/ProjectCard.tsx.
+ */
+export type Project =
+  | (ProjectCore & {
+      /** Reference pod NDA: bez jména, bez odkazu, snímek jen rozmazaný. */
+      locked: true
+      /** Anonymní soubor je vynucený typem: `klient.webp` neprojde překladem. */
+      shot: ProjectCore['shot'] & { src: `/projects/ref-${string}.webp` }
+      href?: never
+      domain?: never
+    })
+  | (ProjectCore & {
+      locked?: false
+      href: string
+      /** Doména bez protokolu. Je to readout, ne odkaz – štítek přístroje. */
+      domain: string
+    })
 
 /**
  * ★ POŘADÍ JE ZÁMĚR, NE ABECEDA.
@@ -67,18 +107,14 @@ export interface Project {
  */
 export const PROJECTS: Project[] = [
   {
-    id: 'superadvokat',
+    id: 'ref-01',
     num: '01',
-    name: 'Super Advokát',
-    domain: 'superadvokat.com',
-    href: 'https://www.superadvokat.com',
-    kind: 'Právní služby online s cenou předem',
+    name: 'Právní služby s cenou předem',
+    locked: true,
+    kind: 'Objednávkový web advokátní kanceláře',
     summary:
-      'Advokátní kancelář, která prodává konkrétní právní služby po internetu: klient si vybere svou situaci, cenu vidí ještě před objednáním a advokát se ozve do 24 hodin. Web proto musí unést ceník, objednávku i více jazyků a přitom zůstat rychlý.',
+      'Advokátní kancelář, která prodává právní služby po internetu: klient si vybere svou situaci, cenu vidí ještě před objednáním a případ jde rovnou advokátovi. Web proto nese ceník, objednávku i cizojazyčné verze a přitom zůstává rychlý.',
     facts: [
-      /* ★ POPISKY JEDNOSLOVNĚ. Lišta `.pcard__fact-k` je 6.5rem široká a
-         dvouslovný popisek se v ní zalomí, takže se řádek fakta rozjede na dva
-         různě vysoké sloupce. Naměřeno na „Pro vyhledávače". */
       { k: 'Doručení', v: 'Předrenderované stránky z CDN (ISR), ne skládání na serveru při každém požadavku' },
       { k: 'Vyhledávače', v: 'Strukturovaná data LegalService, kontakty i adresa kanceláře' },
       { k: 'Jazyky', v: 'hreflang pro cizojazyčné verze, takže se nepřebíjejí ve výsledcích' },
@@ -86,22 +122,20 @@ export const PROJECTS: Project[] = [
     ],
     stack: ['Next.js', 'React', 'Vercel', 'ISR', 'JSON-LD', 'hreflang'],
     shot: {
-      src: '/projects/superadvokat.webp',
-      alt: 'Úvodní obrazovka webu Super Advokát s nadpisem Advokát online s pevnou cenou předem a fotografií advokáta.',
+      src: '/projects/ref-01.webp',
+      alt: 'Záměrně rozmazaný snímek úvodní obrazovky advokátního webu s ceníkem a objednávkou; detail reference je chráněný mlčenlivostí.',
       w: 1440,
       h: 900,
     },
-    external: true,
   },
   {
-    id: 'aktutter',
+    id: 'ref-02',
     num: '02',
-    name: 'Advokátní kancelář Tutter',
-    domain: 'aktutter.cz',
-    href: 'https://aktutter.cz',
-    kind: 'Prezentace advokátní kanceláře',
+    name: 'Advokátní kancelář, Praha',
+    locked: true,
+    kind: 'Prezentace kanceláře s poradnou',
     summary:
-      'Prezentace pražské kanceláře s praxí od roku 1991: přehled oblastí práva, tým, blog a bezplatná úvodní konzultace. Úkolem webu je nést důvěryhodnost a dovést člověka k té jeho oblasti práva dřív, než odejde jinam.',
+      'Zavedená pražská kancelář s praxí přes tři dekády: oblasti práva, tým, blog a bezplatná úvodní konzultace. Úkolem webu je nést důvěryhodnost a dovést člověka k té jeho oblasti práva dřív, než odejde jinam.',
     facts: [
       { k: 'Vyhledávače', v: 'Časté dotazy ve strukturovaných datech, takže se můžou objevit přímo ve výsledku' },
       { k: 'Jazyky', v: 'hreflang pro cizojazyčnou verzi' },
@@ -110,22 +144,20 @@ export const PROJECTS: Project[] = [
     ],
     stack: ['Nuxt', 'Vue', 'Vercel', 'JSON-LD FAQ', 'hreflang'],
     shot: {
-      src: '/projects/aktutter.webp',
-      alt: 'Úvodní obrazovka webu Advokátní kanceláře Tutter s nadpisem Naše zkušenosti jsou klíčem k Vašemu úspěchu.',
+      src: '/projects/ref-02.webp',
+      alt: 'Záměrně rozmazaný snímek úvodní obrazovky webu advokátní kanceláře; detail reference je chráněný mlčenlivostí.',
       w: 1440,
       h: 900,
     },
-    external: true,
   },
   {
-    id: 'slyx',
+    id: 'ref-03',
     num: '03',
-    name: 'SLYX Fashions',
-    domain: 'slyx.com',
-    href: 'https://slyx.com',
-    kind: 'Značkový web módní dílny, USA',
+    name: 'Módní značka, USA',
+    locked: true,
+    kind: 'Značkový web zakázkové dílny',
     summary:
-      'Web americké značky, která šije latexovou módu na míru. Stojí na obrazu, ne na textu: video přes celou plochu, animace řízené scrollem a galerie zakázkové výroby. Anglicky, pro zákazníky mimo Česko.',
+      'Americká značka, která šije módu na míru. Web stojí na obrazu, ne na textu: video přes celou plochu, animace řízené scrollem a galerie zakázkové výroby. Anglicky, pro zákazníky za oceánem.',
     facts: [
       { k: 'Pojetí', v: 'Video hero přes celou šířku, obsah nastupuje animací při scrollu' },
       { k: 'Doručení', v: 'Cloudflare, tedy edge síť blízko americkým zákazníkům' },
@@ -133,12 +165,11 @@ export const PROJECTS: Project[] = [
     ],
     stack: ['Vue', 'GSAP', 'Cloudflare'],
     shot: {
-      src: '/projects/slyx.webp',
-      alt: 'Úvodní obrazovka webu SLYX Fashions s videem modelky v latexovém oblečení na černém pozadí.',
+      src: '/projects/ref-03.webp',
+      alt: 'Záměrně rozmazaný snímek úvodní obrazovky webu módní značky s velkými fotografiemi; detail reference je chráněný mlčenlivostí.',
       w: 1440,
       h: 900,
     },
-    external: true,
   },
   {
     id: 'bejcekit',
@@ -162,7 +193,5 @@ export const PROJECTS: Project[] = [
       w: 1440,
       h: 900,
     },
-    external: false,
-    self: true,
   },
 ]

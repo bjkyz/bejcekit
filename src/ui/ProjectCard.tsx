@@ -1,4 +1,4 @@
-import type { Project } from '../content/projects'
+import { INQUIRY_ANCHOR, LOCKED_DOMAIN, type Project } from '../content/projects'
 import Icon from './Icons'
 
 /**
@@ -13,9 +13,7 @@ import Icon from './Icons'
  *   Nabízí se obalit celou kartu do <a>. Myší to funguje skvěle a pro odečítač
  *   obrazovky je to katastrofa: jméno odkazu se skládá z veškerého textu uvnitř,
  *   takže by nevidomý uživatel uslyšel jednu souvislou větu dlouhou přes dvě stě
- *   znaků („Super Advokát právní služby online s cenou předem advokátní kancelář
- *   která prodává doručení předrenderované stránky z CDN…") a musel by z ní
- *   vyluštit, kam ten odkaz vlastně vede.
+ *   znaků a musel by z ní vyluštit, kam ten odkaz vlastně vede.
  *
  *   Použitý vzor je „natažený odkaz": odkazem je JEN jméno projektu, a jeho
  *   `::after` se roztáhne přes celou kartu jako neviditelný zásahový obdélník.
@@ -24,6 +22,13 @@ import Icon from './Icons'
  *   Cena, kterou to stojí: text uvnitř karty nejde označit myší (leží pod tím
  *   obdélníkem). Na kartě portfolia je to přijatelné – nikdo si odsud nekopíruje
  *   odstavce, a kdo chce, otevře odkazovaný web.
+ *
+ * ★★ ZAMČENÁ KARTA (reference pod NDA) VEDE NA #poptavka, NE NA KLIENTŮV WEB.
+ *   Zámek by byl mrtvý konec: člověk klikne, nic se nestane, odchází. Takhle je
+ *   to nejkratší cesta k jediné akci, která detail reference opravdu odemkne –
+ *   napsat si o něj. Odečítač se pravdu dozví z přípisku ve jménu odkazu
+ *   („detail na vyžádání"), vidoucí z pečeti přes snímek. Pečeť je `aria-hidden`:
+ *   je to táž informace podruhé, jen namalovaná.
  *
  * ★★ FOCUS MUSÍ ROZSVÍTIT CELOU KARTU, NE JEN ŘÁDEK S ODKAZEM.
  *   Když se karta rozsvěcí na `:hover`, ale při tabování jen tence orámuje jméno,
@@ -41,6 +46,16 @@ import Icon from './Icons'
  */
 export default function ProjectCard({ p, i }: { p: Project; i: number }) {
   const headId = `pcard-${p.id}`
+  /* ★ CELÝ REŽIM KARTY SE ODVODÍ TADY, NA JEDNOM MÍSTĚ. Data nesou jen to,
+     co se odvodit nedá (viz rozlišený svaz v content/projects.ts):
+     • zamčená karta vede na poptávkový blok, ne na klientův web,
+     • místo domény nese štítek LOCKED_DOMAIN,
+     • „do ciziny" se pozná z tvaru odkazu, ne z ručního příznaku, který by
+       se při příští veřejné referenci zapomněl nastavit. */
+  const href = p.locked ? `#${INQUIRY_ANCHOR}` : p.href
+  const domain = p.locked ? LOCKED_DOMAIN : p.domain
+  const external = !p.locked && /^https?:\/\//.test(p.href)
+  const icon = p.locked ? 'lock' : external ? 'external' : 'back'
 
   return (
     <article
@@ -70,28 +85,56 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
           fetchPriority={i === 0 ? 'high' : 'low'}
         />
         <span className="pcard__glare" aria-hidden="true" />
+        {/* Plomba přes zamčený snímek. Čistě vizuální dvojnice informace,
+            kterou nese jméno odkazu – proto aria-hidden. Sedí UVNITŘ
+            `.pcard__screen` (pointer-events: none), takže nekrade kliky
+            nataženému odkazu. Typografii jí dává sdílená `.label`;
+            ztmavení pod ní je zapečené přímo ve snímku (scripts/blur-refs.mjs),
+            ne v CSS – viz komentář u `.pcard__seal` ve stylech. */}
+        {p.locked && (
+          <span className="pcard__seal label" aria-hidden="true">
+            <span className="pcard__seal-head">
+              <Icon name="lock" size={12} />
+              Chráněno NDA
+            </span>
+            <span>Detail na vyžádání</span>
+          </span>
+        )}
       </div>
 
       {/* ── POPIS ────────────────────────────────────────────────── */}
       <div className="pcard__body">
         <p className="pcard__head">
           <span className="pcard__num">{p.num}</span>
-          <span className="pcard__domain">{p.domain}</span>
+          <span className="pcard__domain">{domain}</span>
+          {/* Zelená = stav, stejně jako štítek kapacity na úvodu: na tuhle
+              práci se dá kliknout a běží. Štítek má KAŽDÁ odemčená karta –
+              plomba a kontrolka jsou dvě poloviny jedné osy, takže se žádná
+              karta nemůže ocitnout bez stavu. Kontrast je záměr: tři karty
+              říkají „diskrétnost", čtvrtá „a takhle to pak žije". */}
+          {!p.locked && (
+            <span className="pcard__live">
+              <span className="pcard__live-dot" />
+              živá ukázka
+            </span>
+          )}
         </p>
 
         <h2 className="pcard__name" id={headId}>
           <a
             className="pcard__link"
-            href={p.href}
-            target={p.external ? '_blank' : undefined}
-            rel={p.external ? 'noreferrer' : undefined}
+            href={href}
+            target={external ? '_blank' : undefined}
+            rel={external ? 'noreferrer' : undefined}
           >
             {p.name}
-            {/* Ikona je dekorace (aria-hidden), takže smysl „otevře se cizí web"
-                musí nést i text pro odečítač. Vizuálně skrytý dodatek to udělá,
-                aniž by se do jména odkazu psalo něco navíc pro vidoucí. */}
-            <Icon name={p.external ? 'external' : 'back'} size={14} />
-            {p.external && <span className="sr-only"> (otevře se v nové kartě)</span>}
+            {/* Ikona je dekorace (aria-hidden), takže smysl („otevře cizí web",
+                „je pod zámkem") musí nést i text pro odečítač. Vizuálně skrytý
+                dodatek to udělá, aniž by se do jména odkazu psalo něco navíc
+                pro vidoucí. */}
+            <Icon name={icon} size={14} />
+            {p.locked && <span className="sr-only"> (pod NDA, detail na vyžádání)</span>}
+            {external && <span className="sr-only"> (otevře se v nové kartě)</span>}
           </a>
         </h2>
 

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { MeshTransmissionMaterial } from '@react-three/drei'
 import { easing } from 'maath'
-import type { Group, MeshPhysicalMaterial } from 'three'
+import { AdditiveBlending, type Group, type MeshPhysicalMaterial } from 'three'
 import { clampDelta, sceneState } from '../lib/scene-state'
 import { VOID } from './palette'
 import type { Tier } from '../lib/quality'
@@ -47,6 +47,26 @@ export default function Shell({ tier }: { tier: Tier }) {
   })
 
   if (tier === 'low') {
+    /* ★★★ SKLO SE NA 'LOW' PŘIČÍTÁ, NEPŘEKRÝVÁ. A je to celý rozdíl mezi
+       „stroj za sklem" a „šedý flek přes půl obrazovky".
+
+       Stálo tu `transparent opacity={0.16}` s barvou #dff7fb, tedy skoro bílou.
+       Alfa míchání ale znamená VÝMĚNU: každý pixel uvnitř siluety se ze 16 %
+       nahradil bílou — včetně pixelů, na kterých je vidět MODEL. Jádro trysky je
+       ve výchozím stavu tmavý kov se slabou emisí, takže mu 16 % bílé sebralo
+       přesně ten kontrast, ze kterého byl čitelný. Na tieru bez composeru navíc
+       nejede bloom, takže se ta ztráta neměla čím vrátit. Výsledek byl dokonale
+       matoucí: hrany krychle svítily, ale uvnitř nich byl obdélník mléčné mlhy
+       — a uživatel to nahlásil jako „zmizel 3D model". Nezmizel. Zbělal.
+
+       Aditivní míchání nemá jak něco skrýt: umí jedině PŘIDAT světlo. Tmavě
+       azurová skořápka se tak čte jako prosvětlený objem (přesně to, co na vyšších
+       patrech dělá transmisní materiál), ale všechno, co je uvnitř, zůstává vidět
+       — jen o kousek jasnější. Nula render targetů, jeden průchod.
+
+       Barva MUSÍ zůstat tmavá. Aditivně se sčítá napřímo, takže #dff7fb by tu
+       nedělalo mléčnou mlhu, ale rovnou přepal do bílé. */
+
     /* ★ „LEVNÁ" VARIANTA, KTERÁ BYLA DRAŽŠÍ NEŽ TA DRAHÁ.
        Stálo tu `transmission={0.9}` na obyčejném meshPhysicalMaterial. Jenže
        jakákoli nenulová `transmission` nastartuje ve three vlastní
@@ -59,9 +79,9 @@ export default function Shell({ tier }: { tier: Tier }) {
        full-res druhý průchod, zatímco 'mid' si vystačilo s FBO 256×256.
        Levné patro bylo dražší než střední. Přesně naopak, než mělo být.
 
-       Transmission tady tedy nemá co dělat. Sklo se na 'low' fejkuje průhledností
-       a lomem světla na hranách — jeden průchod, žádný extra target. Vypadá to
-       o třídu hůř, ale běží to na tom, na čem to běžet má.
+       Transmission tady tedy nemá co dělat. Sklo se na 'low' fejkuje přičteným
+       objemem (viz výš) — jeden průchod, žádný extra target. Vypadá to o třídu
+       hůř, ale běží to na tom, na čem to běžet má.
 
        Pozor: materiál je v transparentní frontě (depthWrite:false), takže zadní
        cedule nejsou zakryté — FacePlates je proto na 'low' tieru schová. */
@@ -69,15 +89,29 @@ export default function Shell({ tier }: { tier: Tier }) {
       <group ref={grp}>
         <mesh>
           <boxGeometry args={[3, 3, 3]} />
-          <meshPhysicalMaterial
-            transmission={0}
+          {/* ★ JEN PŘEDNÍ STĚNY (výchozí FrontSide), NE DoubleSide. Aditivní
+              vrstvy se sčítají, takže o výsledném jasu rozhoduje, KOLIK jich
+              paprsek protne — a to se během obletu mění: čelně na stěnu jedna,
+              z rohu (tedy uprostřed přeletu) dvě. S DoubleSide je to dvojnásobek
+              obojího a krychle se v zatáčce rozsvítila do svítících plachet.
+              S FrontSide zůstává rozdíl mezi „čelně" a „z rohu" zachovaný — z rohu
+              se díváme přes víc skla, tak je hustší — jen v použitelném rozsahu.
+
+              ★★ A DRŽ TO NÍZKO. Bazální materiál svítí po celé stěně STEJNĚ, takže
+              čím vyšší krytí, tím víc se z krychle stává svítící deska místo skla.
+              Objem má jen naznačit; práci na siluetě dělají hrany a rohové study
+              (EdgeLattice), práci na dojmu světla zář jádra (Core). Sklo je tady
+              podklad pro obojí, ne hlavní hlas.
+
+              toneMapped={false} — na 'low' mapuje AgX přímo renderer (ToneSync ve
+              Scene.tsx) a ten by tenhle už hotový, záměrně tlumený odstín ohnul. */}
+          <meshBasicMaterial
+            color="#0c2c38"
             transparent
-            opacity={0.16}
-            roughness={0.12}
-            metalness={0}
-            ior={1.5}
-            reflectivity={0.6}
-            color="#dff7fb"
+            opacity={0.4}
+            depthWrite={false}
+            blending={AdditiveBlending}
+            toneMapped={false}
           />
         </mesh>
       </group>

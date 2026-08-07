@@ -23,6 +23,14 @@ const STEPS: { axis: 'x' | 'y'; deg: number }[] = [
 
 const AXIS = { x: new Vector3(1, 0, 0), y: new Vector3(0, 1, 0) }
 
+/**
+ * Světová osa otáčení pro ÚSEK dráhy i → i+1. Úsek k je přechod z acc_k na
+ * acc_{k+1}, a ten je přesně STEPS[k+1] — tabulka výš je tedy jediný zdroj pravdy
+ * i pro tohle. Čte to Rig, aby poznal, kdy je přelet vodorovný (a smí se do něj
+ * naklonit) a kdy svislý (kde by náklon nedával smysl).
+ */
+export const SEGMENT_AXIS: Vector3[] = STEPS.slice(1).map((s) => AXIS[s.axis].clone())
+
 /** Kvaterniony natočení krychle tak, aby i-tá stěna mířila na kameru (+Z). */
 export const FACE_QUATS: Quaternion[] = (() => {
   const out: Quaternion[] = []

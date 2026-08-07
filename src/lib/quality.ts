@@ -32,28 +32,86 @@ const OFF_KEY = 'bjk:no-3d'
 /** Po týdnu se strop zahodí — uživatel mohl vyměnit stroj nebo ovladače. */
 const CAP_TTL = 7 * 24 * 3600 * 1000
 
-function storedCap(): Tier | null {
+/**
+ * ★★★ STROP MUSÍ MÍT CESTU ZPÁTKY NAHORU — JINAK JEDNA ŠPATNÁ MINUTA ZHASNE WEB NA TÝDEN.
+ *
+ * Tohle je zdaleka nejdražší chyba, jakou tenhle soubor uměl udělat, a projevila se
+ * přesně tak, jak se taková chyba projevit musí: „vrátˇ zpátky 3D model". Model
+ * nikam nezmizel — web jen na VŠECHNY další návštěvy naběhl v patře 'low', kde je
+ * skořápka fejk bez composeru, bloom neběží a stroj se scvrkne na pár čar. Vypadá to
+ * jako chybějící scéna, protože z ní zbylo torzo.
+ *
+ * Jak se tam člověk dostane: stačí JEDINÁ návštěva, při které stroj chvíli nestíhal.
+ * Běžící export videa, zahřátý notebook na baterce, patnáct otevřených tabů — nebo
+ * (a to je ten reálný případ) hodina pouštění headless Chrome při měření Lighthouse
+ * na tomtéž stroji. Governor sestoupil, zapsal si strop na SEDM DNÍ a od té chvíle
+ * neexistoval mechanismus, který by ho kdy zvedl. Stroj se mezitím dávno nudil.
+ *
+ * Strop teď žije podle dvou pravidel:
+ *
+ *   ZAPAMATUJ SI JEN TO, CO SE OSVĚDČILO. Sestup se zapisuje AŽ POTÉ, co nové patro
+ *   prokazatelně běží (viz PERSIST_HOLD v Scene.tsx) — okamžik paniky se do paměti
+ *   nedostane. Zapisuje se patro, které FUNGOVALO, ne patro, do kterého se uteklo.
+ *
+ *   STROP SE PŘEZKOUMÁVÁ. Zapamatovaný strop je HYPOTÉZA, ne rozsudek: když scéna
+ *   běží dlouho a hladce, governor ho jednou za návštěvu zvedne o patro a paměť
+ *   zahodí. Když se to nepovede, strop se zapíše jako POTVRZENÝ (`firm`) a od té
+ *   chvíle už se nezpochybňuje — stroj dostal šanci a neuspěl, druhé kolo trhání
+ *   by bylo jen otravné.
+ */
+type Cap = { v: Tier; firm: boolean }
+
+function readCap(): Cap | null {
   try {
-    // Session klíč = governor to za běhu úplně vzdal. Platí jen pro tuhle návštěvu:
-    // mohl to být jednorázový stav (battery saver, přehřátí), napořád to nezamykáme.
-    if (sessionStorage.getItem(OFF_KEY)) return 'off'
     const raw = localStorage.getItem(CAP_KEY)
     if (!raw) return null
-    const { v, t } = JSON.parse(raw) as { v?: Tier; t?: number }
+    const { v, t, firm } = JSON.parse(raw) as { v?: Tier; t?: number; firm?: boolean }
     if (typeof t !== 'number' || Date.now() - t > CAP_TTL) return null
-    return v === 'low' || v === 'mid' ? v : null
+    if (v !== 'low' && v !== 'mid') return null
+    return { v, firm: firm === true }
   } catch {
     return null
   }
 }
 
-/** Governor si sem ukládá, kam až musel sestoupit. 'off' jen na session. */
-export function persistTierCap(v: Tier): void {
+/** Zapamatovaný strop i s tím, jestli je potvrzený. Čte ho governor ve Scene.tsx. */
+export function storedCap(): Cap | null {
+  return readCap()
+}
+
+function activeCap(): Tier | null {
+  // Session klíč = governor to za běhu úplně vzdal. Platí jen pro tuhle návštěvu:
+  // mohl to být jednorázový stav (battery saver, přehřátí), napořád to nezamykáme.
+  try {
+    if (sessionStorage.getItem(OFF_KEY)) return 'off'
+  } catch {
+    /* private mode */
+  }
+  return readCap()?.v ?? null
+}
+
+/**
+ * Governor si sem ukládá, kam až musel sestoupit. 'off' jen na session.
+ * `firm` = strop se už jednou zkoušel zvednout a nevyšlo to → víc se nezpochybňuje.
+ */
+export function persistTierCap(v: Tier, firm = false): void {
   try {
     if (v === 'off') sessionStorage.setItem(OFF_KEY, '1')
-    else localStorage.setItem(CAP_KEY, JSON.stringify({ v, t: Date.now() }))
+    else localStorage.setItem(CAP_KEY, JSON.stringify({ v, t: Date.now(), firm }))
   } catch {
     /* private mode — jen se to nezapamatuje */
+  }
+}
+
+/** Pořadí pater jako číslo — jediné povolené „je výš než". */
+export const tierRank = (t: Tier): number => ORDER.indexOf(t)
+
+/** Strop se osvědčil jako zbytečný — scéna běží nad ním. Zahodit a jet naplno. */
+export function clearTierCap(): void {
+  try {
+    localStorage.removeItem(CAP_KEY)
+  } catch {
+    /* private mode */
   }
 }
 
@@ -108,16 +166,27 @@ function probe(): Tier {
   return 'high'
 }
 
+/**
+ * Patro, které stroji přiřkl HARDWARE — bez ohledu na to, co si pamatuje strop.
+ * Governor podle něj pozná, jak vysoko smí strop nejvýš zvednout: přezkoumání
+ * stropu nikdy nesmí přestřelit nad to, co detekce sama považuje za únosné.
+ */
+export function hardwareTier(): Tier {
+  if (typeof window === 'undefined') return 'mid'
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'off'
+  if (probed === null) probed = probe()
+  return probed
+}
+
 export function detectTier(): Tier {
   if (typeof window === 'undefined') return 'mid'
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'off'
+  const hw = hardwareTier()
+  if (hw === 'off') return 'off'
 
-  if (probed === null) probed = probe()
-
-  const cap = storedCap()
-  if (cap !== null) return ORDER[Math.min(ORDER.indexOf(probed), ORDER.indexOf(cap))]
-  return probed
+  const cap = activeCap()
+  if (cap !== null) return ORDER[Math.min(ORDER.indexOf(hw), ORDER.indexOf(cap))]
+  return hw
 }
 
 /** Strop DPR. Telefon s DPR 3 kreslí 9× víc pixelů než DPR 1. */

@@ -2,7 +2,17 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useAnimations, useGLTF } from '@react-three/drei'
 import { easing } from 'maath'
-import { Group, Mesh, MeshStandardMaterial, PointLight } from 'three'
+import {
+  AdditiveBlending,
+  CanvasTexture,
+  Group,
+  MathUtils,
+  Mesh,
+  MeshStandardMaterial,
+  PointLight,
+  SRGBColorSpace,
+  SpriteMaterial,
+} from 'three'
 import { clampDelta, sceneState } from '../lib/scene-state'
 import { CYAN } from './palette'
 import type { Tier } from '../lib/quality'
@@ -28,6 +38,45 @@ const MODEL_MAX_DIM = 4.075
 const FIT = 1.75 / MODEL_MAX_DIM // ≈ 0.43
 
 /**
+ * ═══════════ ZÁŘE PRO PATRO BEZ COMPOSERU ═══════════
+ *
+ * ★ NA 'LOW' NEBĚŽÍ BLOOM — A BLOOM JE TU POLOVINA OBRAZU.
+ *
+ * Celá scéna je postavená na tom, že pár prvků má emisi NAD 1.0 (jádro trysky,
+ * hrany, rohové study) a composer z nich udělá světlo, které se rozlévá do okolí.
+ * Bez composeru se ta samá čísla jenom ořežou tónovým mapováním na bílou tečku:
+ * stroj přestane svítit a zbudou z něj obrysy. Právě proto vypadá nejnižší patro
+ * jako „chybějící model" — nechybí geometrie, chybí SVĚTLO.
+ *
+ * Zář je náhrada za jeden jediný, ale nejdůležitější případ: měkký halo kolem
+ * jádra. Je to JEDEN sprite s radiálním přechodem, aditivně míchaný — tedy jeden
+ * quad, nula render targetů, nula průchodů navíc. Proti skutečnému bloomu je to
+ * hrubé (nezná okolní geometrii a nezáří z hran), ale nese tu jednu věc, kvůli
+ * které se na stroj člověk dívá: že uvnitř něco hoří.
+ *
+ * ★ Textura se kreslí do <canvas>, ne načítá ze souboru — ze stejného důvodu jako
+ *   cedule (viz FacePlates.tsx): 128×128 přechod je pár řádků kódu a nula requestů.
+ */
+const HALO_PX = 128
+
+function drawHalo(): HTMLCanvasElement {
+  const c = document.createElement('canvas')
+  c.width = c.height = HALO_PX
+  const g = c.getContext('2d')!
+  const h = HALO_PX / 2
+  const grd = g.createRadialGradient(h, h, 0, h, h, h)
+  /* Jádro světlé a úzké, spád dlouhý. Lineární přechod by dal kotouč s viditelnou
+     hranou — mezikroky ho ohnou do křivky, která se čte jako rozptyl, ne jako disk. */
+  grd.addColorStop(0, 'rgba(184,245,255,0.95)')
+  grd.addColorStop(0.14, 'rgba(120,232,246,0.45)')
+  grd.addColorStop(0.38, 'rgba(79,216,232,0.14)')
+  grd.addColorStop(1, 'rgba(79,216,232,0)')
+  g.fillStyle = grd
+  g.fillRect(0, 0, HALO_PX, HALO_PX)
+  return c
+}
+
+/**
  * „Primary Ion Drive" — Mike Murdock, CC BY 4.0.
  * Atribuce je SMLUVNÍ POVINNOST, ne zdvořilost. Je na dvou místech: v patičce
  * sekce 05 a ve stavovém panelu. Nikdy ji neodstraňuj z estetických důvodů.
@@ -43,8 +92,18 @@ export default function Core({ tier }: { tier: Tier }) {
   const grp = useRef<Group>(null)
   const inner = useRef<Group>(null)
   const light = useRef<PointLight>(null)
+  const halo = useRef<SpriteMaterial>(null)
   const { scene, animations } = useGLTF(MODEL, USE_DRACO)
   const { actions } = useAnimations(animations, grp)
+
+  // Zář existuje JEN tam, kde chybí bloom. Na 'mid' a 'high' by se s ním sčítala.
+  const haloTex = useMemo(() => {
+    if (tier !== 'low') return null
+    const t = new CanvasTexture(drawHalo())
+    t.colorSpace = SRGBColorSpace
+    return t
+  }, [tier])
+  useEffect(() => () => haloTex?.dispose(), [haloTex])
 
   /** Jen materiály, které mají doopravdy zářit — ty jediné se animují. */
   const glow = useMemo(() => {
@@ -119,9 +178,17 @@ export default function Core({ tier }: { tier: Tier }) {
 
     for (const m of glow) easing.damp(m, 'emissiveIntensity', wantEmissive, 0.3, dt)
     if (light.current) easing.damp(light.current, 'intensity', 3 + wantEmissive, 0.3, dt)
+    /* Zář jede po TÉŽE křivce jako emise, jen převedená do krytí — jinak by se
+       při zážehu z preloaderu rozsvítilo jádro a halo kolem něj zůstalo stát. */
+    if (halo.current) easing.damp(halo.current, 'opacity', 0.1 + wantEmissive * 0.055, 0.3, dt)
 
-    // Jádro se během otáčky opře PROTI skořápce a pak ji dožene.
-    if (inner.current) inner.current.rotation.y -= 0.9 * h * dt
+    /* ★ JÁDRO SE BĚHEM OTÁČKY OPŘE PROTI POHYBU A PAK HO DOŽENE — a musí se opřít
+       PROTI TOMU, KAM SE ZROVNA JEDE. Dřív tu bylo znaménko natvrdo, takže se při
+       scrollování zpátky nahoru jádro opíralo do STEJNÉ strany jako při cestě dolů:
+       setrvačnost, která nezná směr, není setrvačnost, ale ornament.
+       Rychlost se klampuje na ±1 — nad jednu stěnu za sekundu už je to plný odpor
+       a rychlejší švihnutí nemá jádro roztočit dokola. */
+    if (inner.current) inner.current.rotation.y -= 0.9 * h * MathUtils.clamp(sceneState.flow, -1, 1) * dt
 
     /* ★ KOLÉBÁNÍ BĚŽÍ I NA 'low'. Býval tu guard `tier !== 'low'` a byl to špatný
        obchod: zápis do rotation.z stojí NULU (žádný draw call, žádný shader, jeden
@@ -132,17 +199,39 @@ export default function Core({ tier }: { tier: Tier }) {
   })
 
   return (
-    <group ref={grp} scale={FIT * (tier === 'low' ? 0.9 : 1)}>
-      <group ref={inner}>
-        {/* dispose={null} — R3F by jinak při unmountu zlikvidoval i položku
-            v useGLTF cache („model je po návratu černý"). */}
-        <primitive object={scene} dispose={null} />
+    <>
+      <group ref={grp} scale={FIT * (tier === 'low' ? 0.9 : 1)}>
+        <group ref={inner}>
+          {/* dispose={null} — R3F by jinak při unmountu zlikvidoval i položku
+              v useGLTF cache („model je po návratu černý"). */}
+          <primitive object={scene} dispose={null} />
+        </group>
+        {/* Bloom se NEREFRAKTUJE skrz sklo (MTM renderuje svoje FBO mimo composer).
+            Kompenzujeme tím, že jádro nese SKUTEČNÉ světlo — sklo je tak nasvícené
+            zevnitř a čte se jako zdroj světla za sklem. Nebojuj s pipeline. */}
+        <pointLight ref={light} color={CYAN} intensity={4} distance={6} decay={2} />
       </group>
-      {/* Bloom se NEREFRAKTUJE skrz sklo (MTM renderuje svoje FBO mimo composer).
-          Kompenzujeme tím, že jádro nese SKUTEČNÉ světlo — sklo je tak nasvícené
-          zevnitř a čte se jako zdroj světla za sklem. Nebojuj s pipeline. */}
-      <pointLight ref={light} color={CYAN} intensity={4} distance={6} decay={2} />
-    </group>
+
+      {/* ★ ZÁŘ STOJÍ MIMO `grp`, TEDY MIMO ZMENŠENÍ NA FIT (≈0.39). Uvnitř by se
+          scvrkla spolu s modelem a halo o průměru 1,2 jednotky by nemělo kolem
+          čeho zářit. Tady je v měřítku scény, takže přesahuje jádro a rozlévá se
+          do skořápky — přesně jako bloom, který na tomhle patře chybí.
+          Sprite je vždy čelem ke kameře, takže mu kolébání ani protiběh jádra
+          nemají co vzít; jeho místo je střed stroje a ten se nehýbe. */}
+      {haloTex && (
+        <sprite scale={[2.9, 2.9, 1]}>
+          <spriteMaterial
+            ref={halo}
+            map={haloTex}
+            transparent
+            opacity={0.1}
+            depthWrite={false}
+            blending={AdditiveBlending}
+            toneMapped={false}
+          />
+        </sprite>
+      )}
+    </>
   )
 }
 

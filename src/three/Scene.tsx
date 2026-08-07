@@ -2,7 +2,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Preload, useProgress } from '@react-three/drei'
 import { AgXToneMapping, NoToneMapping, type Group, type Material, type Mesh } from 'three'
-import { dprFor, persistTierCap, type Tier } from '../lib/quality'
+import { clearTierCap, dprFor, hardwareTier, persistTierCap, storedCap, tierRank, type Tier } from '../lib/quality'
 import { sceneState } from '../lib/scene-state'
 import { VOID } from './palette'
 import { setLoading } from '../lib/loading'
@@ -62,21 +62,46 @@ const GL = {
  *     3. mid  → low    sklo fejkem, žádný composer, méně prachu
  *     4. low  → PRYČ   3D se vypne úplně a zbude čistý, rychlý web
  *
- * Každý sestup si PAMATUJE (persistTierCap): příští návštěva začne rovnou na
- * patře, které stroj utáhl — první dojem už nikdy není „trhá se to".
- *
- * ★ NAHORU se šplhá JEN DPR. Patro se zpátky nepovyšuje — přepnutí materiálů
- *   znamená rekompilaci shaderů, a governor, který osciluje mezi patry, je horší
- *   než governor, který jednou ustoupí a dá pokoj.
+ * ★ NAHORU se za normálního běhu šplhá JEN DPR. Patro se nepovyšuje — přepnutí
+ *   materiálů znamená rekompilaci shaderů, a governor, který osciluje mezi patry,
+ *   je horší než governor, který jednou ustoupí a dá pokoj. Jediná výjimka je
+ *   PŘEZKOUMÁNÍ STROPU Z PAMĚTI, viz níž — a to se smí spustit jen na návštěvě,
+ *   která pod takovým stropem startovala, a končí prvním zaškobrtnutím.
  *
  * ★★ Startuje se KONZERVATIVNĚ (půlka rozsahu DPR, viz initialDpr) a nahoru se jde
  *   až po důkazu. Opačný postup — začít naplno a čekat, až se to sesype — znamená,
  *   že si každý slabší stroj odbyde trhaný úvod přesně v momentě prvního dojmu.
+ *
+ * ═══════════ PAMĚŤ: ZAPISUJE SE AŽ TO, CO SE OSVĚDČILO ═══════════
+ *
+ * ★★★ SESTUP SE NEZAPISUJE V OKAMŽIKU SESTUPU. Dřív ano — a byla to nejdražší
+ *   chyba celé scény (rozepsáno v lib/quality.ts): jedna vteřina, kdy byl stroj
+ *   vytížený něčím úplně jiným, zamkla web do patra 'low' na SEDM DNÍ. Uživatel to
+ *   nahlásil jako „zmizel 3D model", protože z modelu v tom patře zbude torzo.
+ *
+ *   Sestup je proto REAKCE (proběhne hned, ať je obraz zase plynulý), ale ZÁPIS je
+ *   ZÁVĚR — a závěr se dělá až z důkazu. Nové patro se do paměti dostane, teprve
+ *   když na něm scéna PERSIST_HOLD nepřetržitě běží. Zapamatuje se tedy patro,
+ *   které fungovalo, ne patro, do kterého se uteklo.
+ *
+ * ★ A OPAČNÝM SMĚREM: když se startovalo pod stropem z paměti a scéna přesto
+ *   PROMOTE_HOLD běží jako po másle na plném DPR, byl ten strop omyl. Governor
+ *   zvedne patro a šplhá dál, dokud nedojde na to, co dovoluje hardware — a paměť
+ *   zahodí. Zapomenutý strop se tak vyvrátí BĚHEM JEDNÉ návštěvy, ne během tří.
+ *   Jakmile ale scéna jednou spadne, přezkoumávání pro tuhle návštěvu končí
+ *   a strop se zapíše jako POTVRZENÝ, takže se příště už vůbec nezpochybní.
  */
 const DPR_STEP = 0.25
 const FPS_DOWN = 34 // pod tímhle se sestupuje
 const FPS_UP = 56 // nad tímhle se DPR vrací nahoru
 const FPS_ABORT = 20 // hluboko pod použitelností → 3D jde pryč úplně
+
+/** Jak dlouho musí patro plynule běžet, než se zapíše do paměti jako „tohle šlo". */
+const PERSIST_HOLD = 5000
+/** Jak dlouho musí scéna běžet bez zaškobrtnutí, než se přezkoumá strop z paměti. */
+const PROMOTE_HOLD = 9000
+/** Přezkoumání stropu chce POHODLNOU rezervu, ne těsný průlez přes FPS_UP. */
+const FPS_PROMOTE = 58
 
 function Governor({
   level,
@@ -85,6 +110,8 @@ function Governor({
   dpr,
   setDpr,
   demote,
+  promote,
+  mayPromote,
 }: {
   level: Level
   min: number
@@ -92,10 +119,14 @@ function Governor({
   dpr: number
   setDpr: (d: number) => void
   demote: (from: Level) => void
+  promote: (from: Level) => void
+  /** Startovalo se pod nepotvrzeným stropem, ještě se nespadlo a je kam růst. */
+  mayPromote: boolean
 }) {
   const ema = useRef(60)
   const holdUntil = useRef(0) // po každém zásahu chvíli ticho — ať se změna stihne projevit
   const badSince = useRef(0)
+  const goodSince = useRef(0)
 
   useFrame((_, delta) => {
     const now = performance.now()
@@ -104,6 +135,7 @@ function Governor({
        v řádu sekund. To není fps, to byl spánek — vzorek zahodit a chvíli počkat. */
     if (delta <= 0 || delta > 0.5) {
       holdUntil.current = Math.max(holdUntil.current, now + 1000)
+      goodSince.current = 0
       return
     }
 
@@ -114,10 +146,12 @@ function Governor({
     if (holdUntil.current === 0) holdUntil.current = now + 3000
     if (now < holdUntil.current) {
       badSince.current = 0
+      goodSince.current = 0
       return
     }
 
     if (ema.current < FPS_DOWN) {
+      goodSince.current = 0
       if (dpr > min + 0.01) {
         setDpr(Math.max(min, Math.round((dpr - DPR_STEP) * 20) / 20))
         holdUntil.current = now + 2000
@@ -136,13 +170,53 @@ function Governor({
     }
 
     badSince.current = 0
+
     if (ema.current > FPS_UP && dpr < cap - 0.01) {
       setDpr(Math.min(cap, Math.round((dpr + DPR_STEP) * 20) / 20))
       holdUntil.current = now + 1500
+      goodSince.current = 0
+      return
+    }
+
+    /* ── PLYNULÝ BĚH: dvě věci, které se z něj dají uzavřít ─────────────────
+       Obojí se počítá z JEDNOHO měřidla (jak dlouho už to jede v pohodě), jen
+       s jinou laťkou: zapsat „tohle patro šlo" stačí obyčejná plynulost,
+       zpochybnit strop z paměti chce pohodlnou rezervu i plné DPR. */
+    if (goodSince.current === 0) goodSince.current = now
+    const steady = now - goodSince.current
+
+    if (steady > PERSIST_HOLD) commitLevel(level)
+
+    if (mayPromote && ema.current > FPS_PROMOTE && dpr > cap - 0.01 && steady > PROMOTE_HOLD) {
+      promote(level)
+      holdUntil.current = now + 4000
+      goodSince.current = 0
     }
   })
 
   return null
+}
+
+/**
+ * Zápis stropu do paměti. Volá se z governoru každý snímek plynulého běhu, takže
+ * musí být LEVNÝ a IDEMPOTENTNÍ — localStorage je synchronní a sáhnout do něj
+ * 60×/s by byl vlastní gól. Stačí si pamatovat, co už je zapsané.
+ */
+let committed: Level | null = null
+let firmCap = false
+function commitLevel(level: Level): void {
+  if (committed === level) return
+  committed = level
+  /* ★ ZAPISUJE SE JEN SKUTEČNÝ STROP, tedy patro POD tím, co dovoluje hardwarová
+     detekce. Kdyby se zapisovalo i patro, na které stroj stejně sám dosáhne
+     (telefon → 'low', stará integrovaná Intel → 'mid'), byl by ten záznam
+     tautologie: `detectTier` z něj vezme minimum s toutéž hodnotou. Hlavně by ale
+     přestal znamenat to jediné, kvůli čemu existuje — „tady musel governor
+     ustoupit". A záznam, který nic neznamená, se špatně ruší.
+     Když je patro rovné hardwaru (nebo nad ním), je případný starý strop naopak
+     vyvrácený a musí pryč. */
+  if (tierRank(level) < tierRank(hardwareTier())) persistTierCap(level, firmCap)
+  else clearTierCap()
 }
 
 /**
@@ -220,20 +294,72 @@ export default function Scene({
 
   sceneState.tier = level
 
+  /* ★ PŘEZKOUMÁNÍ STROPU SE ROZHODUJE JEDNOU, PŘI VZNIKU SCÉNY — a schválně
+     `useState` s inicializátorem, ne `useMemo`: hodnota nesmí přeblikávat při
+     remountu plátna po ztrátě kontextu (viz MAX_RESTORES), jinak by stroj dostal
+     druhý pokus o povýšení tam, kde právě spadl kontext.
+
+     Podmínky jsou tři a všechny musí platit:
+       • v paměti JE strop a NENÍ potvrzený (potvrzený = už se to jednou zkusilo),
+       • hardware sám o sobě dovoluje víc, než kolik strop pouští,
+       • scéna vůbec startuje pod tím, co hardware dovolí. */
+  const [startedCapped] = useState(() => {
+    const c = storedCap()
+    if (!c || c.firm) return false
+    const hw = hardwareTier()
+    return hw !== 'off' && tierRank(hw) > tierRank(tier === 'off' ? 'low' : tier)
+  })
+  const [hw] = useState(hardwareTier)
+  const promoted = useRef(false)
+  /** Jakmile scéna jednou spadne, přezkoumávání pro tuhle návštěvu končí. */
+  const noMorePromotions = useRef(false)
+
   const demote = useCallback(
     (from: Level) => {
+      /* Sestup po povýšení = strop z paměti měl pravdu. Zapíše se jako POTVRZENÝ,
+         takže se příště už nezpochybňuje a stroj si trhaný start neodbyde dvakrát. */
+      if (promoted.current) firmCap = true
+      noMorePromotions.current = true
+      committed = null // nové patro se musí osvědčit znovu, viz commitLevel
+
       if (from === 'low') {
         persistTierCap('off')
         onFail()
         return
       }
       const next: Level = from === 'high' ? 'mid' : 'low'
-      persistTierCap(next)
+
+      /* ★ DNO SE ZAPISUJE HNED, VYŠŠÍ PATRA AŽ PO DŮKAZU.
+         Pravidlo „zapiš jen to, co se osvědčilo" (viz commitLevel) má jednu díru:
+         stroj, který se netrefí do plynulého běhu ANI na nejnižším patře, by si
+         nikdy nezapsal nic — a odbyl by si celý sestup high→mid→low při KAŽDÉ
+         návštěvě znovu. Přesně tomu měla paměť zabránit.
+         Na 'low' už ale není kam sestupovat, takže tam se nemá na co čekat: víc
+         se z toho stroje stejně nedozvíme. Zapisuje se proto rovnou — a jako
+         NEPOTVRZENÉ, aby to příští návštěva směla přezkoumat (viz Governor). */
+      if (next === 'low') persistTierCap('low', firmCap)
+
       setDpr((d) => Math.min(d, dprFor(next)[1]))
       setLevel(next)
     },
     [onFail],
   )
+
+  /** Strop z paměti se neosvědčil — o patro výš. */
+  const promoteLevel = useCallback((from: Level) => {
+    promoted.current = true
+    committed = null
+    setLevel(from === 'low' ? 'mid' : 'high')
+  }, [])
+
+  /* ★ ŠPLHAT SE SMÍ AŽ NA HARDWAROVÉ PATRO, NE JEN O JEDEN SCHOD.
+     Kdyby platil strop „jedno povýšení za návštěvu", trvalo by vyvrácení
+     zapomenutého 'low' na výkonném stroji DVĚ další návštěvy (low→mid, pak
+     mid→high). Každé povýšení stojí 9 vteřin bezchybného běhu a jednu
+     rekompilaci shaderů, takže cesta z dna nahoru trvá minimálně 18 vteřin
+     nepřetržité plynulosti — a první zaškobrtnutí ji ukončí natrvalo
+     (noMorePromotions). Oscilovat to tedy nemá jak; jen se to uzdraví celé. */
+  const mayPromote = startedCapped && !noMorePromotions.current && tierRank(level) < tierRank(hw)
 
   /* Největší reálná úspora baterie: když plátno není vidět (nebo je karta na
      pozadí), frameloop se úplně zastaví. */
@@ -317,7 +443,16 @@ export default function Scene({
       >
         <color attach="background" args={[VOID.r, VOID.g, VOID.b]} />
 
-        <Governor level={level} min={floor} cap={cap} dpr={dpr} setDpr={setDpr} demote={demote} />
+        <Governor
+          level={level}
+          min={floor}
+          cap={cap}
+          dpr={dpr}
+          setDpr={setDpr}
+          demote={demote}
+          promote={promoteLevel}
+          mayPromote={mayPromote}
+        />
         <ToneSync level={level} />
 
         <LoadingBridge />

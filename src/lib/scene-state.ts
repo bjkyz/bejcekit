@@ -23,7 +23,30 @@ export const sceneState = {
       tlumí zpět k nule. Mesh, který ještě neexistuje, nejde zapálit — proto se
       to nedělá shaderem v preloaderu, ale rampou světla po loadu. */
   boost: 0,
+  /**
+   * ★ ZNAMÉNKOVÁ RYCHLOST NA DRÁZE, VE STĚNÁCH ZA SEKUNDU. Píše ji Choreo,
+   * čte Rig (náklon do zatáčky) a Core (protiběh jádra).
+   *
+   * Proč ne `scrollState.velocity` z Lenisu: ta je v PIXELECH ZA SNÍMEK, takže
+   * znamená něco jiného na 1440×900 a něco jiného na telefonu s dvakrát vyšší
+   * sekcí — a při 120Hz displeji zase něco jiného než při 60. Tady je jednotka
+   * odvozená od TRASY (stěna), ne od zařízení: „půl stěny za sekundu" je půl
+   * stěny za sekundu všude. Teprve z takového čísla se dají stavět prahy.
+   */
+  flow: 0,
 }
+
+/**
+ * ★ SMOOTHERSTEP (6t⁵−15t⁴+10t³), NE SMOOTHSTEP.
+ *
+ * Obyčejný smoothstep má nulovou první derivaci na koncích, ale DRUHÁ derivace
+ * tam skáče. V pohybu kamery se to projeví jako jemné „klepnutí" přesně v momentě,
+ * kdy jedna stěna předává druhé: zrychlení se změní skokem, a oko na skokovou
+ * změnu zrychlení reaguje mnohem citlivěji než na skokovou změnu rychlosti.
+ * Smootherstep má nulovou i druhou derivaci, takže je přechod mezi oblouky
+ * spojitý až do zrychlení a celý oblet se čte jako JEDEN pohyb, ne jako šest.
+ */
+export const smootherstep = (t: number) => t * t * t * (t * (t * 6 - 15) + 10)
 
 /**
  * ★ STROP NA DELTU. Když se karta vrátí z pozadí, dostane useFrame deltu

@@ -2,8 +2,8 @@ import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { easing } from 'maath'
 import { Euler, MathUtils, Quaternion, Vector3 } from 'three'
-import { FACE_CAM_QUATS } from '../lib/faces'
-import { clampDelta, ORBIT_PAN, ORBIT_RADIUS, sceneState } from '../lib/scene-state'
+import { FACE_CAM_QUATS, SEGMENT_AXIS } from '../lib/faces'
+import { clampDelta, ORBIT_PAN, ORBIT_RADIUS, sceneState, smootherstep } from '../lib/scene-state'
 import { SIDE_BY_SIDE } from '../lib/stage'
 
 const LAST = FACE_CAM_QUATS.length - 1
@@ -85,7 +85,83 @@ const PARALLAX = 0.12
 const DRIFT_TOUCH = 0.09 // na dotyku nese drift veškerý život scény
 const DRIFT_MOUSE = 0.04 // na myši jen podbarvuje parallax, ať se nepere s rukou
 
-const smoothstep = (t: number) => t * t * (3 - 2 * t)
+/**
+ * ★ TŘETÍ OSA KLIDOVÉHO DRIFTU: PŘIBLÍŽENÍ A ODDÁLENÍ.
+ *
+ * Lissajous výš sune kameru do stran a nahoru dolů — tedy KOLMO na pohled. Takový
+ * pohyb se na ploché obrazovce projeví hlavně posunem obrazu; hloubka z něj vzniká
+ * jen díky parallaxe mezi prachem a strojem. Chybí ta jediná osa, na které se mění
+ * VELIKOST siluety, a právě ta se čte jako prostor: stroj se nadechne a vydechne.
+ *
+ * Osm promile poloměru je na první pohled neviditelné číslo a je to schválně —
+ * má se to poznat až po pár vteřinách dívání, jako že obraz „žije". Cokoli většího
+ * začne v periferním vidění pumpovat a z klidné komory je akvárium.
+ */
+const BREATH_IDLE = 0.008
+
+/**
+ * ★ NÁDECH V PŮLCE PŘELETU. Kamera během otáčky couvne o 5,5 % a zase se vrátí.
+ *
+ * Dělá to najednou tři věci, a proto to má tak dobrý poměr cena/výkon:
+ *   • KOMPOZICE. Silueta krychle se uprostřed přeletu roztáhne na stěnovou
+ *     úhlopříčku (×√2, viz FIT_SPAN_WIDE níž) — přesně v ten okamžik je jí
+ *     v záběru nejtěsněji. Couvnutí jí to místo dá právě tam, kde chybí.
+ *   • POHYB. Změna vzdálenosti je jediná složka pohybu kamery, kterou nejde
+ *     splést s posunem obrazu: mění MĚŘÍTKO, ne polohu. Oblet je díky ní vidět
+ *     i tehdy, když je krychle zrovna natočená symetricky.
+ *   • RYTMUS. Pohyb dostane oblouk i ve třetím rozměru, takže se přelet čte jako
+ *     jeden vedený tah, ne jako otočení kolem osy.
+ *
+ * Uplatňuje se AŽ ZA podlahou odstupu (viz FIT_SPAN_*): couvnutí vzdálenost jedině
+ * zvětšuje, takže žádnou podlahu porušit nemůže.
+ */
+const TRANSIT_BREATH = 0.055
+
+/**
+ * ★ NÁKLON DO ZATÁČKY. Kameraman i pilot dělají totéž: když se točí doleva,
+ *   nakloní se doleva. Bez toho je oblet geometricky správný a mrtvý.
+ *
+ * Amplituda je 1,2° a víc si tu nedovol. Vodorovná linka textu v DOM zůstává
+ * vodorovná pořád, takže každý stupeň navíc je stupeň NESOULADU mezi 3D vrstvou
+ * a stránkou nad ní — nad ~3° to přestane vypadat jako režie a začne to vypadat
+ * jako rozbité vykreslování (týž strop platí pro statický roll v ORBIT_PAN).
+ *
+ * ★★ NAKLÁNÍ SE JEN VE VODOROVNÝCH ZATÁČKÁCH, a pozná se to VÝPOČTEM, ne tabulkou:
+ *   náklon patří k rychlosti otáčení kolem SVISLÉ OSY KAMERY. Stačí tedy skalární
+ *   součin osy otáčení daného úseku dráhy (SEGMENT_AXIS) s vektorem „nahoru" té
+ *   kamery. Vyjde ±1 na vodorovných přeletech a 0 na svislých — a hlavně to platí
+ *   i nad pólem, kde je „vodorovně" něco úplně jiného než ve světových osách.
+ *   Ručně opsaná tabulka „na kterých úsecích se naklánět" by tuhle past minula.
+ */
+const BANK = 0.021
+
+/** Tlumení odstupu. Krátké — má vyhladit skok při změně okna, ne přidat setrvačnost. */
+const DOLLY_SMOOTH = 0.12
+
+/**
+ * ★ PŘÍLET. Scéna nenaskočí, ale DOSEDNE — kamera dojede z 16 % větší dálky.
+ *
+ * Plátno se mountuje až po `load` + prvním volnu (viz useArmed v App.tsx), tedy
+ * ve chvíli, kdy už návštěvník na stránku kouká a čte. Krychle se do hotového
+ * obrazu do té doby prostě STŘIHLA: jeden snímek nic, další snímek stroj v plné
+ * velikosti. Střih je nejtvrdší přechod, jaký film zná, a tady navíc přišel
+ * v okamžiku, který si nikdo nevybral.
+ *
+ * Dvouvteřinový nájezd z toho udělá příjezd. Nestojí nic (je to jedno číslo
+ * v už existujícím tlumení odstupu), nezdrží nic (obsah je dávno vykreslený)
+ * a potká se přesně se zážehem jádra, který v tu chvíli pouští preloader —
+ * takže se stroj rozsvítí ve stejnou vteřinu, kdy k němu kamera dojede.
+ *
+ * ★ Hodnota žije MIMO komponentu schválně: po remountu plátna (ztráta WebGL
+ *   kontextu, viz MAX_RESTORES ve Scene.tsx) se přílet NEOPAKUJE. Obnova po
+ *   pádu kontextu má být neviditelná oprava, ne druhá premiéra.
+ */
+const ARRIVE_BACK = 0.16
+const ARRIVE_SMOOTH = 0.55
+
+/** Odstup a doznívající přílet mezi snímky. Mimo komponentu — useFrame nesmí alokovat. */
+const dolly = { r: 0 }
+const arrive = { v: 1 }
 
 /**
  * ★ KAMERA OBÍHÁ KRYCHLI. Krychle se neotáčí — viz ORBIT_* v lib/scene-state.ts
@@ -113,7 +189,10 @@ export default function Rig({ parallax }: { parallax: boolean }) {
     /* ── 1. KDE NA DRÁZE JSME ──────────────────────────────── */
     const a = MathUtils.clamp(sceneState.aim, 0, LAST)
     const i = MathUtils.clamp(Math.floor(a), 0, LAST - 1)
-    const t = smoothstep(MathUtils.clamp(a - i, 0, 1))
+    /* ★ SMOOTHERSTEP, NE SMOOTHSTEP — viz lib/scene-state.ts. Na hranici stěn se
+       mění OSA otáčení (viz faces.ts), takže tam musí být nulová nejen rychlost,
+       ale i zrychlení. Se smoothstepem tam zůstávalo slyšitelné klepnutí. */
+    const t = smootherstep(MathUtils.clamp(a - i, 0, 1))
 
     // Slerp = oblet po nejkratším oblouku. Každý krok je přesně 90° (viz faces.ts).
     orbit.slerpQuaternions(FACE_CAM_QUATS[i], FACE_CAM_QUATS[i + 1], t)
@@ -134,6 +213,24 @@ export default function Rig({ parallax }: { parallax: boolean }) {
       ? FIT_SPAN_WIDE / (2 * Math.tan(HALF_FOV) * Math.min(aspect, 1))
       : CUBE_EDGE / NARROW_WIDTH_FRACTION / (2 * Math.tan(HALF_FOV) * aspect)
     if (r < needed) r = needed
+
+    /* Nádech v půlce přeletu, klidové dýchání a doznívající přílet. Všechno tři
+       odstup jen ZVĚTŠUJE, takže se to smí počítat až za podlahou — porušit ji
+       to nemá jak. */
+    const calm = 0.35 + 0.65 * (1 - sceneState.heat)
+    easing.damp(arrive, 'v', 0, ARRIVE_SMOOTH, dt)
+    r *=
+      1 + TRANSIT_BREATH * sceneState.heat + Math.sin(time * 0.19) * BREATH_IDLE * calm + ARRIVE_BACK * arrive.v
+
+    /* ★ ODSTUP SE TLUMÍ. Ne kvůli dráze (ta je spojitá sama o sobě), ale kvůli
+       ZMĚNÁM OKNA: otočení telefonu nebo tažení za roh okna přehodí větev výpočtu
+       i poměr stran, a kamera by v jednom snímku skočila o jednotku a půl. Krátká
+       konstanta z toho udělá pohyb, ale nepřidá do dráhy setrvačnost.
+       První snímek se dosazuje napřímo — jinak by kamera startovala z počátku,
+       tedy zevnitř krychle. */
+    if (dolly.r === 0) dolly.r = r
+    easing.damp(dolly, 'r', r, DOLLY_SMOOTH, dt)
+    r = dolly.r
 
     // Kamera sedí PŘESNĚ na normále stěny, ve vzdálenosti r. Bez alokace.
     cam.position.set(0, 0, r).applyQuaternion(orbit)
@@ -156,7 +253,7 @@ export default function Rig({ parallax }: { parallax: boolean }) {
 
     let yaw = wide ? MathUtils.lerp(p0.yaw, p1.yaw, t) : 0
     let pitch = MathUtils.lerp(p0.pitch, p1.pitch, t)
-    const roll = wide ? MathUtils.lerp(p0.roll, p1.roll, t) : 0
+    let roll = wide ? MathUtils.lerp(p0.roll, p1.roll, t) : 0
 
     /* ── 4. POSUN KAMERY: parallax myši + klidový drift ────── */
     /* ★ SKUTEČNÝ PARALLAX = POSUN KAMERY, ne jen natočení. Kdyby se kamera jen
@@ -169,8 +266,9 @@ export default function Rig({ parallax }: { parallax: boolean }) {
        ze špatného čísla a krychle by uplavala ze středu. */
     /* Za přeletu drift ustoupí režii: kamera zrovna letí po dráze, o život scény
        je postaráno a dvě vrstvy pohybu přes sebe by se jen praly. Nejsilnější je
-       tam, kde je nejvíc potřeba — v klidu nad stěnou. */
-    const gain = (parallax ? DRIFT_MOUSE : DRIFT_TOUCH) * (0.35 + 0.65 * (1 - sceneState.heat))
+       tam, kde je nejvíc potřeba — v klidu nad stěnou. (`calm` výš je táž váha;
+       počítá se jednou a používá se i pro klidové dýchání odstupu.) */
+    const gain = (parallax ? DRIFT_MOUSE : DRIFT_TOUCH) * calm
     let offX = Math.sin(time * 0.29) * gain // perioda 21.7 s
     let offY = Math.cos(time * 0.43) * gain * 0.62 // perioda 14.6 s — nesoudělná s tou nad ní
 
@@ -187,6 +285,13 @@ export default function Rig({ parallax }: { parallax: boolean }) {
     up.set(0, 1, 0).applyQuaternion(orbit)
     cam.position.addScaledVector(right, offX)
     cam.position.addScaledVector(up, offY)
+
+    /* ── 4b. NÁKLON DO ZATÁČKY ─────────────────────────────── */
+    /* Kolik z otáčení tohohle úseku připadá na SVISLOU osu kamery: ±1 na
+       vodorovných přeletech, 0 na svislých a plynulý přechod nad pólem. Násobí se
+       teplem, takže náklon vzniká a zaniká spolu s přeletem, a rychlostí na dráze,
+       aby se kamera naklonila na správnou stranu i při scrollování zpátky nahoru. */
+    roll -= MathUtils.clamp(sceneState.flow, -1, 1) * SEGMENT_AXIS[i].dot(up) * BANK * sceneState.heat
 
     /* …a dorovnat záběr zpátky na krychli. Bez tohohle by posun kamery vysunul
        krychli ze středu a parallax by se choval jako rozházená kompozice.

@@ -19,6 +19,25 @@
   text-wrap: balance;
 }
 
+/* ★ SVĚTLO SHORA NA NADPISECH. Svislý spád bílá → chladná šedá dělá z plochého
+   nadpisu nasvícený objekt — stejný jazyk, jakým světlo zachází se strojem.
+   Je to spád přes CELÝ blok (víceřádkový H2 tmavne až na druhém řádku), proto
+   koncová zarážka 125 %: uvnitř boxu se stihne projet jen její část a spodní
+   řádek vyjde na ~#dbe2e7, tedy ~14.7:1 proti --bg-0 — pořád AAA s rezervou.
+   ★ POZOR: text-shadow sem NEPATŘÍ — přes průhledné glyfy by prosvítal SKRZ
+   písmo a vypadalo by rozmazaně. Záři si nadpisy nechávají od scény za sebou.
+   @supports guard: bez podpory clipu by `color: transparent` nechal prázdné
+   místo místo H1. Postaru = plná --tx-1, o nic se nepřijde. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .display,
+  .headline {
+    background-image: linear-gradient(180deg, #ffffff 0%, var(--tx-1) 55%, #ccd6de 125%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
 .body {
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -300,15 +319,38 @@
   color: var(--green);
 }
 
-/* Vyplněné CTA existuje na celém webu POUZE na sekci 05. */
+/* Vyplněné CTA existuje na celém webu POUZE na sekci 05 (a na CTA /projekty).
+   ★ SHEEN: přes výplň jednou přejede úzký pás světla — pohyb, který oko čte
+   jako odlesk na materiálu, tedy tentýž jazyk jako odlesk na kartách projektů.
+   Technika: gradient jako background-image ŠIRŠÍ NEŽ TLAČÍTKO (300 %), pás
+   světla ve 40–60 % obrazu. Pozadí prvek ořezává samo, takže žádný overflow:
+   hidden — ten by uřízl záři ::after, která přesahuje ven.
+   Klidová pozice 100 % = pás stojí CELÝ VLEVO MIMO obraz (posun je (šířka
+   tlačítka − 300 %) × pozice, viz spec background-position); animace na 0 %
+   ho protáhne doprava. `from` je totožné s klidem, takže po doběhnutí není
+   žádný skok — neviditelné se vrátí do neviditelného. Jen animation, žádná
+   transition: zpáteční přejezd při opuštění tlačítka by byl vizuální šum. */
 .btn--solid {
-  background: var(--neon-2);
+  background-color: var(--neon-2);
+  background-image: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.38) 50%, transparent 60%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
   color: var(--bg-0);
   font-weight: 600;
 }
 .btn--solid:hover {
-  background: var(--neon-1);
+  background-color: var(--neon-1);
   color: var(--bg-0);
+  animation: btn-sheen 850ms var(--e-out-quint);
+}
+@keyframes btn-sheen {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
 }
 
 /* ★ Ghost je podřízený, ne neviditelný. Při --line-2 (alfa 0.10) vycházela hrana

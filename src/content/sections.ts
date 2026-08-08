@@ -83,8 +83,11 @@ export const SECTIONS: Section[] = [
      *   Fakta se neztratila, jen se přesunula do odrážek: ty se dají SKENOVAT,
      *   kdežto odstavec se musí přečíst celý, nebo vůbec.
      */
+    /* „hodiny týdně", ne jen „hodiny": stejný nárok, jaký AI sekce dokládá
+       propočtem („ušetří hodiny každý týden") — konkrétní číslo se pamatuje,
+       vágní ne. Žádný nový slib, jen dřívější slib řečený přesně. */
     body:
-      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI jen tam, kde ušetří hodiny. A držím servery v chodu, aby vás výpadek nestál tržby.',
+      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI jen tam, kde ušetří hodiny týdně. A držím servery v chodu, aby vás výpadek nestál tržby.',
     bullets: [],
     /* Týž obsah, který tu dřív byl jako tři odrážky uprostřed sloupce.
        Proč se přestěhoval na patu obrazovky, viz `specs` v rozhraní výš. */

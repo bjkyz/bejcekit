@@ -76,6 +76,29 @@
 .nav__link.is-active {
   color: var(--neon-2);
 }
+/* ★ PODTRŽENÍ ROSTE ZLEVA — vlasová linka, tedy týž konstrukční jazyk jako
+   rohové značky a předěly odrážek. Jen na zařízeních s myší: na dotyku hover
+   neexistuje a `.nav__link` tam má min-height 44px (viz níž), takže by linka
+   na spodku hitboxu visela ~12 px pod písmem. Značení aktivní sekce na dotyku
+   dál nese barva. Bez záře: 1px linka s blur stínem by se slila do šmouhy. */
+@media (hover: hover) {
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.4em;
+    height: 1px;
+    background: var(--neon-2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--d-lift) var(--e-out-expo);
+  }
+  .nav__link:hover::after,
+  .nav__link.is-active::after {
+    transform: scaleX(1);
+  }
+}
 .nav__cta {
   font-family: var(--font-mono);
   font-size: var(--fs-btn); /* ★ ne --fs-label: fixní „Napište mi" je vidět na 100 % pozic scrollu */

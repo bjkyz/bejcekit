@@ -10,6 +10,24 @@ html {
   background: var(--bg-0); /* na <html>, ne v komponentě — jinak bílý záblesk před mountem Reactu */
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
+  /* Scrollbar v barvě přístroje. Na macOS overlay neviditelné; na Windows je
+     výchozí šedý sloup vedle tmavého webu ta nejlacinější věc na obrazovce. */
+  scrollbar-color: var(--bg-4) var(--bg-0);
+}
+
+/* ★ PLYNULÉ KOTVY — JEN TAM, KDE NENÍ LENIS. Týká se /projekty (nav „Napište
+   mi" → #poptavka, zamčené karty → tamtéž), skip-linků a hlavní stránky
+   v jednoduchém režimu: bez tohohle tam kotva SKOČÍ natvrdo — jediný tvrdý
+   střih na webu, kde jinak všechno plyne.
+   ★★ `:not(.lenis)` NENÍ KOSMETIKA. Zápis scrollTop se řídí CSS scroll-behavior,
+   takže smooth na <html> by BROWSER vyhlazoval i Lenisem počítané per-frame
+   zápisy — dvojí tlumení, rozteklý scroll. Pojistka `.lenis.lenis-smooth
+   { scroll-behavior: auto !important }` výš na to nestačí: `lenis-smooth` je
+   od Lenisu 1.3 DYNAMICKÁ třída (visí na html jen BĚHEM smooth animace),
+   kdežto holé `.lenis` tam sedí od initu — ověřeno sondou (html má „js lenis").
+   Omezený pohyb to ruší blok prefers-reduced-motion na konci souboru. */
+html:not(.lenis) {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -45,6 +63,27 @@ a {
 ::selection {
   background: rgba(79, 216, 232, 0.28);
   color: var(--tx-1);
+}
+
+/* ── PŘECHOD MEZI STRÁNKAMI ────────────────────────────────────
+   Web je MPA (/ a /projekty jsou dva dokumenty) a navigace mezi nimi byla
+   jediný tvrdý střih na jinak plynulém webu: bílý-vlastně-černý flash a nový
+   dokument. Cross-document view transition z toho udělá prolnutí — obě stránky
+   sdílejí pozadí #08090a, takže přechod vypadá, jako by se vyměnil jen obsah.
+
+   Čistě progresivní vylepšení: prohlížeč bez podpory pravidlo ignoruje a
+   naviguje postaru. Žádný JS, žádný vliv na prerender ani hydrataci — je to
+   kompozitorové prolnutí snímků, obsah se nemění.
+
+   ★ Delší než výchozích 250 ms schválně ne: prolnutí je interpunkce mezi
+   stránkami, ne vlastní představení. Jen se sladí easing se zbytkem webu. */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 240ms;
+  animation-timing-function: var(--e-ui);
 }
 /* Android jinak bliká šedým obdélníkem přes celé CTA; :active stavy máme vlastní. */
 a,
@@ -146,6 +185,11 @@ ol {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* Prolnutí stránek je pohyb jako každý jiný: vypnout celé, ne jen zrychlit.
+     (Kotvy řeší už univerzální pravidlo výš — `*` pokrývá i <html>.) */
+  @view-transition {
+    navigation: none;
   }
   /* Reveal efekty musí zůstat ve finálním stavu, ne zmizet. */
   .reveal {

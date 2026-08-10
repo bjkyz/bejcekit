@@ -59,6 +59,10 @@ const FIT = 1.75 / MODEL_MAX_DIM // ≈ 0.43
  */
 const HALO_PX = 128
 
+/** Fáze kolébání mezi snímky — z clampnuté delty, ne z clock.elapsedTime,
+    ať po návratu karty z pozadí neskočí (táž past jako drift, viz Rig.tsx). */
+const sway = { t: 0 }
+
 function drawHalo(): HTMLCanvasElement {
   const c = document.createElement('canvas')
   c.width = c.height = HALO_PX
@@ -159,8 +163,9 @@ export default function Core({ tier }: { tier: Tier }) {
     }
   }, [actions])
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     const dt = clampDelta(delta)
+    sway.t += dt
     const h = sceneState.heat
     const i = sceneState.faceIndex
 
@@ -195,7 +200,7 @@ export default function Core({ tier }: { tier: Tier }) {
        float), zatímco vypnuté kolébání stojí přesně to, co scéna na slabém telefonu
        potřebuje nejvíc — aby vypadala živě. Šetřilo se tam, kde se nedalo ušetřit,
        za cenu obrazu právě tam, kde byl nejmrtvější. */
-    if (grp.current) grp.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.2) * 0.05
+    if (grp.current) grp.current.rotation.z = Math.sin(sway.t * 0.2) * 0.05
   })
 
   return (

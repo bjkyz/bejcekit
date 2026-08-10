@@ -164,6 +164,19 @@ const dolly = { r: 0 }
 const arrive = { v: 1 }
 
 /**
+ * ★ FÁZE DRIFTU SE STŘÁDÁ Z CLAMPNUTÉ DELTY, NE Z clock.elapsedTime.
+ *
+ * Hodiny R3F běží dál i se zastaveným frameloopem (karta v pozadí — viz
+ * `visible` ve Scene.tsx): po návratu elapsedTime skočí o celou dobu spánku
+ * a s ním by skočila fáze všech tří smyček driftu. Kamera by v jediném
+ * snímku popojela až o dvojnásobek amplitudy — cvaknutí přesně v okamžiku,
+ * kdy se návštěvník na stránku vrací. Vlastní fáze roste jen o odžité
+ * (a stropnuté, viz clampDelta) delty: spánek ji zastaví a probuzení naváže
+ * přesně tam, kde obraz ztichl.
+ */
+const phase = { t: 0 }
+
+/**
  * ★ KAMERA OBÍHÁ KRYCHLI. Krychle se neotáčí — viz ORBIT_* v lib/scene-state.ts
  *   a FACE_CAM_QUATS v lib/faces.ts, kde je odvození i důvody.
  *
@@ -184,7 +197,7 @@ export default function Rig({ parallax }: { parallax: boolean }) {
   useFrame((state, delta) => {
     const dt = clampDelta(delta)
     const cam = state.camera
-    const time = state.clock.elapsedTime
+    phase.t += dt
 
     /* ── 1. KDE NA DRÁZE JSME ──────────────────────────────── */
     const a = MathUtils.clamp(sceneState.aim, 0, LAST)
@@ -220,7 +233,7 @@ export default function Rig({ parallax }: { parallax: boolean }) {
     const calm = 0.35 + 0.65 * (1 - sceneState.heat)
     easing.damp(arrive, 'v', 0, ARRIVE_SMOOTH, dt)
     r *=
-      1 + TRANSIT_BREATH * sceneState.heat + Math.sin(time * 0.19) * BREATH_IDLE * calm + ARRIVE_BACK * arrive.v
+      1 + TRANSIT_BREATH * sceneState.heat + Math.sin(phase.t * 0.19) * BREATH_IDLE * calm + ARRIVE_BACK * arrive.v
 
     /* ★ ODSTUP SE TLUMÍ. Ne kvůli dráze (ta je spojitá sama o sobě), ale kvůli
        ZMĚNÁM OKNA: otočení telefonu nebo tažení za roh okna přehodí větev výpočtu
@@ -269,8 +282,8 @@ export default function Rig({ parallax }: { parallax: boolean }) {
        tam, kde je nejvíc potřeba — v klidu nad stěnou. (`calm` výš je táž váha;
        počítá se jednou a používá se i pro klidové dýchání odstupu.) */
     const gain = (parallax ? DRIFT_MOUSE : DRIFT_TOUCH) * calm
-    let offX = Math.sin(time * 0.29) * gain // perioda 21.7 s
-    let offY = Math.cos(time * 0.43) * gain * 0.62 // perioda 14.6 s — nesoudělná s tou nad ní
+    let offX = Math.sin(phase.t * 0.29) * gain // perioda 21.7 s
+    let offY = Math.cos(phase.t * 0.43) * gain * 0.62 // perioda 14.6 s — nesoudělná s tou nad ní
 
     if (parallax) {
       easing.damp(mouse.current, 'x', state.pointer.x * PARALLAX, 0.35, dt)

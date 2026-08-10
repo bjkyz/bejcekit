@@ -27,6 +27,8 @@ let lenis: Lenis | null = null
 let snap: Snap | null = null
 let tops: number[] = []
 let heights: number[] = []
+/** Tangenty dP/dy v uzlech dráhy — viz computeGrades(). */
+let grades: number[] = []
 let cols: HTMLElement[] = []
 let allFit = true
 let rafId: number | null = null
@@ -120,6 +122,43 @@ function measure(): void {
   cols = els.map((el) => el.querySelector<HTMLElement>('.section__col')).filter((el) => el !== null)
   // Vejde se KAŽDÁ sekce do jedné obrazovky?
   allFit = heights.every((h) => h <= window.innerHeight + 2)
+  computeGrades()
+}
+
+/**
+ * ★ TEMPO KAMERY NESMÍ NA HRANICI SEKCE SKOČIT.
+ *
+ * Progres se interpoluje přes REÁLNÉ výšky sekcí — jenže ty si nejsou rovné:
+ * česky psaná sekce je o ~15 % delší než sousední a hero má vlastní stavbu.
+ * Po částech lineární mapování mělo proto v každém uzlu ZLOM: derivace
+ * progresu podle scrollu je 1/výška sekce a na hranici se skokem změnila,
+ * takže kamera při stejném tahu prstem najednou letěla jiným tempem — jako
+ * přeřazení bez spojky. Damper v Choreo zlom změkčí, ale nezruší: co skočí
+ * v cíli, prolije se do rychlosti.
+ *
+ * Řešení: monotónní kubický Hermite. Tangenta v uzlu je HARMONICKÝ průměr
+ * sousedních sečen (Fritsch–Butland) — ten je vždy ≤ 2·min obou sečen, tedy
+ * bezpečně v pásmu monotonie: mapování nikdy necouvne ani nepřestřelí.
+ * Uzly drží přesně (tops[i] → i), takže snap i zákon dosednutí sedí na
+ * stěnu stejně jako dřív. A když jsou sekce náhodou stejně vysoké, Hermite
+ * DEGENERUJE NA PŮVODNÍ PŘÍMKU — nový kód tedy nemění nic než ty zlomy.
+ */
+function computeGrades(): void {
+  const n = tops.length
+  grades = new Array(n).fill(0)
+  if (n < 2) return
+  const secants: number[] = []
+  for (let i = 0; i < n - 1; i++) {
+    const span = tops[i + 1] - tops[i]
+    secants.push(span > 0 ? 1 / span : 0)
+  }
+  grades[0] = secants[0]
+  grades[n - 1] = secants[n - 2]
+  for (let i = 1; i < n - 1; i++) {
+    const a = secants[i - 1]
+    const b = secants[i]
+    grades[i] = a > 0 && b > 0 ? (2 * a * b) / (a + b) : 0
+  }
 }
 
 /**
@@ -152,7 +191,16 @@ function progressFromScroll(y: number): number {
   for (let i = 0; i < tops.length - 1; i++) {
     if (y < tops[i + 1]) {
       const span = tops[i + 1] - tops[i]
-      return span > 0 ? i + (y - tops[i]) / span : i
+      if (span <= 0) return i
+      /* Kubický Hermite mezi uzly i a i+1 (hodnoty jsou přímo indexy stěn,
+         tangenty viz computeGrades). Clamp drží gumový přetah iOS (y < 0)
+         na kraji dráhy místo kubické extrapolace mimo ni. */
+      const s = Math.min(1, Math.max(0, (y - tops[i]) / span))
+      const s2 = s * s
+      const s3 = s2 * s
+      const m0 = grades[i] * span
+      const m1 = grades[i + 1] * span
+      return i + (3 * s2 - 2 * s3) + m0 * (s3 - 2 * s2 + s) + m1 * (s3 - s2)
     }
   }
   return FACE_COUNT - 1
@@ -203,7 +251,14 @@ export function initScroll(simple: boolean): () => void {
     }
   }
 
-  const coarse = window.matchMedia('(pointer: coarse)').matches
+  /* ★ DOTYK SE POZNÁVÁ PODLE any-pointer, NE PODLE PRIMÁRNÍHO UKAZOVADLA.
+     `pointer: coarse` popisuje jen PRIMÁRNÍ pointer — a notebook s dotykovým
+     displejem hlásí jako primární myš (fine), přestože prst na skle je často
+     to první, čím návštěvník scrollne. syncTouch by mu ten dotyk přepsal do
+     JS — přesně ten hack, který blok níž na dotyku zapovídá. Rozhodovat musí
+     existence JAKÉHOKOLI hrubého ukazovadla, jinak platí výjimka jen pro
+     telefony a hybridy z ní vypadnou. */
+  const anyCoarse = window.matchMedia('(any-pointer: coarse)').matches
 
   lenis = new Lenis({
     autoRaf: false, // ★ jinak běží Lenis a GSAP na dvou rAF smyčkách a ScrollTrigger
@@ -230,7 +285,7 @@ export function initScroll(simple: boolean): () => void {
      * emituje 'scroll' s pozicí i rychlostí, takže choreografie běží dál — a snap
      * je na dotyku stejně jen 'proximity' (viz snapType()).
      */
-    syncTouch: !coarse,
+    syncTouch: !anyCoarse,
     syncTouchLerp: 0.09,
     touchInertiaExponent: 1.6,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

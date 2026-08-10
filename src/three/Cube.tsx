@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group } from 'three'
+import { clampDelta } from '../lib/scene-state'
 import type { Tier } from '../lib/quality'
 import Shell from './Shell'
 import Core from './Core'
@@ -27,17 +28,22 @@ import TracePulse from './TracePulse'
  *   three/Choreo.tsx — jsou to vlastnosti DRÁHY, ne krychle, a kdyby je počítalo
  *   něco, co se ani nehýbe, nikdo by je tu příště nehledal.
  */
+
+/** Fáze vznášení mezi snímky. Mimo komponentu — useFrame nesmí alokovat. */
+const phase = { t: 0 }
 export default function Cube({ tier, dragRef }: { tier: Tier; dragRef: React.RefObject<Group | null> }) {
   const float = useRef<Group>(null)
 
-  /* Vznášení jede z absolutního času, ne z delty — nemá se co „dohánět", takže
-     tu žádný strop na deltu (clampDelta) nepotřebujeme. Amplituda je v setinách
-     jednotky: stroj dýchá, neplave. */
-  useFrame((state) => {
+  /* Vznášení jede z VLASTNÍ fáze, ne z clock.elapsedTime. Hodiny běží i se
+     zastaveným frameloopem, takže po návratu karty z pozadí by fáze skočila
+     o celou dobu spánku a stroj by se přemístil až o půl amplitudy — cvaknutí
+     přesně v okamžiku návratu (táž past jako drift kamery, viz Rig.tsx).
+     Amplituda je v setinách jednotky: stroj dýchá, neplave. */
+  useFrame((_, delta) => {
     if (!float.current) return
-    const e = state.clock.elapsedTime
-    float.current.position.y = Math.sin(e * 0.45) * 0.045
-    float.current.position.x = Math.cos(e * 0.31) * 0.025
+    float.current.position.y = Math.sin(phase.t * 0.45) * 0.045
+    float.current.position.x = Math.cos(phase.t * 0.31) * 0.025
+    phase.t += clampDelta(delta)
   })
 
   return (

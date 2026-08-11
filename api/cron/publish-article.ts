@@ -50,8 +50,34 @@
  *   přepnul na silnější model, počítej s minutami: pak je potřeba tarif Pro
  *   A ZÁROVEŇ tohle číslo zvednout. Jedno bez druhého nestačí.
  */
-import { ENTITIES } from '../../src/content/entities'
-import { TOPICS } from '../../src/content/topics'
+/**
+ * ★★★ ŽÁDNÉ IMPORTY MIMO TENHLE ADRESÁŘ. A NENÍ TO ESTETIKA.
+ *
+ * Funkce původně sahala na `src/content/entities.ts` a `src/content/topics.ts`,
+ * tedy na TypeScript mimo `api/`. Nasazení tím projde, ale funkce se pak při
+ * každém zavolání složí JEŠTĚ PŘED PRVNÍM ŘÁDKEM handleru a platforma vrátí
+ * holé `FUNCTION_INVOCATION_FAILED` — chybu bez jediného slova o příčině, kterou
+ * nejde odladit odjinud než z logů. Serverless funkce má být soběstačná.
+ *
+ * ★★ DUPLICITA SE TÍM ALE NEZAVÁDÍ. Seznamy níž jsou opsané ze zdroje pravdy
+ *    (`src/content/entities.ts`, `src/content/topics.ts`) a `scripts/prerender.mjs`
+ *    je při KAŽDÉM buildu porovnává. Když se rozejdou, build spadne a řekne,
+ *    co přibylo nebo zmizelo. Opsaný seznam, který hlídá stroj, je bezpečnější
+ *    než import, který se rozpadne až v provozu.
+ *
+ * ★ KDYŽ PŘIDÁŠ FIRMU NEBO TÉMA: přidej ho do `src/content/*` a pak sem.
+ *   V jakém pořadí, na tom nezáleží; build tě upozorní, dokud to nebude sedět.
+ */
+
+/* prerender:topics */
+const TOPIC_ENUM = ['ai', 'automatizace', 'weby-a-seo', 'infrastruktura', 'bezpecnost', 'vyvoj']
+/* prerender:entities */
+const ENTITY_ENUM = [
+  'amazon', 'amd', 'anthropic', 'apple', 'aws', 'claude', 'cloudflare', 'databricks',
+  'deepmind', 'docker', 'gemini', 'github', 'google', 'huggingface', 'ibm', 'intel',
+  'kubernetes', 'linux', 'meta', 'microsoft', 'mistral', 'n8n', 'nvidia', 'openai',
+  'oracle', 'postgresql', 'proxmox', 'vercel',
+]
 
 export const maxDuration = 60
 
@@ -241,9 +267,6 @@ async function existingSlugs(): Promise<string[]> {
 
 /* ═══════════ SCHÉMA VÝSTUPU ═══════════ */
 
-const TOPIC_ENUM = TOPICS.map((t) => t.slug)
-const ENTITY_ENUM = Object.keys(ENTITIES)
-
 /**
  * ★ STRUKTUROVANÝ VÝSTUP, NE „VRAŤ MI JSON". Schéma se vynucuje na straně API
  *   (`output_config.format`), takže odpověď buď odpovídá, nebo požadavek selže —
@@ -425,7 +448,7 @@ function validate(d: Draft, items: FeedItem[], existing: string[]) {
   const scan = (s: string) => {
     ENT_RE.lastIndex = 0
     let m: RegExpExecArray | null
-    while ((m = ENT_RE.exec(s))) if (m[1] in ENTITIES) inText.add(m[1])
+    while ((m = ENT_RE.exec(s))) if (ENTITY_ENUM.includes(m[1])) inText.add(m[1])
   }
   scan(d.title)
   scan(d.takeaway)

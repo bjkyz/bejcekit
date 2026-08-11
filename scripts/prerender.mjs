@@ -61,6 +61,45 @@ function checkNda(root) {
   }
 }
 
+/**
+ * ★★ POJISTKA PROTI ROZEJÍTÍ SE S CRONEM.
+ *
+ * `api/cron/publish-article.ts` musí být SOBĚSTAČNÝ: serverless funkce, která
+ * importuje TypeScript mimo svůj adresář, se při zavolání složí ještě před
+ * prvním řádkem kódu a platforma vrátí holé `FUNCTION_INVOCATION_FAILED`.
+ * Seznamy témat a firem jsou proto v ní opsané — a tahle kontrola je jediný
+ * důvod, proč je to bezpečné. Když se opis rozejde se zdrojem pravdy
+ * (`src/content/topics.ts`, `src/content/entities.ts`), build spadne a řekne,
+ * co přibylo nebo zmizelo.
+ *
+ * Opsaný seznam, který hlídá stroj, je lepší než import, který se rozpadne
+ * až v provozu a nikdo si toho týden nevšimne.
+ */
+function checkCronEnums(topics, entities) {
+  const src = readFileSync(resolve(process.cwd(), 'api/cron/publish-article.ts'), 'utf8')
+  const grab = (marker) => {
+    const at = src.indexOf(`/* prerender:${marker} */`)
+    if (at === -1) throw new Error(`cron: chybí značka prerender:${marker}`)
+    const open = src.indexOf('[', at)
+    const close = src.indexOf(']', open)
+    return [...src.slice(open + 1, close).matchAll(/'([a-z0-9-]+)'/g)].map((m) => m[1])
+  }
+  for (const [name, mine, theirs] of [
+    ['témata', topics, grab('topics')],
+    ['entity', entities, grab('entities')],
+  ]) {
+    const missing = mine.filter((x) => !theirs.includes(x))
+    const extra = theirs.filter((x) => !mine.includes(x))
+    if (missing.length || extra.length) {
+      throw new Error(
+        `cron a obsah se rozešly (${name}) – v api/cron/publish-article.ts ` +
+          `${missing.length ? `CHYBÍ: ${missing.join(', ')}. ` : ''}` +
+          `${extra.length ? `PŘEBÝVÁ: ${extra.join(', ')}.` : ''}`,
+      )
+    }
+  }
+}
+
 const ROOT_MARKER = '<div id="root"></div>'
 const HEAD_BEGIN = '<!-- head:begin -->'
 const HEAD_END = '<!-- head:end -->'
@@ -113,8 +152,12 @@ try {
      Šablona se načte JEDNOU a pro každou stránku se z ní udělá kopie.
      `dist/clanky.html` v tu chvíli už má inlinovaný CSS a dosazenou adresu,
      takže to všechno každý článek zdědí, aniž by se cokoli opakovalo. */
-  const { ARTICLES, LIVE_TOPICS } = await vite.ssrLoadModule('/src/content/journal.ts')
+  const { ARTICLES, LIVE_TOPICS, TOPIC_SLUGS } = await vite.ssrLoadModule('/src/content/journal.ts')
+  const { ENTITY_KEYS } = await vite.ssrLoadModule('/src/content/entities.ts')
   const seo = await vite.ssrLoadModule('/src/lib/seo.ts')
+
+  checkCronEnums(TOPIC_SLUGS, ENTITY_KEYS)
+  console.log('prerender: cron zná stejná témata i firmy jako web')
 
   const shellPath = resolve(dist, 'clanky.html')
   const shell = readFileSync(shellPath, 'utf8')

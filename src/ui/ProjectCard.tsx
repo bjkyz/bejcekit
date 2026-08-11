@@ -1,4 +1,5 @@
-import { INQUIRY_ANCHOR, LOCKED_DOMAIN, type Project } from '../content/projects'
+import { LOCKED_DOMAIN, type Project } from '../content/projects'
+import { CONTACT_HREF } from '../content/sections'
 import Icon from './Icons'
 
 /**
@@ -52,14 +53,18 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
      • místo domény nese štítek LOCKED_DOMAIN,
      • „do ciziny" se pozná z tvaru odkazu, ne z ručního příznaku, který by
        se při příští veřejné referenci zapomněl nastavit. */
-  const href = p.locked ? `#${INQUIRY_ANCHOR}` : p.href
+  const href = p.locked ? CONTACT_HREF : p.href
   const domain = p.locked ? LOCKED_DOMAIN : p.domain
   const external = !p.locked && /^https?:\/\//.test(p.href)
   const icon = p.locked ? 'lock' : external ? 'external' : 'back'
 
   return (
     <article
-      className="pcard"
+      /* ★ `--wide` dostává jen první karta a jen nad 62rem (viz projects.css).
+         Pořadí je záměr: první položka je nejúplnější zakázka, takže dostane
+         nejvíc místa a jako jediná ukáže snímek dost velký na to, aby se v něm
+         dalo něco přečíst. */
+      className={`pcard${i === 0 ? ' pcard--wide' : ''}`}
       aria-labelledby={headId}
       /* Naklápění potřebuje vědět, která karta je která; tilt.ts si je hledá
          přes `.pcard`, tohle je jen pro ladění a testy. */
@@ -83,6 +88,14 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
           /* První snímek je nejpravděpodobnější LCP kandidát stránky, ostatní
              jsou pod ohybem a nemají proč soutěžit o linku. */
           fetchPriority={i === 0 ? 'high' : 'low'}
+          /* ★ `sizes` BEZ `srcset` NENÍ ZBYTEČNÉ. Zdrojová sada je jen jedna
+             (1440px), takže prohlížeč nemá z čeho vybírat — ale `sizes` mu říká,
+             jak VELKÝ ten obrázek na stránce bude, což používá při rozhodování
+             o dekódování a prioritě. A hlavně je to jediné místo, kde je ta
+             informace zapsaná, až se sada rozšíří.
+             Široká první karta zabírá zhruba polovinu mřížky (strop 78rem),
+             ostatní při dvou sloupcích ~590 px; na telefonu je to plná šířka. */
+          sizes={i === 0 ? '(min-width: 62rem) 40rem, 100vw' : '(min-width: 62rem) 37rem, 100vw'}
         />
         <span className="pcard__glare" aria-hidden="true" />
         {/* Plomba přes zamčený snímek. Čistě vizuální dvojnice informace,

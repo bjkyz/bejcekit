@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
-import { CONTACT_CHANNELS, EMAIL, GITHUB, MAILTO, SECTIONS, type Section as S } from '../content/sections'
+import { CONTACT_CHANNELS, CONTACT_HREF, EMAIL, GITHUB, MAILTO, SECTIONS, type Section as S } from '../content/sections'
 import { useReveal } from '../lib/hooks'
 import { revealDelay as delay } from '../lib/reveal'
 import Kicker from './Kicker'
@@ -284,6 +284,10 @@ function Footer() {
           nejsou žádné další odkazy a proto se sem projekty vešly jen výměnou
           za nic. Je to druhá cesta na /projekty pro toho, kdo dorolloval až sem. */}
       <p className="footer__links">
+        {/* ★ Kontakt první: od zavedení formuláře je to cíl všech výzev k akci
+            a patička je poslední místo, kde se na něj dá jít. */}
+        <a href={CONTACT_HREF}>Kontakt</a>
+        <span aria-hidden="true">·</span>
         <a href="/projekty">Projekty</a>
         <span aria-hidden="true">·</span>
         <a href={GITHUB} target="_blank" rel="noreferrer">

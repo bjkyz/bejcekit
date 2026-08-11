@@ -12,6 +12,7 @@ import {
   Vector3,
 } from 'three'
 import { clampDelta, sceneState } from '../lib/scene-state'
+import type { Tier } from '../lib/quality'
 
 const HALF = 1.5
 const STUD = 0.075
@@ -43,7 +44,24 @@ for (const x of [-HALF, HALF])
 const INDEX_CORNER = 7
 const INDEX_SCALE = 1.5
 
-export default function EdgeLattice() {
+/**
+ * ★★ `toneMapped` MUSÍ ZÁVISET NA PATŘE, JINAK JE 'low' OSM BÍLÝCH ČTVEREČKŮ.
+ *
+ * Hrany i study jedou na barvě NAD 1.0 (×1.6, resp. ×2.0 → ×3.2 při heat) —
+ * to je záměr, bloom je bez toho vůbec nezachytí (luminanceThreshold 0.92).
+ *
+ * Uvnitř composeru (high/mid) je `toneMapped` stejně no-op: EffectComposer si
+ * po dobu své existence přepne renderer na NoToneMapping a mapuje až <ToneMapping>
+ * na konci řetězu. Napsat tam `false` tedy nic nedělá a nic nestojí.
+ *
+ * Na 'low' ale composer neběží a AgX mapuje přímo renderer (ToneSync ve Scene.tsx).
+ * Tam `false` znamená „mě nemapuj" — takže se lineární (0.27, 2.28, 2.64) ořízne
+ * na (1,1,1). Ze žhavých studů se stanou bílé krychličky bez odstínu a z hran
+ * bílé linky. Přesně to, co se hlásilo jako „na slabém stroji je z modelu torzo":
+ * scéna neztratila světlo, ztratila ODSTÍN — všechno svítivé přepálilo do bílé.
+ */
+export default function EdgeLattice({ tier }: { tier: Tier }) {
+  const toneMapped = tier === 'low'
   const studs = useRef<InstancedMesh>(null)
   const edgeMat = useRef<LineBasicMaterial>(null)
   const studMat = useRef<MeshBasicMaterial>(null)
@@ -89,11 +107,11 @@ export default function EdgeLattice() {
   return (
     <group>
       <lineSegments geometry={edges}>
-        <lineBasicMaterial ref={edgeMat} color={edgeColor} toneMapped={false} transparent opacity={0.5} />
+        <lineBasicMaterial ref={edgeMat} color={edgeColor} toneMapped={toneMapped} transparent opacity={0.5} />
       </lineSegments>
 
       <instancedMesh ref={studs} args={[studGeo, undefined, CORNERS.length]}>
-        <meshBasicMaterial ref={studMat} color={studBase} toneMapped={false} />
+        <meshBasicMaterial ref={studMat} color={studBase} toneMapped={toneMapped} />
       </instancedMesh>
     </group>
   )

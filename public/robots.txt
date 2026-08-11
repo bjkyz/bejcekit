@@ -1,4 +1,30 @@
 User-agent: *
 Allow: /
 
+# ★ Serverless funkce nemají co dělat v indexu. `/api/cron/publish-article`
+#   vrací bez autorizace 401 a `/api/contact` je POST endpoint — crawler z nich
+#   nemá co získat a jen na nich sbírá chybové kódy, které kazí statistiky
+#   procházení. (Nejde o bezpečnost: autorizaci a rate limit řeší samy funkce.)
+Disallow: /api/
+
+# Vyhledávače si nemají číst parametry stavu formuláře jako samostatné stránky.
+Disallow: /kontakt?odeslano=
+Disallow: /kontakt?chyba=
+
+# ★ AI CRAWLERY PUŠTĚNÉ VĚDOMĚ. Web má `llms.txt` (rozcestník pro jazykové
+#   modely) a žurnál o AI, který sám AI píše — zavírat před nimi dveře by bylo
+#   v přímém rozporu s tím, co web tvrdí. Je to rozhodnutí, ne opomenutí:
+#   obsah je veřejná prezentace služeb a být citovaný modelem je pro ni zisk.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: __SITE_ORIGIN__/sitemap.xml

@@ -114,6 +114,15 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(30rem, 100%), 1fr));
   gap: clamp(1.25rem, 2.4vw, 2rem);
+  /* ★★ MŘÍŽKA MÁ MÍT RYTMUS, NE RASTR. Čtyři stejné karty 2×2 nesou vizuálně
+     tvrzení „všechny zakázky jsou stejně důležité", zatímco data říkají opak
+     (content/projects.ts: „pořadí je záměr, první karta nejlíp vysvětlí, co
+     za práci člověk kupuje"). První karta proto zabere celý řádek a uvnitř se
+     rozloží na dva sloupce — je to zároveň jediné místo, kde se snímek ukáže
+     dost velký na to, aby se v něm dalo něco přečíst.
+     ★ Jen když jsou sloupce aspoň dva: v jednosloupcovém režimu (telefon) je
+     `1 / -1` totéž co normální buňka a `.pcard--wide` se musí složit zpátky
+     pod sebe, viz média dotaz níž. */
   /* Dvě karty vedle sebe jsou při 90rem široké přes 700 px a řádek popisu se
      roztáhne přes celou tu šířku. Mřížka proto drží vlastní strop užší než
      stránka; na 1920 tím vzniknou dva sloupce po ~590 px, což je pro kartu
@@ -136,6 +145,48 @@
   padding: 3px;
 }
 
+/* ── PRVNÍ KARTA PŘES CELÝ ŘÁDEK ─────────────────────────────
+   Práh 62rem, ne `min-width: 900px` od oka: mřížka se láme na jeden sloupec,
+   když se dvě karty po 30rem přestanou vejít, takže se roztažená varianta smí
+   zapnout jen nad tou hranicí. Pod ní vypadá `1 / -1` stejně jako běžná buňka
+   a řádkový layout uvnitř by kartu roztrhal. */
+@media (min-width: 62rem) {
+  .pgrid__cell--wide {
+    grid-column: 1 / -1;
+  }
+  /**
+   * ★★★ `.pcard.pcard--wide`, TEDY SPECIFICITA (0,2,0) — NE `.pcard--wide`.
+   *
+   * Tohle pravidlo stojí v souboru NAD `.pcard` (protože `.pgrid__cell` je nad
+   * ním), a média dotaz specificitu NEZVYŠUJE. Při (0,1,0) by tedy `display: grid`
+   * prohrálo s pozdějším `.pcard { display: flex }` — karta by zůstala sloupcem
+   * a obrazovka by se roztáhla přes celý řádek do výšky 875 px. Přesně to se
+   * při první verzi stalo (naměřeno na snímku 1600 px).
+   *
+   * Je to táž past, jakou popisuje hlavička journal.css: v produkci navíc
+   * `inlineCss()` slepuje stylesheety v pořadí ADRESÁŘE, ne importů, takže se
+   * na pořadí nedá spolehnout ani mezi soubory. Vyšší specificita je jediná
+   * obrana, která platí vždycky.
+   *
+   * ★ `align-items: start` na obrazovce, ne `stretch`: displej si drží poměr
+   *   stran 1440/900 a při stretchi by se natáhl na výšku textu vedle sebe.
+   */
+  .pcard.pcard--wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+  .pcard.pcard--wide .pcard__body {
+    padding-top: 0;
+  }
+  /* Na širší kartě smí popis dýchat o stupeň víc — je to hlavní exponát stránky. */
+  .pcard.pcard--wide .pcard__sum {
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
+}
+
 /* ── KARTA ───────────────────────────────────────────────────
    ★★ ŽÁDNÝ `overflow: hidden` NA `.pcard`. NEJDRAŽŠÍ ŘÁDEK TOHOHLE SOUBORU.
       Podle specifikace platí, že jakákoli hodnota `overflow` jiná než `visible`
@@ -151,11 +202,49 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--line-2);
   border-radius: 3px;
-  background: rgba(13, 15, 17, 0.62);
-  box-shadow: var(--elev-2);
   padding: 0.75rem 0.75rem 1.25rem;
+
+  /**
+   * ★★ RÁM JE GRADIENT, NE JEDNA BARVA — a je to hlavní rozdíl mezi „obdélník
+   *    s okrajem" a „kus hmoty".
+   *
+   * Reálný předmět osvětlený shora nemá po celém obvodu stejnou hodnotu: horní
+   * hrana chytá světlo, spodní je ve stínu. Jedna plochá `rgba(255,255,255,.1)`
+   * dokola je nejrychlejší způsob, jak z karty udělat vykreslený div.
+   *
+   * Dělá se to dvěma pozadími najednou: výplň se ořízne na `padding-box`
+   * a gradient rámu na `border-box`, přičemž `border` je průhledný a jen drží
+   * ten jeden pixel místa. ★ Proto je `border-color` v hoveru níž nahrazený
+   * změnou celého `background-image` — na průhledném rámu by nic neudělal.
+   *
+   * ★★★ TOHLE MUSÍ ZŮSTAT `background`, NIKDY `filter` ANI `mask`. Karta má
+   *    `transform-style: preserve-3d` a jakákoli grouping property (overflow,
+   *    filter, mask-image, clip-path, opacity < 1, mix-blend-mode, isolation,
+   *    contain: paint) 3D kontext TIŠE ZPLOŠTÍ — paralaxa mezi obrazovkou
+   *    a textem zmizí a nikde není chyba. `background-clip` mezi ně nepatří.
+   */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(19, 22, 25, 0.72), rgba(11, 13, 15, 0.86)) padding-box,
+    linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.045) 42%,
+        rgba(79, 216, 232, 0.16) 100%
+      )
+      border-box;
+  /**
+   * ★ SKUTEČNÝ VRŽENÝ STÍN S ODSAZENÍM. `--elev-2` má `0 0 64px` s nulovým
+   *   posunem a barvou TMAVŠÍ než pozadí, takže na tomhle webu nebyl vidět
+   *   vůbec — karta nikde neležela nad podkladem, jen tam byla. Posun dolů
+   *   a záporný spread z ní udělají desku položenou na stole.
+   *   Nahoře k tomu bevel: jeden pixel světla na horní hraně, jak to dělá
+   *   kov s ostrým sražením.
+   */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 40px -30px rgba(0, 0, 0, 0.95);
 
   transform-style: preserve-3d;
   /* Zdvih celé karty k oku (6 px) jede ze stejného `--lift` jako zanoření
@@ -166,13 +255,57 @@
      přechod položený přes ni by dojezd počítal dvakrát a karta by se za rukou
      viditelně opožďovala. Přechod smí být jen na tom, co JS nesahá. */
   transition:
-    border-color var(--d-hover) var(--e-ui),
-    background-color var(--d-hover) var(--e-ui);
+    background-image var(--d-hover) var(--e-ui),
+    box-shadow var(--d-lift) var(--e-ui);
 }
 .pcard:hover,
 .pcard:focus-within {
-  border-color: rgba(79, 216, 232, 0.45);
-  background: rgba(19, 22, 25, 0.72);
+  background:
+    linear-gradient(180deg, rgba(23, 28, 32, 0.82), rgba(13, 16, 19, 0.9)) padding-box,
+    linear-gradient(160deg, rgba(184, 245, 255, 0.45), rgba(79, 216, 232, 0.14) 45%, rgba(79, 216, 232, 0.4) 100%)
+      border-box;
+  /* Stín se s pozorností prohloubí — deska se opravdu zvedla. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 26px 56px -30px rgba(0, 0, 0, 1);
+}
+/* ★ FYZICKÁ ODEZVA NA STISK. Karta je celá klikatelná (natažený odkaz), ale
+   dosud na stisknutí nijak nereagovala — jediné místo webu, kde se dalo kliknout
+   a nic se nestalo. Měřítko, ne posun: posun by se pral s náklonem z tilt.ts. */
+.pcard:active {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(calc(var(--lift, 0) * 6px)) scale(0.993);
+}
+
+/**
+ * ★★★ SVĚTLO PŘES CELOU KARTU — A ZÁROVEŇ OPRAVA CHYBY, KTERÁ TU BYLA OD ZAČÁTKU.
+ *
+ * `--mx` a `--my` počítá tilt.ts jako polohu kurzoru v procentech CELÉ KARTY
+ * (`px = (e.clientX - rect.left) / rect.width` nad `.pcard`). Jenže jediný prvek,
+ * který je četl, byl `.pcard__glare` UVNITŘ `.pcard__screen` — a obrazovka zabírá
+ * jen horních ~46 % výšky karty. Odlesk se tedy svisle pohyboval zhruba 2,2×
+ * pomaleji než ruka: když kurzor stál dole v textu, světlo pořád svítilo
+ * uprostřed obrázku. Přesně tohle ubíralo kartě „materiálovost" — odlesk
+ * nesledoval ruku, opožďoval se za ní.
+ *
+ * Spotlight na `.pcard::before` je ve stejném souřadném systému, ve kterém se
+ * ta čísla počítají, takže sedí přesně. A svítí i na spodní polovinu karty,
+ * která dosud na kurzor nereagovala vůbec.
+ *
+ * ★ `translateZ(0.1px)` je povinné: bez něj leží pseudo-element v rovině
+ *   `z = 0` rodiče, kdežto text je v proudu, a při naklonění se vůči sobě
+ *   viditelně rozjedou („světlo plave po kartě").
+ * ★ `pointer-events: none` je povinné: vrstva leží NAD textem a bez toho by
+ *   sebrala kliky nataženému odkazu.
+ */
+.pcard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--lift, 0);
+  background: radial-gradient(26rem 26rem at var(--mx, 50%) var(--my, 50%), rgba(184, 245, 255, 0.1), transparent 62%);
+  transform: translateZ(0.1px);
 }
 /* Obrazovka animuje translateZ každý snímek hoveru; promotion předem jí ušetří
    rasterizaci uprostřed prvního snímku. Vázané na :hover, ne trvale — trvalá
@@ -277,16 +410,29 @@
    ★ Bez `mix-blend-mode`: blend by na světlých snímcích (dva ze čtyř jsou bílé)
    přepálil hero do mléka a stál by vlastní kompozitní vrstvu navíc. Obyčejný
    gradient s nízkou alfou dělá na tmavém i světlém podkladu totéž a je zdarma. */
+/**
+ * ★★ ODLESK OBRAZOVKY UŽ NESLEDUJE KURZOR — a je to oprava, ne ochuzení.
+ *
+ * Sledoval ho ze špatných souřadnic (viz `.pcard::before` výš) a hlavně: dvě
+ * nezávislá pohyblivá světla na jedné kartě se čtou jako chyba, ne jako materiál.
+ * Dělba práce je teď fyzikálně poctivá:
+ *   • povrch KARTY je lesklý a chytá pohyblivé světlo → `.pcard::before`
+ *   • DISPLEJ je zapuštěný pod ním, takže má PEVNÝ šikmý odlesk, který se jen
+ *     rozsvítí, když se karta zvedne — přesně jako sklo přístroje pod lampou
+ * Bez `mix-blend-mode`: dva ze čtyř snímků jsou světlé a blend by hero přepálil
+ * do mléka a stál vlastní kompozitní vrstvu navíc.
+ */
 .pcard__glare {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: var(--lift, 0);
-  background: radial-gradient(
-    18rem 18rem at var(--mx, 50%) var(--my, 50%),
-    rgba(184, 245, 255, 0.17),
-    rgba(184, 245, 255, 0.05) 45%,
-    transparent 70%
+  opacity: calc(var(--lift, 0) * 0.9);
+  background: linear-gradient(
+    118deg,
+    transparent 26%,
+    rgba(184, 245, 255, 0.12) 42%,
+    rgba(184, 245, 255, 0.03) 52%,
+    transparent 62%
   );
 }
 
@@ -353,19 +499,43 @@
   padding: 1.15rem 0.6rem 0;
 }
 
+/* ★ HLAVIČKA JE LIŠTA, NE ŘÁDEK. Mezi obrazovkou a textem nebyla žádná dělicí
+   linka — první přišla až u faktů, takže číslo, jméno, obor a shrnutí vlály
+   v prostoru bez rámce. Vlasovka nahoře dá tělu karty začátek. */
 .pcard__head {
   display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
+  align-items: center;
+  gap: 0.7rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line-1);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
+  letter-spacing: var(--ls-readout);
   text-transform: uppercase;
   color: var(--tx-3);
 }
+/**
+ * ★★ POŘADOVÉ ČÍSLO JE TYPOGRAFICKÝ OBJEKT, NE POPISEK.
+ *
+ * Bylo sázené stejně jako doména, obor, klíče faktů i chipy stacku — pět různých
+ * rolí v JEDNÉ kombinaci (mono / --fs-label / verzálky / tracking). Karta tím
+ * měla pět hlasů, které zněly identicky, a četla se jako výpis z databáze.
+ * Číslo je jediná věc na kartě, která smí být čistě vizuální, takže si vezme
+ * velikost a stane se kotvou kompozice. Tabulární číslice drží šířku napříč
+ * kartami, aby lišty začínaly na stejném místě.
+ */
 .pcard__num {
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--neon-3);
   font-variant-numeric: tabular-nums;
+  transition: color var(--d-hover) var(--e-ui);
+}
+.pcard:hover .pcard__num,
+.pcard:focus-within .pcard__num {
+  color: var(--neon-2);
 }
 .pcard__domain {
   overflow-wrap: anywhere;
@@ -556,6 +726,8 @@
    (poznámka pod čarou, ne třetí vrstva tlačítek); tady zbývá jen odstup. */
 .page__cta-trust {
   margin-top: 1.1rem;
+  /* Readout, ne štítek: „Nezávazně · Odpověď do 24 hodin · Diskrétně" je věta. */
+  letter-spacing: var(--ls-readout);
 }
 
 /* ── TELEFON A TABLET ────────────────────────────────────────── */

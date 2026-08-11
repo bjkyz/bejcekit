@@ -2,7 +2,14 @@
 .display {
   font-family: var(--font-sans);
   font-size: var(--fs-d0);
-  font-weight: 600;
+  /* ★★ 550, NE 600 — OPTICKÁ KOMPENZACE, NE ZLEHČENÍ NADPISU.
+     `.display` je jediná role, která jede až na 70 px, a plocha písma roste
+     s DRUHOU MOCNINOU stupně: tentýž řez, který při 27 px vypadá akorát, je
+     při 70 px opticky výrazně těžší. A protože halace na tmavém podkladu roste
+     přesně s tou plochou, srazí půlstupeň váhy rozlévání víc než samotné
+     ztlumení barvy. Geist je variabilní (100–900), takže mezistupeň nestojí
+     ani bajt navíc. `.headline` zůstává na 600 — ta jede na 27–52 px. */
+  font-weight: 550;
   letter-spacing: var(--ls-d0);
   line-height: var(--lh-d0);
   color: var(--tx-1);
@@ -31,7 +38,12 @@
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .display,
   .headline {
-    background-image: linear-gradient(180deg, #ffffff 0%, var(--tx-1) 55%, #ccd6de 125%);
+    /* ★ CELÝ SPÁD POSUNUTÝ DOLŮ O ~5 STUPŇŮ, TVAR ZACHOVANÝ.
+       Bylo #ffffff (19.9:1) → --tx-1 → #ccd6de (13.5:1). Čistá bílá na nejvyšším
+       nadpisu webu je přesně ta kombinace, ze které vzniká halace — a #ffffff
+       navíc jako jediná barva na webu nedrží chladný nádech palety.
+       Teď 16.2 → 13.9 → 9.4, tedy stejné rozpětí (6.8 proti 6.4), jen bez špičky. */
+    background-image: linear-gradient(180deg, #e3e8ee 0%, var(--tx-1) 55%, #aab3bf 125%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -516,9 +528,14 @@
   padding: 0.4rem 0.1rem;
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
+  letter-spacing: var(--ls-readout);
   text-transform: uppercase;
-  color: var(--tx-3);
+  /* ★ --tx-2, ne --tx-3. Kopírka je JEDINÝ prvek sekce 05, který nemá pod sebou
+     vlastní dlaždici — leží rovnou na scrimu nad scénou. Nad rozžhavenou hranou
+     skla vycházela na 2.84:1, tedy jako jediné místo webu pod AA. Scrim se
+     opravil (layout.css), tohle je nezávislá pojistka: kdyby se elipsa někdy
+     znovu ladila, tenhle prvek nesmí spadnout s ní. */
+  color: var(--tx-2);
   transition: color var(--d-hover) var(--e-ui);
 }
 .copy-btn:hover {
@@ -755,15 +772,26 @@
 .hero-spec::before {
   content: '';
   position: absolute;
-  inset: -1.5rem calc(var(--gutter) * -1) calc(var(--sp-sec-bottom) * -1);
   z-index: -1;
   pointer-events: none;
+  /* ★★ ZAČÍNÁ VÝŠ A STOUPÁ RYCHLEJI — kvůli dvěma prvkům, které nad pásem leží
+     přímo na skle a neměly pod sebou nic:
+       • `.grab-hint` („táhni a otoč") sedí na spodní hraně `.hero-stage`, tedy
+         těsně nad pásem, a v jeho výšce byl gradient ještě úplně průhledný.
+         Naměřeno nad rozžhavenou hranou skla: 3.35:1, tedy pod AA.
+       • `.hero-spec__v` vycházelo při 16% zarážce na 2.00:1 a ani ve svém
+         nejtmavším bodě nepřesáhlo 4:1.
+     Přesah nahoru z 1.5rem na 3.25rem a zarážky posunuté k začátku dají nápovědě
+     pod sebe aspoň 0.45 a hodnotám specifikací ~0.78–0.92. Dolní konec zůstává
+     stejný, takže „podlaha pod strojem" se nemění. */
+  inset: -3.25rem calc(var(--gutter) * -1) calc(var(--sp-sec-bottom) * -1);
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(8, 9, 10, 0.62) 16%,
-    rgba(8, 9, 10, 0.82) 52%,
-    rgba(8, 9, 10, 0.9) 100%
+    rgba(8, 9, 10, 0.45) 10%,
+    rgba(8, 9, 10, 0.78) 30%,
+    rgba(8, 9, 10, 0.88) 60%,
+    rgba(8, 9, 10, 0.92) 100%
   );
 }
 
@@ -786,9 +814,16 @@
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   line-height: var(--lh-mono);
-  letter-spacing: var(--ls-label);
+  /* ★ READOUT, NE ŠTÍTEK. „JEDEN INŽENÝR, NE AGENTURA" jsou čtyři slova ve
+     verzálkovém monu; s prokladem 0.12em se rozpadnou na jednotlivé znaky. */
+  letter-spacing: var(--ls-readout);
   text-transform: uppercase;
-  color: var(--tx-1);
+  /* ★ --tx-2, ne --tx-1. Byla to nejhorší jednotlivá kombinace na webu:
+     verzálky + mono + tracking + 18.7:1 na třinácti pixelech. Verzálky nemají
+     dotahy, takže se slovo čte znak po znaku, a při tak vysokém kontrastu
+     každý tah bloumá do sousedního. Hierarchii proti hodnotě pod tím udrží
+     nový odstup tx-2 (11.8) vs tx-3 (7.2) — v L* je to 16 stupňů, víc než dost. */
+  color: var(--tx-2);
   margin-bottom: 0.3rem;
 }
 .hero-spec__v {
@@ -852,9 +887,13 @@
   margin-bottom: 0.5rem;
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
+  letter-spacing: var(--ls-readout);
   text-transform: uppercase;
-  color: var(--tx-4);
+  /* ★ --tx-3, ne --tx-4. Nápověda leží PŘÍMO NA SKLE (spodní hrana `.hero-stage`)
+     a je to jediný text webu bez vlastního podkladu. Scrim pásu se kvůli ní
+     posunul nahoru, ale i tak je to nejexponovanější místo — a nejtišší token
+     tu byl o stupeň moc. */
+  color: var(--tx-3);
   white-space: nowrap;
   opacity: 0;
   /* Nastupuje i zdola: pouhé prolnutí splyne se zrnem, posun o 6 px z něj

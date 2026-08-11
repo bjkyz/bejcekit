@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server'
 import App from './App.tsx'
 import ProjectsPage from './ProjectsPage.tsx'
 import ServicesPage from './ServicesPage.tsx'
+import ContactPage from './ContactPage.tsx'
 import JournalRoot from './JournalRoot.tsx'
 import type { JournalRoute } from './lib/journal-route.ts'
 
@@ -46,6 +47,15 @@ export const PAGES: Record<string, () => string> = {
     renderToString(
       <StrictMode>
         <ServicesPage />
+      </StrictMode>,
+    ),
+  /* ★ Kontakt se prerenderuje jako každá jiná stránka. Formulář je čistý HTML
+     s `action` a `method`, takže vyrenderovaná verze funguje i bez hydratace —
+     viz komentář v ContactPage.tsx. */
+  'kontakt.html': () =>
+    renderToString(
+      <StrictMode>
+        <ContactPage />
       </StrictMode>,
     ),
 }

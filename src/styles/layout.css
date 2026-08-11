@@ -74,10 +74,22 @@ main::before {
    Na desktopu naopak dělá půlku dojmu — obraz má střed a okraje ustupují do tmy.
    Platí se tedy tam, kde je to vidět, a neplatí tam, kde není. Práh 1025 px je
    táž hranice, na které se web láme všude jinde (SIDE_BY_SIDE, lib/stage.ts). */
+/* ★★★ VNITŘNÍ ZARÁŽKA 32 %, NE 42 % — VINĚTA SE DŘÍV K OKRAJŮM VŮBEC NEDOSTALA.
+   Komentář výš slibuje, že „tmavší okraj dá podklad rohovým značkám, pravé liště
+   a stavovému panelu". Přepočítal jsem, kde ty prvky doopravdy leží, a nesedělo to:
+     • pravá lišta je na `top: 50%`, tedy dx = 0.40, dy ≈ 0.04 → v elipse na 40.2 %
+     • stavový panel vlevo dole → 58.1 %, tedy krytí 0.224, ne očekávaných 0.5
+   Při vnitřní zarážce 42 % byla viněta v místě LIŠTY ještě úplně průhledná. Popisky
+   tam tedy ležely na holé scéně a nad rozžhavenou hranou skla vycházel jejich
+   kontrast na 3.35:1 (panel dokonce 1.6–2.0:1) — hluboko pod AA, na textu, který
+   nese i povinnou licenční atribuci.
+   Stažením na 32 % dostane lišta krytí ~0.36 a panel ~0.42, takže obojí vyleze
+   nad 4.5:1. ★ Střed obrazu se tím NEZTMAVÍ: stroj leží uvnitř 30 % a tam je
+   gradient pořád průhledný — past „ztratil se 3D model" se neotevírá. */
 @media (min-width: 1025px) {
   main::before {
     background:
-      radial-gradient(125% 95% at 50% 46%, transparent 42%, rgba(8, 9, 10, 0.5) 78%, rgba(8, 9, 10, 0.72) 100%),
+      radial-gradient(125% 95% at 50% 46%, transparent 32%, rgba(8, 9, 10, 0.5) 74%, rgba(8, 9, 10, 0.75) 100%),
       rgb(8 9 10 / var(--veil));
   }
 }
@@ -206,13 +218,23 @@ main::before {
   inset: -3rem -4rem;
   z-index: -1;
   pointer-events: none;
+  /* ★★★ SVISLÝ POLOMĚR 74 %, NE 54 % — A NENÍ TO „ROZTAŽENÍ ELIPSY".
+     Vodorovný poloměr zůstává 62 % (bylo 60), takže krychle vlevo a vpravo od
+     sloupce svítí dál a past „ztratil se 3D model" se neotevírá. Mění se jen
+     VÝŠKA, a to z měřeného důvodu: sekce 05 má kicker + H2 + odstavec + kanály
+     + patičku, tedy box vysoký 800–900 px. Při svislém poloměru 54 % dosáhl
+     scrim v plné síle jen do poloviny a na PRVNÍ ŘÁDEK (H2 a kicker) zbylo
+     krytí ~0.14 — nad rozžhavenou hranou skla vychází kontrast ~1.5:1.
+     Naměřeno i konkrétní oběť: tlačítko „Kopírovat adresu" je jediný prvek
+     téhle sekce bez vlastní dlaždice a vycházelo na 2.84:1, tedy pod AA.
+     Držet plnou sílu přes celý text a mizet teprve ZA ním je správný tvar. */
   background: radial-gradient(
-    60% 54% at 50% 48%,
-    rgba(8, 9, 10, 0.72) 0%,
-    rgba(8, 9, 10, 0.66) 48%,
-    rgba(8, 9, 10, 0.38) 68%,
-    rgba(8, 9, 10, 0.1) 84%,
-    transparent 94%
+    62% 74% at 50% 50%,
+    rgba(8, 9, 10, 0.88) 0%,
+    rgba(8, 9, 10, 0.86) 62%,
+    rgba(8, 9, 10, 0.44) 80%,
+    rgba(8, 9, 10, 0.12) 90%,
+    transparent 97%
   );
 }
 /* ★ PLATÍ UŽ JEN PRO SEKCI 05 — úvod má vlastní, mnohem lehčí variantu níž.

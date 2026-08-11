@@ -130,27 +130,76 @@ export default function Core({ tier }: { tier: Tier }) {
       if (!mat || done.has(mat.uuid)) return
       done.add(mat.uuid)
 
+      /* ★★★ NEJDŮLEŽITĚJŠÍ ŘÁDEK V CELÉM SOUBORU. Bez něj neplatí NIC z toho,
+         co se o pár řádků níž nastavuje jako barva materiálu.
+
+         Model nese u KAŽDÉ primitivy atribut COLOR_0 (ověřeno v GLB: 6 mesh
+         primitiv, všechny mají NORMAL+COLOR_0+POSITION). Když GLTFLoader takový
+         atribut najde, naklonuje materiál a zapne `vertexColors = true` — a v
+         shaderu three je to prosté `diffuseColor *= vColor`, tedy NÁSOBENÍ.
+
+         Vertex barvy v tomhle modelu jsou zbytky původního Sketchfab materiálu:
+         čistě červená, čistě modrá a čistě žlutá. Takže:
+           constant1  #2c3a41 × (0.9, 0, 0)      → zelený i modrý kanál na NULU
+           constant2  #123a42 × (0.9, 0.9, 0)    → modrý kanál na nulu, z azurové oliva
+         Model se tím kreslil na ~10 % zamýšleného jasu a ve špatných odstínech —
+         a to na VŠECH patrech, ne jen na 'low'. Právě proto vypadal „nezpracovaně":
+         nešlo o chybějící efekty, ale o to, že paleta níž se nikdy neuplatnila.
+
+         ★ `needsUpdate` je povinné: vertexColors je shader define (USE_COLOR),
+         změna bez rekompilace se tiše neprojeví.
+
+         (Emise se tím nikdy neovlivnila — vColor násobí jen diffuse, ne
+         totalEmissiveRadiance. Proto zář jádra fungovala a chyby si nikdo nevšiml.) */
+      mat.vertexColors = false
+      mat.needsUpdate = true
+
       if (mat.name === 'constant2') {
         // JEDINÝ zdroj záře. Tmavý podklad, ať veškerou práci odvede emise + bloom.
         mat.color.set('#123a42')
         mat.emissive.copy(CYAN)
         mat.emissiveIntensity = 0 // zapálí se až po loadu, z preloaderu
-        mat.toneMapped = false
+        /* ★ toneMapped PODLE PATRA, ne natvrdo `false`.
+           Uvnitř composeru (high/mid) je `toneMapped` stejně no-op — composer si
+           vynutí NoToneMapping na rendereru a mapuje až <ToneMapping> na konci.
+           Na 'low' ale composer NEBĚŽÍ a mapuje AgX přímo renderer (ToneSync ve
+           Scene.tsx) — a tam `false` znamenalo, že se emise ~5.8 vůbec nenamapuje
+           a ořízne se do bílé. Jádro tedy na nejnižším patře nebylo žhavé, ale
+           přepálené: bílá tečka bez odstínu. Tohle je druhá polovina toho,
+           proč 'low' vypadalo jako torzo. */
+        mat.toneMapped = tier === 'low'
       } else if (mat.name === 'HoloFillDark') {
         mat.color.set('#0a1f26')
         mat.emissive.copy(CYAN)
         mat.emissiveIntensity = 0.18
       } else {
-        // constant1 — konstrukce. Světlejší kov, než by člověk čekal: ve tmavé
-        // komoře za sklem se jinak slije s pozadím a model zmizí.
-        mat.color.set('#2c3a41')
+        /* constant1 — nosná konstrukce. Po vypnutí vertex barev se konečně
+           uplatní tahle barva, takže může být TMAVŠÍ než dřív: #2c3a41 bylo
+           zesvětlené proto, aby model po vynásobení červenou vůbec nezmizel.
+           Teď by při té hodnotě konstrukce přesvítila jádro. */
+        mat.color.set('#1d2830')
         mat.emissive.copy(CYAN)
         mat.emissiveIntensity = 0.1
-        mat.metalness = 0.8
-        mat.roughness = 0.35
+        mat.metalness = 0.72
+        /* ★★ ROUGHNESS 0.42, NE 0.3 — A JE TO OPRAVA ZRNĚNÍ, NE ESTETIKA.
+           Model má normály uložené jako 8bitové oktaedrální (BYTE/normalized,
+           ověřeno v GLB), takže na hladkých válcových plochách jsou kvantované.
+           Úzký specular lalok (nízká roughness) tu nepřesnost zvětšuje: sousední
+           trojúhelníky trefí odlesk různě a plocha se rozsype na bílé tečky.
+           Širší lalok tytéž normály zprůměruje a povrch se čte jako souvislý kov.
+           Naměřeno na snímcích při 51k trojúhelnících na ~250 px siluety, tedy
+           ~4 trojúhelníky na pixel — režim, kde je zrnění nejvíc vidět. */
+        mat.roughness = 0.42
+        /* ★ Env mapa místo ambientu. Prostředí (Lights.tsx) dává SMĚR — odlesk
+           má kde vzniknout a kov se čte jako kov. Ambient plní plošně a plochý
+           kov vypadá jako plast. Nula runtime nákladů: `frames={1}`, mapa je
+           upečená a intenzita je jen násobič ve fragment shaderu.
+           1.25, ne 1.9: nad ~1.5 přesvítí konstrukce jádro a stroj přestane mít
+           jedno ohnisko — a jedno ohnisko je celá kompozice téhle scény. */
+        mat.envMapIntensity = 1.25
       }
     })
-  }, [scene])
+  }, [scene, tier])
 
   // Zapečená rotační animace („Main", 10 s) — živé jádro zadarmo.
   useEffect(() => {
@@ -205,7 +254,12 @@ export default function Core({ tier }: { tier: Tier }) {
 
   return (
     <>
-      <group ref={grp} scale={FIT * (tier === 'low' ? 0.9 : 1)}>
+      {/* ★ ŽÁDNÉ ZMENŠOVÁNÍ NA 'low'. Bývalo tu `FIT * (tier === 'low' ? 0.9 : 1)`
+          a byl to obchod pozpátku: na patře, kde je model ze všeho nejhůř vidět
+          (bez bloomu, bez refrakce, bez pěti cedulí), se ještě o desetinu zmenšil.
+          Zmenšení nic nešetří — je to táž geometrie, jen na míň pixelech — a bralo
+          přesně to jediné, co na slabém stroji zbývá: velikost siluety. */}
+      <group ref={grp} scale={FIT}>
         <group ref={inner}>
           {/* dispose={null} — R3F by jinak při unmountu zlikvidoval i položku
               v useGLTF cache („model je po návratu černý"). */}

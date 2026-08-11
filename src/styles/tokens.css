@@ -11,19 +11,57 @@
   --bg-3: #1a1e22;
   --bg-4: #23282d;
 
-  /* ── VLASOVÉ LINKY — jen alfa, nikdy plný hex (skládají se přes plátno) ── */
-  --line-1: rgba(255, 255, 255, 0.06);
-  --line-2: rgba(255, 255, 255, 0.1);
-  --line-3: rgba(255, 255, 255, 0.16);
+  /* ── VLASOVÉ LINKY ──────────────────────────────────────────────
+     Jen alfa, nikdy plný hex (skládají se přes plátno).
 
-  /* ── TEXT — všechny poměry změřené proti --bg-0, ne odhadnuté ── */
-  --tx-1: #f7f8f8; /* nadpisy       18.7:1  ✓ AAA */
-  --tx-2: #dee3ea; /* text          15.5:1  ✓ AAA */
-  --tx-3: #8a8f98; /* mono popisky   6.1:1  ✓ AA  */
-  --tx-4: #797e86; /* nejtišší        4.9:1  ✓ AA
-                      Dřív #62666d (3.5:1) — PROPADALO AA a Lighthouse to hlásil.
+     ★★ TŘI ROLE, NE TŘI ODSTÍNY TÉHOŽ. WCAG 1.4.11 chce u prvků, které NESOU
+     FUNKCI (hranice tlačítka, ovladače), kontrast 3:1 vůči okolí. Vlasovky tu
+     ale dělají dvě různé práce a dřív měly obě stejně slabé hodnoty:
+       • typografický PŘEDĚL mezi odrážkami a řádky tabulek — dekorace, na tu
+         se 1.4.11 nevztahuje a smí zůstat sotva viditelná (to je celý smysl)
+       • HRANICE OVLÁDACÍHO PRVKU — tlačítko „Napište mi", posuvník pravé lišty
+     Naměřeno: --line-2 nad --bg-0 vyjde 1.24:1. Jediný signál „tohle je tlačítko"
+     na trvale viditelném CTA celého webu tedy byl pod pětinou požadované meze. */
+  --line-1: rgba(255, 255, 255, 0.07); /* předěl v textu — dekorace, 1.15:1 */
+  --line-2: rgba(255, 255, 255, 0.16); /* plocha karty, tichý rám  1.52:1 */
+  --line-3: rgba(255, 255, 255, 0.34); /* ★ HRANICE OVLÁDACÍHO PRVKU  3.01:1 ✓ 1.4.11 */
+
+  /**
+   * ── TEXT ────────────────────────────────────────────────────────
+   *
+   * ★★★ ROZSAH JE ZÁMĚRNĚ STLAČENÝ. NEJDE O TO MÍT KONTRAST CO NEJVYŠŠÍ.
+   *
+   * Bylo 4.9 → 18.7 (rozpětí 3.8×). Čistě bílá na téměř černé je 19–20:1, tedy
+   * skoro maximum, kterého jde na obrazovce dosáhnout — a přesně to je problém:
+   * na tmavém podkladu se z tak velkého rozdílu stane HALACE. Světlé tahy se
+   * opticky rozlévají do tmy, písmeno „vibruje" a po pár odstavcích z toho bolí
+   * oči. Nejsilněji to dopadá na lidi s astigmatismem, což je zhruba třetina.
+   *
+   * Nová škála 5.7 → 13.9 (rozpětí 2.4×) tlumí SHORA a přidává ZDOLA:
+   *   • nadpisy a zvýraznění přestanou zářit
+   *   • nejtišší popisky se zvednou z 4.9 na 5.7, tedy dál od meze AA
+   *   • odstup mezi stupni v L* zůstane, takže hierarchie nezmizí
+   *
+   * Kotvy z praxe, ať čísla nejsou vycucaná: GitHub Dark má tělo 12.3:1,
+   * Stripe docs 11.2:1, Linear 13.4:1. Náš čtený text 11.8:1 sedí doprostřed
+   * a pořád je vysoko nad AAA (7:1).
+   *
+   * ★ VŠECHNY ČTYŘI DRŽÍ CHLADNÝ NÁDECH (B − R je 13–17). Staré --tx-1 #f7f8f8
+   *   bylo prakticky neutrální (B − R = 1) a jako jediný token z palety vypadávalo
+   *   — na webu, jehož hlavička říká „do studena posunutá, aby v ní azurová
+   *   seděla přirozeně".
+   *
+   * ★ POZADÍ SE NEZVEDÁ. Nabízelo by se místo tlumení textu zesvětlit --bg-0,
+   *   jenže ten literál (#08090a / rgba(8,9,10,…)) je na webu na 53 místech ve
+   *   scrimech, závojích a gradientech a jedno z nich je i barva scény
+   *   (three/palette.ts VOID). Snížit text je levnější a přesnější.
+   */
+  --tx-1: #d2d8df; /* nadpisy a zvýraznění  13.9:1  ✓ AAA (bylo #f7f8f8 / 18.7) */
+  --tx-2: #c1c8d1; /* čtený text            11.8:1  ✓ AAA (bylo #dee3ea / 15.5) */
+  --tx-3: #959ca6; /* popisky s významem     7.2:1  ✓ AAA (bylo #8a8f98 /  6.1) */
+  --tx-4: #828993; /* nejtišší               5.7:1  ✓ AA  (bylo #797e86 /  4.9)
                       I „ornament" (tečkované vodiče, řádek s CC-BY) je pořád text,
-                      který někdo čte. Nic na webu už není pod AA. */
+                      který někdo čte. Nic na webu není pod AA. */
 
   /* ── BARVY NESOU VÝZNAM ────────────────────────────────────────
      Tři akcenty, každý má PRÁVĚ JEDNU roli. Kdyby se používaly volně,
@@ -54,7 +92,10 @@
   --glow-soft: 0 0 40px -8px rgba(79, 216, 232, 0.35);
   --glow-hard: 0 0 0 1px rgba(79, 216, 232, 0.3), 0 0 24px -6px rgba(79, 216, 232, 0.45);
   --glow-text: 0 0 24px rgba(79, 216, 232, 0.28);
-  --focus: 0 0 0 2px rgba(82, 174, 255, 0.45);
+  /* ★ 0.75, ne 0.45. Prstenec focusu je ovládací signál, tedy 1.4.11 → 3:1.
+     Při 0.45 vycházel 2.48:1 a používá se přesně tam, kde je `outline` vypnutý
+     (náhled certifikátu, karta článku), takže tam nebyla žádná záloha. Teď 5.4:1. */
+  --focus: 0 0 0 2px rgba(82, 174, 255, 0.75);
 
   --elev-1: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   --elev-2: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 64px rgba(8, 9, 10, 0.4);
@@ -103,6 +144,10 @@
   --fs-d1: clamp(1.6875rem, 1.35rem + 1.6vw, 3.25rem); /* H2 sekcí:        27 → 52 px */
   --fs-d2: clamp(1.375rem, 1.05rem + 1.3vw, 2.25rem); /* e-mail na 05:     22 → 36 px */
   --fs-body: clamp(1rem, 0.9rem + 0.3vw, 1.0625rem); /* TĚLO:              16 → 17 px */
+  /* ★ O stupeň větší, JEN pro /clanky. Žurnál se čte deset minut v kuse, kdežto
+     sekce úvodu se skenují — a text, na kterém člověk stráví deset minut, si
+     zaslouží 18 px a delší proklad. Nikde jinde se tenhle token nepoužívá. */
+  --fs-body-long: clamp(1.0625rem, 1rem + 0.35vw, 1.125rem); /* ČLÁNEK:     17 → 18 px */
   --fs-bullet: clamp(0.9375rem, 0.885rem + 0.22vw, 1rem); /* odrážky:      15 → 16 px */
   --fs-mono: clamp(0.8125rem, 0.79rem + 0.08vw, 0.875rem); /* readouty:    13 → 14 px */
   /* ★ TLAČÍTKA MAJÍ VLASTNÍ STUPEŇ. Jela na --fs-label, tedy na 11px verzálkovém
@@ -116,7 +161,20 @@
      při 34px na telefonu by slova lezla na sebe. */
   --ls-d0: -0.032em;
   --ls-d1: -0.028em;
-  --ls-label: 0.12em;
+  /**
+   * ★★ DVĚ PROKLÁDÁNÍ, NE JEDNO. `--ls-label` 0.12em je správné pro ŠTÍTEK
+   *    o dvou třech slovech („00 / IDENT", „CO DOSTANETE", název technologie).
+   *    Jenže se přes sdílenou třídu `.label` rozlezlo i na VĚTY sázené
+   *    verzálkovým monem — „JEDEN INŽENÝR, NE AGENTURA", trust řádky, drobečky.
+   *    Verzálky nemají dotahy, takže se slovo čte znak po znaku už samo o sobě;
+   *    s prokladem 0.12em se rozpadne úplně a oko ztratí hranice slov.
+   *
+   *    Že je to moc, ví i stávající kód: stavový panel si `letter-spacing`
+   *    ručně stáhl na 0.06em. Ta výjimka je důkaz, ne odchylka — a tenhle token
+   *    z ní dělá pravidlo.
+   */
+  --ls-label: 0.12em; /* štítek: 1–3 slova */
+  --ls-readout: 0.055em; /* verzálková mono VĚTA */
 
   /* ČESKÝ ŘÁDKOVÝ PROKLAD: ne 0.89, co si dovolí anglická display typografie.
      Háčky ě/š/č/ř/ž jdou nad verzálkovou výšku a kolidují s dotahy řádku nad nimi,
@@ -126,6 +184,17 @@
   --lh-body: 1.65;
   --lh-bullet: 1.6;
   --lh-mono: 1.5;
+  /**
+   * ★★ PROKLAD MUSÍ RŮST S MÍROU ŘÁDKU, NE S ROLÍ PRVKU.
+   *
+   * `--lh-bullet: 1.6` vzniklo pro odrážky v úzkém sloupci úvodu (~57 znaků),
+   * kde je správné. Jenže se rozlezlo na devět rolí souvislé prózy, mezi nimi
+   * bloky široké 72–78 znaků (odpovědi na časté dotazy, položky katalogu).
+   * Při 16 px a prokladu 1.6 je mezi řádky 25,6 px — a na 75 znacích oko při
+   * zpáteční cestě na začátek dalšího řádku o řádek přeskočí. Je to nejčastější
+   * důvod, proč se text „čte blbě", aniž by na něm bylo cokoli vidět.
+   */
+  --lh-long: 1.72; /* souvislá próza nad ~65 znaků */
 
   /* ★ MÍRA ŘÁDKU. Role, které ji neměly, měřily 75–123 znaků (nejhůř patička
      na 1024px). Čtenářské optimum je 45–75; přes 80 oko ztrácí návaznost řádků.
@@ -141,11 +210,19 @@
 
      Patička zůstává v `ch` schválně — je celá v mono, kde je každý glyf stejně
      široký a `ch` je tam tedy přesně to, co slibuje. */
-  --measure-body: 32rem; /* ≈ 61 znaků při 17px */
+  /* ★ 34rem, ne 32. Ve stejném sloupci stálo `.body` na 512 px a odrážky,
+     důkaz i rámeček VÝSTUP na 592 px — tedy JEDEN blok se DVĚMA pravými
+     hranami vzdálenými 74 px od sebe, což je na 1920 dobře vidět jako
+     nedbalost. 34rem to srazí na 48 px a `.body` zvedne z 60 na 64 znaků,
+     pořád uvnitř čtenářského optima 45–75. */
+  --measure-body: 34rem;
   /* 37rem, ne 36: při 36 se na 1920 ořízly odrážky o 10 px, sekce WEB tím
      narostla o 9 px a přestala se vejít do okna (a s ní spadl povinný snap). */
   --measure-text: 37rem;
   --measure-wide: 60ch; /* mono, viz výš */
+  /* Sloupec článku. 34rem při 18px ≈ 60 znaků — žurnál je „text na deset minut"
+     a tam je horní hranice 75 znaků příliš vysoko, ne tak akorát. */
+  --measure-long: 34rem;
 
   /* ── ROZESTUPY (řídí je média dotazy níž; komponenty na ně jen sahají) ──
      ★ POZOR: média dotaz NEZVYŠUJE SPECIFICITU. Kdyby tenhle soubor přebíjel

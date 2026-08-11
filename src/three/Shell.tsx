@@ -132,7 +132,15 @@ export default function Shell({ tier }: { tier: Tier }) {
           /* ★ Bez `resolution` spadne drei's useFBO na PLNOU velikost obrazovky
              × devicePixelRatio — tedy re-render celé scény v retina rozlišení,
              každý snímek. Nejčastější příčina 20fps WebGL webu, oprava na jedno slovo. */
-          resolution={tier === 'high' ? 512 : 256}
+          /* ★★ 1024 NA 'high' — TOHLE JE HLAVNÍ DŮVOD, PROČ MODEL PŮSOBIL MĚKCE
+             I NA NEJVYŠŠÍM PATŘE. Všechno, co je vidět SKRZ sklo (tedy sám model,
+             duchové cedule i prach), není kreslené na obrazovku: je to obsah
+             refrakčního bufferu, roztažený přes siluetu krychle. Ta má na 1440p
+             kolem 700 px, takže se 512² buffer nafukoval skoro 1,4× — bilineárně,
+             bez mipmap. Model za sklem byl doslova zvětšený obrázek.
+             `resolution` je bezpečný runtime prop (useFBO na něj reaguje jedním
+             setSize), na rozdíl od `samples`, které jde do konstruktoru. */
+          resolution={tier === 'high' ? 1024 : 256}
           backside={tier === 'high'}
           backsideResolution={256}
           transmission={1}

@@ -105,7 +105,11 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--neon-2);
-  border: 1px solid var(--line-2);
+  /* ★ --line-3, ne --line-2. Tohle je jediné CTA, které je vidět na 100 % pozic
+     scrollu, a rám je jeho jediný signál „jsem tlačítko". Při --line-2 vycházel
+     kontrast rámu vůči pozadí na 1.24:1 — WCAG 1.4.11 chce u hranic ovládacích
+     prvků 3:1. --line-3 je nově přesně 3.01:1. */
+  border: 1px solid var(--line-3);
   padding: 0.55rem 0.9rem;
   border-radius: 2px;
   transition:
@@ -554,8 +558,13 @@
   padding-top: 0.5rem;
   border-top: 1px solid var(--line-1);
   color: var(--tx-4);
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
+  /* ★★ 0.625rem = 10 px BYLO POD VLASTNÍ PODLAHOU ČITELNOSTI. tokens.css sám
+     stanoví „verzálkové mono nikdy pod 12 px" a tenhle řádek byl jediné místo
+     na webu, které to porušovalo — a přitom na něm žije POVINNÁ licenční
+     atribuce k 3D modelu (CC BY 4.0). Text, který tam musí být ze smlouvy,
+     nesmí být nečitelný. Škála --fs-label je 12→13 px. */
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-readout);
   text-transform: uppercase;
 }
 

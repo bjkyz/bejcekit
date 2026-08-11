@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { easing } from 'maath'
-import { CanvasTexture, Group, LinearFilter, MeshBasicMaterial, SRGBColorSpace } from 'three'
+import {
+  CanvasTexture,
+  Group,
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  MeshBasicMaterial,
+  Quaternion,
+  SRGBColorSpace,
+  Vector3,
+} from 'three'
 import { FACE_TRANSFORMS } from '../lib/faces'
 import { SECTIONS } from '../content/sections'
 import { clampDelta, sceneState } from '../lib/scene-state'
@@ -73,11 +82,22 @@ function drawPlate(num: string, code: string): HTMLCanvasElement {
  */
 const ACTIVE_OPACITY: Record<number, number> = { 0: 0.5, 5: 0.2 }
 
+/* Pomocné objekty pro test natočení. Mimo komponentu a znovupoužité — useFrame
+   nesmí alokovat (šedesátkrát za vteřinu × šest cedulí je práce pro GC zadarmo). */
+const normal = new Vector3()
+const toCamera = new Vector3()
+const worldPos = new Vector3()
+const worldQuat = new Quaternion()
+
 function Plate({ i, tier }: { i: number; tier: Tier }) {
   const grp = useRef<Group>(null)
   const mat = useRef<MeshBasicMaterial>(null)
   const t = FACE_TRANSFORMS[i]
   const s = SECTIONS[i]
+  /* Skutečný strop ovladače, ne odhad. Na Apple GPU je to 16, na starých Intel 2 —
+     a požadovat víc, než karta umí, three tiše ořízne, takže je to bezpečné číslo. */
+  const maxAnisotropy = useThree((st) => Math.min(8, st.gl.capabilities.getMaxAnisotropy()))
+  const camera = useThree((st) => st.camera)
 
   // Kreslíme AŽ po doběhnutí fontů — jinak canvas sáhne po systémovém fallbacku
   // a nápis bude jinou písmovkou než zbytek webu.
@@ -94,11 +114,22 @@ function Plate({ i, tier }: { i: number; tier: Tier }) {
     if (!ready) return null
     const texture = new CanvasTexture(drawPlate(s.plateNum, s.plateCode))
     texture.colorSpace = SRGBColorSpace
-    texture.minFilter = LinearFilter // bez mipmap: nápis je vždy zhruba stejně velký
+    /* ★★ MIPMAPY MUSÍ BÝT, JINAK SE NÁPIS TŘPYTÍ — a anisotropy je bez nich mrtvý kód.
+       Stálo tu `minFilter = LinearFilter` s poznámkou „nápis je vždy zhruba stejně
+       velký". Věcně to neplatí: textura je 1024×512 na rovině 2.4×1.2 a kamera je
+       na r ≈ 9.6–10.8, takže cedule na obrazovce zabírá kolem 200 px. To je
+       minifikace zhruba 5× — přesně režim, pro který mipmapy existují. Bez mip
+       řetězce se sousední texely při každém pohybu kamery vzorkují náhodně a text
+       jiskří (aliasing), a `anisotropy` NEDĚLÁ NIC, protože anizotropní filtrování
+       vybírá právě z mip úrovní.
+       LinearMipmapLinear + reálná anisotropie z capabilities: ostrý nápis i při
+       šikmém pohledu, a ještě levnější vzorkování než dřív. */
+    texture.minFilter = LinearMipmapLinearFilter
     texture.magFilter = LinearFilter
-    texture.anisotropy = 4
+    texture.generateMipmaps = true
+    texture.anisotropy = maxAnisotropy
     return texture
-  }, [ready, s.plateNum, s.plateCode])
+  }, [ready, s.plateNum, s.plateCode, maxAnisotropy])
 
   // Co jsme si sami `new`-li, sami uklidíme.
   useEffect(() => () => tex?.dispose(), [tex])
@@ -110,11 +141,33 @@ function Plate({ i, tier }: { i: number; tier: Tier }) {
     const activeOpacity = ACTIVE_OPACITY[i] ?? 1
     if (mat.current) easing.damp(mat.current, 'opacity', active ? activeOpacity : 0.22, 0.25, dt)
 
-    /* ★ Na 'low' tieru je skořápka meshPhysicalMaterial s transparent →
-       depthWrite:false, takže zadní cedule NEJSOU zakryté a vykreslily by se
-       ostře, pozpátku a naležato přes přední stěnu. Proto je tam schováme.
-       (Musí to být v useFrame — sceneState re-render nespouští.) */
-    if (grp.current) grp.current.visible = tier !== 'low' || active
+    /* ★★ NA 'low' SE SKRÝVAJÍ JEN ODVRÁCENÉ CEDULE, NE VŠECHNY KROMĚ AKTIVNÍ.
+       Fejk skořápka na tomhle patře nezapisuje hloubku (Shell.tsx), takže ZADNÍ
+       cedule by prolezly dopředu a vykreslily se ostře, pozpátku a naležato přes
+       přední stěnu. Původní obrana byla „ukaž jen aktivní" — jenže tím zmizelo
+       pět ze šesti nápisů a z krychle zbyl drátěný model s jedním štítkem. Přitom
+       „duchový stoh" cedulí je podle Shell.tsx podpis celé scény.
+
+       Skrýt stačí ty, které jsou od kamery odvrácené: jejich normála míří pryč,
+       takže je stejně nemá být vidět, a právě ony jsou tím, co prolézá. Test je
+       jedno skalární násobení na ceduli a na snímek, nula draw callů navíc —
+       a vrátí to na nejnižším patře tři nápisy místo jednoho. */
+    if (grp.current) {
+      if (tier !== 'low') {
+        grp.current.visible = true
+      } else {
+        /* ★ SVĚTOVÁ rotace, ne lokální. Cedule sedí uvnitř `float` (vznášení)
+           a `dragRef` (tažení myší), takže se její lokální quaternion s natočením
+           krychle vůbec nemění — test by pak platil jen dokud nikdo nesáhne na
+           krychli, a přesně v tu chvíli by cedule začaly probleskovat. */
+        grp.current.getWorldQuaternion(worldQuat)
+        grp.current.getWorldPosition(worldPos)
+        normal.set(0, 0, 1).applyQuaternion(worldQuat)
+        toCamera.subVectors(camera.position, worldPos).normalize()
+        // Malý kladný práh, ne 0: přesně na hraně by cedule při dýchání blikala.
+        grp.current.visible = active || normal.dot(toCamera) > 0.02
+      }
+    }
   })
 
   /* ★ DOKUD NENÍ TEXTURA, MESH VŮBEC NEVZNIKNE.

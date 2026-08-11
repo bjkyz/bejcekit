@@ -53,7 +53,10 @@ export default function Cube({ tier, dragRef }: { tier: Tier; dragRef: React.Ref
           Po puštění se pružinou vrátí do nuly. */}
       <group ref={dragRef}>
         <Shell tier={tier} />
-        <EdgeLattice />
+        {/* ★ EdgeLattice potřebuje `tier` kvůli tónovému mapování: na 'low' neběží
+            composer, takže emise nad 1.0 se musí mapovat na rendereru, jinak se
+            ořízne do bílé. Viz komentář v EdgeLattice.tsx. */}
+        <EdgeLattice tier={tier} />
         <FacePlates tier={tier} />
         <TracePulse />
         {/* Jádro má vlastní pohyb a protiběh — proto vlastní komponenta. */}

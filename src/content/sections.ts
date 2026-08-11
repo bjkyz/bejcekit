@@ -69,6 +69,27 @@ export const WHATSAPP = 'https://wa.me/420607706102'
  */
 export const MAILTO = `mailto:${EMAIL}?subject=${encodeURIComponent('Poptávka z bejcek.it')}`
 
+/**
+ * ★★ KAM VEDOU VŠECHNY VÝZVY K AKCI. JEDNO MÍSTO, JEDNA CESTA.
+ *
+ * Dřív byla CTA rozstřelená mezi tři cíle: kotvu `#kontakt` (scroll přes pět
+ * obrazovek WebGL), `mailto:` (otevře cizí aplikaci a prázdné okno s otázkou
+ * „co mám napsat") a kotvu `#poptavka` na podstránkách. Tři různé prahy, tři
+ * různé zážitky a ani jeden z nich neměl vlastní URL, kterou by šlo poslat,
+ * inzerovat nebo změřit.
+ *
+ * ★ Kotvy `#kontakt` a `#poptavka` se tím NERUŠÍ: sekce 05 na úvodu zůstává
+ *   (krychle musí mít přesně šest stěn) a poptávkové bloky na podstránkách taky.
+ *   Jen z nich přestaly být CÍLE — jsou to rozcestníky, které vedou sem.
+ *
+ * ★★ MUSÍ STÁT NAD `SECTIONS`, KTERÉ HO POUŽÍVAJÍ. `const` je sice hoistovaný,
+ *   ale do doby vyhodnocení leží v temporal dead zone — a `SECTIONS` je taky
+ *   modulová konstanta, takže se vyhodnotí PŘI IMPORTU. S deklarací níž v souboru
+ *   by import celého modulu skončil na `ReferenceError` a spadl by s ním celý web,
+ *   včetně prerenderu. (Ověřeno: build zhavaroval hned při prvním pokusu.)
+ */
+export const CONTACT_HREF = '/kontakt'
+
 export const SECTIONS: Section[] = [
   {
     id: 'ident',
@@ -88,7 +109,7 @@ export const SECTIONS: Section[] = [
      *   výčet zkratek — ten je až ve stacku o dvě obrazovky níž.
      */
     body:
-      'Jsem Jiří Bejček. Navrhuji a stavím AI systémy, automatizace a software na míru: od prvního nápadu po produkt, který firma opravdu používá. Nemusíte vědět, jestli potřebujete agenta, API nebo databázi. Stačí říct, co vám dnes bere čas.',
+      'Jsem Jiří Bejček. Stavím AI systémy, automatizace a software na míru. Nemusíte vědět, jestli potřebujete agenta, API nebo databázi. Stačí říct, co vám dnes bere čas.',
     bullets: [],
     specs: [
       { k: 'Jeden inženýr, ne agentura', v: 'Mluvíte přímo s tím, kdo to staví a kdo za to ručí.' },
@@ -96,7 +117,7 @@ export const SECTIONS: Section[] = [
       { k: 'Odpovím do 24 hodin', v: 'I o víkendu. Celé Česko, remote i u vás.' },
     ],
     status: 'Volná kapacita: zbývá 1 místo',
-    cta: { label: 'Pojďme vytvořit něco chytrého', href: '#kontakt' },
+    cta: { label: 'Pojďme vytvořit něco chytrého', href: CONTACT_HREF },
     /**
      * ★ DRUHÉ TLAČÍTKO VEDE NA SLUŽBY, NE NA SEKCE POD SEBOU.
      *   Scroll dolů i pravá lišta nabízejí totéž co odkaz na sekci, takže by
@@ -115,7 +136,7 @@ export const SECTIONS: Section[] = [
     plateNum: '01',
     headline: 'AI, která skutečně pracuje.',
     body:
-      'AI nemusí být chatbot na webu. Může číst vaše dokumenty, hledat v interních znalostech a sama spouštět procesy. Stavím ji tak, aby odpovídala z vašich dat a u každé odpovědi ukázala zdroj. A nejdřív spočítám, jestli se to vrátí.',
+      'AI nemusí být chatbot. Stavím ji tak, aby odpovídala z vašich dat, ukázala zdroj a sama spustila navazující proces.',
     bullets: [
       'Asistenti, kteří znají vaše dokumenty a procesy. Odpovídají z nich, ne z internetu.',
       'Vytěžování smluv, faktur, objednávek a životopisů. Data padají rovnou do systému.',
@@ -133,10 +154,10 @@ export const SECTIONS: Section[] = [
       'Důkaz: žurnál na tomhle webu píše každý den AI linka, kterou jsem postavil. Zdroje si nevymýšlí, protože k tomu nemá příležitost. Přečtěte si, jak je udělaná.',
     deliverable: {
       label: 'Co dostanete',
-      text: 'Propočet návratnosti před stavbou, běžící řešení napojené na vaše systémy a měsíční report ušetřených hodin.',
+      text: 'Běžící řešení napojené na vaše systémy a měsíční report ušetřených hodin.',
     },
     stack: ['Anthropic API', 'OpenAI API', 'RAG', 'MCP', 'Vektorová DB', 'Python'],
-    cta: { label: 'Chci nasadit AI', href: '#kontakt' },
+    cta: { label: 'Chci nasadit AI', href: CONTACT_HREF },
     ghostCta: { label: 'Číst žurnál', href: '/clanky' },
     align: 'left',
     subsystem: 'AI SYSTÉMY',
@@ -148,19 +169,18 @@ export const SECTIONS: Section[] = [
     plateNum: '02',
     headline: 'Automatizujte to, co se opakuje.',
     body:
-      'Kopírování dat, e-maily, tabulky, reporty, přepisování informací mezi systémy. Když člověk dělá pořád totéž, dá se to skoro vždycky předat stroji. Propojím AI, API, databáze a vaše nástroje do jednoho workflow, které běží, i když se nikdo nedívá.',
+      'Kopírování dat, e-maily, tabulky, reporty, přepisování mezi systémy. Když člověk dělá pořád totéž, dá se to skoro vždycky předat stroji.',
     bullets: [
       'Dřív: e-mail, člověk, otevřít dokument, přepsat data, zkontrolovat, uložit.',
       'Teď: e-mail, extrakce, kontrola, databáze, hotovo. Člověk jen schvaluje výjimky.',
-      'Míň ruční práce, míň chyb a stopa o tom, co se kdy stalo.',
       'n8n, API, webhooky, CRM. Propojím systémy, které spolu dnes nemluví.',
     ],
     deliverable: {
       label: 'Co dostanete',
-      text: 'Běžící workflow, dokumentaci k němu a měsíční report toho, kolik hodin sundalo z lidí.',
+      text: 'Běžící workflow, dokumentaci a měsíční report ušetřených hodin.',
     },
     stack: ['n8n', 'API', 'Webhooky', 'PostgreSQL', 'Node.js', 'Cron'],
-    cta: { label: 'Chci zautomatizovat proces', href: '#kontakt' },
+    cta: { label: 'Chci zautomatizovat proces', href: CONTACT_HREF },
     align: 'right',
     subsystem: 'AUTOMATIZACE',
   },
@@ -175,15 +195,15 @@ export const SECTIONS: Section[] = [
     bullets: [
       'Interní nástroje a portály: dokumenty, data a workflow na jednom místě.',
       'SaaS od MVP po produkci: účty, předplatné, limity, platby, administrace.',
-      'Dashboardy a reporty: data převedená do rozhraní, ve kterém se dá rozhodovat.',
+      'Dashboardy: čísla, ze kterých se dá rozhodnout, ne exporty do Excelu.',
       'Weby a webové aplikace, které jsou rychlé, protože se tak stavěly od začátku.',
     ],
     deliverable: {
       label: 'Co dostanete',
-      text: 'Nasazenou aplikaci, přístupy i kód ve svých rukou a plán dalšího rozvoje. Produkt nekončí prvním nasazením.',
+      text: 'Nasazenou aplikaci, přístupy i kód ve svých rukou a plán dalšího rozvoje.',
     },
     stack: ['Next.js', 'React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Vercel'],
-    cta: { label: 'Chci postavit software', href: '#kontakt' },
+    cta: { label: 'Chci postavit software', href: CONTACT_HREF },
     ghostCta: { label: 'Prohlédnout projekty', href: '/projekty' },
     align: 'left',
     subsystem: 'SOFTWARE NA MÍRU',
@@ -195,7 +215,7 @@ export const SECTIONS: Section[] = [
     plateNum: '04',
     headline: 'Od nápadu k fungujícímu produktu.',
     body:
-      'Nemusíte mít technické zadání. Stačí věta „tohle děláme ručně" nebo „tohle chceme vytvořit". Rozsah, termín a cena jsou na papíře dřív, než napíšu první řádek kódu. Když se rozsah změní, znáte cenu dřív, než se do změny pustím.',
+      'Nemusíte mít technické zadání. Stačí věta „tohle děláme ručně" nebo „tohle chceme vytvořit".',
     bullets: [],
     /* ★ ČTYŘI KROKY, NE PĚT. Sekce se musí vejít do 100svh i na notebooku
        1440×900 (viz --sp-* v tokens.css); pátá dlaždice ji přetáhne a spodek
@@ -208,7 +228,7 @@ export const SECTIONS: Section[] = [
       },
       {
         title: 'Návrh',
-        text: 'Řešení, architektura a pevná cena. Písemně, před začátkem. Žádné „to se uvidí“.',
+        text: 'Řešení, architektura a pevná cena. Písemně, před začátkem. Když se rozsah změní, znáte cenu předem.',
       },
       {
         title: 'Stavba',
@@ -219,7 +239,7 @@ export const SECTIONS: Section[] = [
         text: 'Monitoring, úpravy, další funkce. Po vystavení faktury nemizím.',
       },
     ],
-    cta: { label: 'Domluvit hovor zdarma', href: '#kontakt' },
+    cta: { label: 'Domluvit hovor zdarma', href: CONTACT_HREF },
     align: 'right',
     subsystem: 'PRACOVNÍ POSTUP',
   },
@@ -228,10 +248,27 @@ export const SECTIONS: Section[] = [
     kicker: '[ 05 / KONTAKT ]',
     plateCode: 'KONTAKT',
     plateNum: '05',
+    /**
+     * ★★★ TAHLE SEKCE JE OD ZAVEDENÍ `/kontakt` ROZCESTNÍK, NE CÍL.
+     *
+     * Krychle musí mít PŘESNĚ ŠEST STĚN — sedmá scénu shodí (`FACE_TRANSFORMS[6]`
+     * je undefined) a pátá by nechala kameru viset na prázdné pozici. Kontakt
+     * z ní tedy zmizet nemůže, i když se vlastní poptávka přestěhovala na
+     * samostatnou stránku s formulářem.
+     *
+     * Ze sekce se proto stalo to jediné, co dává smysl: konec scrollu, který
+     * má jednu silnou větu a jedno velké tlačítko. Text se ZKRÁTIL na polovinu,
+     * protože všechno, co tu dřív stálo (co se dozvíte, do kdy, co když nejsem
+     * ten pravý), je teď na `/kontakt` u formuláře — tedy tam, kde se to čte
+     * ve chvíli rozhodování, ne o pět obrazovek dřív.
+     *
+     * ★ Kanály pod tím zůstávají: kdo nechce formulář, nemá důvod klikat dál.
+     */
     headline: 'Řekněte mi, co potřebujete vyřešit.',
     body:
-      'Nemusíte znát technologii, to je moje práce. Popište problém vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý, co to bude stát a kdy to bude hotové. A když ten pravý nejsem, řeknu vám to rovnou a pošlu vás za někým, kdo je.',
+      'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy a do 24 hodin víte, co to bude stát a kdy to bude hotové.',
     bullets: [],
+    cta: { label: 'Napsat poptávku', href: CONTACT_HREF },
     align: 'center',
     subsystem: 'KONTAKT',
   },
@@ -293,6 +330,7 @@ export const NAV_PAGES: { label: string; title: string; href: string }[] = [
   { label: 'PROJEKTY', title: 'Projekty', href: '/projekty' },
   { label: 'ŽURNÁL', title: 'Žurnál', href: '/clanky' },
 ]
+
 
 /**
  * ★★ KOLIK SEKCÍ ÚVODU SE VEJDE DO LIŠTY VEDLE PODSTRÁNEK.

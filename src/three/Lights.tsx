@@ -35,7 +35,14 @@ export default function Lights() {
     <>
       <ambientLight color={AMBI} intensity={0.8} />
 
-      <Environment resolution={64} frames={1}>
+      {/* ★ ROZLIŠENÍ 256, NE 64 — A JE TO ZDARMA. `frames={1}` znamená, že se
+          prostředí upeče JEDNOU při startu; per-snímek se nemění nic, ať je mapa
+          jakkoli velká. Při 64² měl čtvrtý, „úzký a ostrý" lightformer níž
+          v krychlové mapě jen pár pixelů, takže z ostrého odlesku, který má po
+          skle ubíhat, byla rozmazaná kaše. Env mapa navíc svítí i MODEL (je to
+          MeshStandardMaterial), takže se to projeví na všech patrech včetně 'low',
+          kde je to jediné směrové světlo, které zbylo. */}
+      <Environment resolution={256} frames={1}>
         <Lightformer form="rect" intensity={1.8} color="#bfe9f2" position={[0, 4, 3]} scale={[8, 4, 1]} />
         <Lightformer form="rect" intensity={1.1} color="#4fd8e8" position={[-5, 0, 2]} scale={[4, 6, 1]} />
         <Lightformer form="rect" intensity={0.8} color="#52aeff" position={[5, -1, -3]} scale={[5, 5, 1]} />

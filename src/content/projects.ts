@@ -113,7 +113,7 @@ export const PROJECTS: Project[] = [
     locked: true,
     kind: 'Objednávkový web advokátní kanceláře',
     summary:
-      'Advokátní kancelář, která prodává právní služby po internetu: klient si vybere svou situaci, cenu vidí ještě před objednáním a případ jde rovnou advokátovi. Web proto nese ceník, objednávku i cizojazyčné verze a přitom zůstává rychlý.',
+      'Advokátní kancelář prodává právní služby po internetu: klient si vybere situaci, cenu vidí před objednáním a případ jde rovnou advokátovi.',
     facts: [
       { k: 'Doručení', v: 'Předrenderované stránky z CDN (ISR), ne skládání na serveru při každém požadavku' },
       { k: 'Vyhledávače', v: 'Strukturovaná data LegalService, kontakty i adresa kanceláře' },
@@ -135,7 +135,7 @@ export const PROJECTS: Project[] = [
     locked: true,
     kind: 'Prezentace kanceláře s poradnou',
     summary:
-      'Zavedená pražská kancelář s praxí přes tři dekády: oblasti práva, tým, blog a bezplatná úvodní konzultace. Úkolem webu je nést důvěryhodnost a dovést člověka k té jeho oblasti práva dřív, než odejde jinam.',
+      'Zavedená pražská kancelář: oblasti práva, tým, blog, bezplatná konzultace. Úkolem webu je dovést člověka k jeho oblasti práva dřív, než odejde jinam.',
     facts: [
       { k: 'Vyhledávače', v: 'Časté dotazy ve strukturovaných datech, takže se můžou objevit přímo ve výsledku' },
       { k: 'Jazyky', v: 'hreflang pro cizojazyčnou verzi' },
@@ -157,7 +157,7 @@ export const PROJECTS: Project[] = [
     locked: true,
     kind: 'Značkový web zakázkové dílny',
     summary:
-      'Americká značka, která šije módu na míru. Web stojí na obrazu, ne na textu: video přes celou plochu, animace řízené scrollem a galerie zakázkové výroby. Anglicky, pro zákazníky za oceánem.',
+      'Americká značka, která šije módu na míru. Web stojí na obrazu, ne na textu: video přes celou plochu a animace řízené scrollem.',
     facts: [
       { k: 'Pojetí', v: 'Video hero přes celou šířku, obsah nastupuje animací při scrollu' },
       { k: 'Doručení', v: 'Cloudflare, tedy edge síť blízko americkým zákazníkům' },
@@ -179,7 +179,7 @@ export const PROJECTS: Project[] = [
     href: '/',
     kind: 'Portfolio se 3D scénou v prohlížeči',
     summary:
-      'Web, na kterém právě jste. Skleněný stroj uprostřed není obrázek, ale scéna počítaná v prohlížeči, kolem které obíhá kamera podle scrollu. Postavil jsem ho hlavně proto, abych na něm mohl ukázat, že se výkon a efekt nevylučují.',
+      'Web, na kterém právě jste. Skleněný stroj uprostřed není obrázek, ale scéna počítaná v prohlížeči, kolem které obíhá kamera podle scrollu.',
     facts: [
       { k: 'Rychlost', v: 'Lighthouse 100 / 100 / 100 / 100 na desktopu. Změřte si to sami.' },
       { k: 'Odolnost', v: 'Na slabém stroji scéna sama sestoupí o patro níž a nakonec se vzdá. Web zůstane celý.' },

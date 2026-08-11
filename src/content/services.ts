@@ -39,7 +39,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     num: '01',
     code: 'AI SYSTEMS',
     title: 'AI napojená na vaše podnikání.',
-    lead: 'AI nemusí být chatbot na webu. Může pracovat s dokumenty, rozumět firemním datům, vyhledávat informace a spouštět další procesy. Stavím ji tak, aby odpovídala z vašich podkladů a u každé odpovědi ukázala, odkud to má.',
+    lead: 'Pět způsobů, jak AI pracuje s tím, co ve firmě už je. U každé odpovědi ukáže, odkud to má.',
     items: [
       { k: 'AI asistenti', v: 'Interní asistenti, kteří znají vaše dokumenty, procesy a informace.' },
       { k: 'Zpracování dokumentů', v: 'Automatické vytěžování smluv, faktur, objednávek a životopisů.' },
@@ -53,8 +53,8 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
   {
     num: '02',
     code: 'AUTOMATION',
-    title: 'Automatizujte to, co se opakuje.',
-    lead: 'Kopírování dat, e-maily, tabulky, reporty, kontroly, přepisování informací mezi systémy. Když člověk opakuje stejný postup znovu a znovu, je velká šance, že se dá předat stroji.',
+    title: 'Ruční kroky, které stroj zvládne sám.',
+    lead: 'Čtyři místa, kde se opakovaný postup dá předat stroji.',
     items: [
       { k: 'Vytěžování a přepis dat', v: 'Z e-mailu, PDF nebo formuláře rovnou do systému, bez ručního opisování.' },
       { k: 'Propojení systémů', v: 'API, webhooky a databáze. Nástroje, které spolu dnes nemluví, začnou.' },
@@ -68,7 +68,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     num: '03',
     code: 'INTERNAL TOOLS',
     title: 'Software přesně podle toho, jak pracujete.',
-    lead: 'Každá firma má vlastní procesy a někdy se jim žádný univerzální software nedokáže přizpůsobit. Pak je levnější postavit nástroj podle procesu než ohýbat proces podle nástroje.',
+    lead: 'Někdy je levnější postavit nástroj podle procesu než ohýbat proces podle nástroje.',
     items: [
       { k: 'Interní nástroje', v: 'Zpracování firemních dat, generování dokumentů, řízení workflow.' },
       { k: 'Klientské portály', v: 'Dokumenty, komunikace, služby a informace na jednom místě.' },
@@ -82,7 +82,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     num: '04',
     code: 'SAAS',
     title: 'Máte nápad na produkt? Postavme ho.',
-    lead: 'SaaS není jen webová aplikace. Je to produkt, který může používat jeden zákazník nebo tisíce. Pomáhám ho vytvořit od prvního konceptu po produkční verzi, na kterou se dá napojit fakturace.',
+    lead: 'SaaS není webová aplikace, ale produkt: jeden zákazník, nebo tisíce.',
     items: [
       { k: 'MVP', v: 'Rychle ověříme, jestli má nápad smysl, dřív než se do něj utopí rozpočet.' },
       { k: 'Vývoj produktu', v: 'Skutečný produkt připravený pro zákazníky, ne prototyp v produkci.' },
@@ -97,19 +97,19 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     num: '05',
     code: 'ANONYMIZACE',
     title: 'Citlivá data nemusí stát mezi vámi a AI.',
-    lead: 'Potřebujete pracovat s dokumenty, které obsahují osobní nebo citlivé informace? Data můžou projít automatickou detekcí a anonymizací ještě předtím, než je uvidí další systém nebo model.',
+    lead: 'Citlivé dokumenty projdou detekcí a anonymizací dřív, než je uvidí další systém nebo model.',
     items: [
       { k: 'Detekce údajů', v: 'Jména, adresy, telefonní čísla, e-maily a identifikační údaje v textu i v dokumentech.' },
       { k: 'Anonymizace a pseudonymizace', v: 'Údaje se odstraní nebo nahradí zástupnou hodnotou, podle toho, co s daty potřebujete dál dělat.' },
       { k: 'Zpracování na vaší straně', v: 'Citlivá část zpracování může běžet u vás a ven jde jen to, co už osobní údaje neobsahuje.' },
     ],
-    punch: 'Soukromí by nemělo být překážkou inovace. Konkrétní způsob i míru ochrany navrhuji podle typu dat a požadavků projektu.',
+    punch: 'Soukromí nemá být překážkou. Míru ochrany navrhnu podle typu dat.',
   },
   {
     num: '06',
     code: 'WEB',
     title: 'Web, který není jen vizitka.',
-    lead: 'Moderní web musí být rychlý, důvěryhodný a připravený na další rozvoj. Rychlost přitom není položka na konci nabídky, ale rozhodnutí v architektuře: co se stahuje dřív než text.',
+    lead: 'Rychlost není položka na konci nabídky, ale rozhodnutí v architektuře: co se stahuje dřív než text.',
     items: [
       { k: 'Firemní weby', v: 'Prezentace značky, služby nebo produktu, která obstojí vedle konkurence.' },
       { k: 'Landing pages', v: 'Stránka navržená s jediným cílem: dovést návštěvníka k akci.' },

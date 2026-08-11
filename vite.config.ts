@@ -143,8 +143,36 @@ function inlineCss(): Plugin {
       if (cssFiles.length === 0) return
       const css = cssFiles.map((f) => readFileSync(resolve(assets, f), 'utf8')).join('')
 
-      for (const page of readdirSync(dist).filter((f) => f.endsWith('.html'))) {
-        const htmlPath = resolve(dist, page)
+      /**
+       * ★★★ PROCHÁZÍ SE REKURZIVNĚ, NE JEN KOŘEN dist/.
+       *
+       * Původně tu bylo `readdirSync(dist).filter(f => f.endsWith('.html'))`, což
+       * vidí jen soubory v kořeni. Dokud byly všechny stránky v kořeni, fungovalo
+       * to; od chvíle, kdy přibyla anglická verze v `dist/en/`, by to znamenalo,
+       * že VNOŘENÉ stránky jako jediné drží render-blokující `<link>` na CSS —
+       * jenže ten soubor se v dist/assets sice nemaže, ale stránka by ho stahovala
+       * navíc a bez inline stylů by nejdřív problikla bez formátování.
+       *
+       * A hlavně: šablona žurnálu se KLONUJE z hotového HTML (scripts/prerender.mjs),
+       * takže by se ta chyba propsala do každého článku.
+       *
+       * Je to táž třída chyby, kvůli které se sem kdysi doplnilo procházení celého
+       * adresáře místo napevno napsaného index.html — jen o patro hloub.
+       */
+      const pages: string[] = []
+      const walk = (dir: string) => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          const full = resolve(dir, entry.name)
+          if (entry.isDirectory()) {
+            if (entry.name !== 'assets') walk(full)
+          } else if (entry.name.endsWith('.html')) {
+            pages.push(full)
+          }
+        }
+      }
+      walk(dist)
+
+      for (const htmlPath of pages) {
         const html = readFileSync(htmlPath, 'utf8')
           .replace(/[ \t]*<link[^>]*rel="stylesheet"[^>]*>\s*/g, '')
           .replace('</head>', `<style>${css}</style>\n</head>`)
@@ -205,6 +233,10 @@ export default defineConfig({
         index: resolve(process.cwd(), 'index.html'),
         projekty: resolve(process.cwd(), 'projekty.html'),
         sluzby: resolve(process.cwd(), 'sluzby.html'),
+        /* ★ Kontakt je vlastní stránka, ne kotva. Kotva `#kontakt` na úvodu
+           nemá vlastní URL, titulek ani náhled pro sdílení — a hlavně vede přes
+           scroll pěti obrazovkami WebGL. Konverzní cesta musí být co nejkratší. */
+        kontakt: resolve(process.cwd(), 'kontakt.html'),
         clanky: resolve(process.cwd(), 'clanky.html'),
       },
       output: {

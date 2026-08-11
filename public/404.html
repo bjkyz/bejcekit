@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="cs" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Stránka nenalezena · bejcek.it</title>
+    <!--
+      ★★ `noindex`, ALE `follow`. Chybová stránka nemá co dělat ve výsledcích
+        vyhledávání, ale odkazy z ní vést mají — je to poslední místo, odkud se
+        crawler (i člověk) dostane zpátky do webu místo aby skončil.
+    -->
+    <meta name="robots" content="noindex,follow" />
+    <meta name="theme-color" content="#08090a" />
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!--
+      ★★★ TAHLE STRÁNKA JE ZÁMĚRNĚ STATICKÁ A BEZ JEDINÉHO BAJTU JAVASCRIPTU.
+
+      Nabízelo se udělat z ní šestý vstupní bod Vite a React komponentu, aby
+      sdílela navigaci a patičku. Jenže 404 je stránka, kterou nikdo nemá vidět
+      a která se musí zobrazit i tehdy, když se něco pokazilo — třeba když
+      chybí právě ten JS chunk, kvůli kterému člověk skončil na 404. Vlastní
+      bundle by tedy přidal přesně tu závislost, kterou tady nechceme.
+
+      Styly dostane zadarmo: `inlineCss()` ve vite.config.ts prochází VŠECHNA
+      HTML v dist/ (včetně těch zkopírovaných z public/) a vloží do nich celý
+      stylesheet. Třídy níž jsou tedy ty skutečné z webu, ne opsané.
+
+      ★ ŽÁDNÉ ABSOLUTNÍ URL. Soubor není v `ORIGIN_FILES` ve vite.config.ts,
+        takže by se v něm token `__SITE_ORIGIN__` nenahradil a zůstal by
+        v odkazech doslova. Všechny cesty jsou proto relativní ke kořeni.
+    -->
+  </head>
+  <body>
+    <div class="bg-field" aria-hidden="true"></div>
+    <div class="frame" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+    <nav class="nav nav--page" aria-label="Hlavní navigace">
+      <a class="nav__mark" href="/">
+        <svg width="30" height="21" viewBox="0 0 80 56" fill="currentColor" aria-hidden="true">
+          <path
+            d="M8 6c6 0 10 3 13 7 4-2 9-3 19-3s15 1 19 3c3-4 7-7 13-7 2 0 3 2 2 4l-5 9c2 4 3 9 3 14 0 12-9 20-32 20S8 45 8 33c0-5 1-10 3-14L6 10C5 8 6 6 8 6Z"
+          />
+        </svg>
+        <span class="sr-only">bejcek.it, úvod</span>
+      </a>
+      <a class="nav__cta" href="/kontakt">Napište mi</a>
+    </nav>
+
+    <main class="page" style="max-width: 46rem">
+      <p class="kicker label">[ 404 / NENALEZENO ]</p>
+      <h1 class="display" style="margin-top: 0.25rem">Tady nic není.</h1>
+      <p class="body">
+        Stránka, kterou hledáte, neexistuje nebo se přestěhovala. Odsud se dostanete kamkoli jinam.
+      </p>
+
+      <ul class="channels" style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 2rem">
+        <li>
+          <a class="channel" href="/">
+            <span class="channel__k">Úvod</span>
+            <span class="channel__v">Co stavím</span>
+            <span class="channel__n">AI systémy, automatizace a software na míru</span>
+          </a>
+        </li>
+        <li>
+          <a class="channel channel--green" href="/kontakt">
+            <span class="channel__k">Kontakt</span>
+            <span class="channel__v">Napsat poptávku</span>
+            <span class="channel__n">Odpověď do 24 hodin, nezávazně</span>
+          </a>
+        </li>
+        <li>
+          <a class="channel" href="/sluzby">
+            <span class="channel__k">Služby</span>
+            <span class="channel__v">Celý katalog</span>
+            <span class="channel__n">Šest skupin od AI po weby</span>
+          </a>
+        </li>
+        <li>
+          <a class="channel" href="/clanky">
+            <span class="channel__k">Žurnál</span>
+            <span class="channel__v">Články</span>
+            <span class="channel__n">Novinky z AI přeložené do řeči firem</span>
+          </a>
+        </li>
+      </ul>
+
+      <footer class="footer" style="margin-top: 4rem">
+        <p class="footer__links">
+          <a href="/">Úvod</a>
+          <span aria-hidden="true">·</span>
+          <a href="/sluzby">Služby</a>
+          <span aria-hidden="true">·</span>
+          <a href="/projekty">Projekty</a>
+          <span aria-hidden="true">·</span>
+          <a href="/clanky">Žurnál</a>
+          <span aria-hidden="true">·</span>
+          <a href="/kontakt">Kontakt</a>
+        </p>
+      </footer>
+    </main>
+
+    <div class="grain" aria-hidden="true"></div>
+  </body>
+</html>

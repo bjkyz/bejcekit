@@ -121,7 +121,12 @@
   display: block;
   margin-top: 0.2rem;
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  /* ★ MÍRA ŘÁDKU CHYBĚLA ÚPLNĚ. Prvek sedí v pravém sloupci 1.15fr, takže při
+     vnitřní šířce 1120 px vycházel na 621 px = ~78 znaků. Vedle něj přitom
+     `.svc__lead` drží `--measure-body` a má 54. Dva sousední bloky téže sekce
+     se tak četly úplně jinak. */
+  max-width: var(--measure-long);
+  line-height: var(--lh-long);
   color: var(--tx-2);
   text-wrap: pretty;
 }
@@ -130,7 +135,13 @@
 .svc__punch {
   margin: 0.25rem 0 0;
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  /* ★★ NEJDELŠÍ ŘÁDEK NA CELÉM WEBU: 140 ZNAKŮ. Prvek dostává `grid-column: 1/-1`
+     a neměl žádný strop šířky, takže se roztáhl přes celou sekci (1120 px).
+     Čtenářské optimum je 45–75 znaků; nad 80 už oko ztrácí návaznost řádků
+     a nad 100 přeskakuje. A je to shodou okolností ta jediná věta ve skupině,
+     která má zůstat v hlavě. */
+  max-width: var(--measure-text);
+  line-height: var(--lh-long);
   color: var(--tx-1);
   text-wrap: pretty;
 }
@@ -204,6 +215,8 @@
 /* Metoda jako readout, ne jako věta. Pět sloves s tečkami mezi nimi je
    nejkratší možný popis toho, jak se pracuje. */
 .svc-about__method {
+  /* Readout, ne štítek: pět slov oddělených tečkami. */
+  letter-spacing: var(--ls-readout);
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--line-1);
@@ -236,7 +249,12 @@
   /* Náhled je jen náhled: mírně ztlumený, aby nekřičel na celou stránku,
      a při najetí naplno. Ztlumení je na JASU, ne na sytosti — dokument tím
      nepřestane vypadat jako platný. */
-  filter: brightness(0.88);
+  /* ★ 0.80, ne 0.88. Náhled je ~550×390 px světlého papíru na #08090a, tedy
+     zdaleka největší jednotlivá plocha jasu na webu — průměrně kolem 15:1 proti
+     stránce. To je hlavní zdroj oslnění na /sluzby. Ztlumení zůstává na JASU
+     (ne na sytosti), takže dokument dál nevypadá jako neplatný, a rozdíl proti
+     hoveru (1.0) je pořád jasně čitelný. */
+  filter: brightness(0.8);
   transition: filter var(--d-lift) var(--e-out-quint), transform var(--d-lift) var(--e-out-quint);
 }
 .cert__shot:hover img {

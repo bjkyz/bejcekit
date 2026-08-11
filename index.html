@@ -17,6 +17,7 @@
     />
     <meta name="author" content="Jiří Bejček" />
     <meta name="theme-color" content="#08090a" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="cs_CZ" />
@@ -44,43 +45,100 @@
          obsahu; preload by 513 kB tahal souběžně s textem a zdržoval to, na čem
          návštěvníkovi doopravdy záleží. Krychle je bonus, ne mýtné. -->
 
+    <!--
+      ★★★ JEDEN SOUVISLÝ @graph, NE JEDEN OSAMOCENÝ UZEL. Tři změny proti dřívějšku
+        a každá řeší konkrétní chybu, kterou hlásil Rich Results Test:
+
+      1) PŘIBYL `WebSite`. Google čte funkci „jméno webu" (tedy to, že se ve
+         výsledcích ukáže „bejcek.it" místo holé domény) VÝHRADNĚ z uzlu WebSite
+         na HOMEPAGE. Nikde jinde ho nehledá. Bez něj si jméno hádal z titulku.
+
+      2) `Organization` MÍSTO `ProfessionalService`. `ProfessionalService` je
+         podtyp `LocalBusiness` a ten vyžaduje `address` — bez ní je to tvrdá
+         CHYBA, ne varování. Provozovna ale neexistuje (práce běží remote po
+         celém Česku), takže adresu vymýšlet nejde a nemá smysl: nárok na místní
+         výsledky bez skutečné adresy stejně nevznikne. `Organization`
+         + `ContactPoint` popisuje realitu přesně.
+
+      3) `hasCredential` SEDÍ NA `#person` A TEN JE VLASTNÍ UZEL. Dřív byla osoba
+         vnořená do `founder` a certifikát měla jen tady — kdežto `seo.ts` skládal
+         `#person` pro články BEZ certifikátu. Vznikly tím dvě různé verze téhož
+         člověka a nejsilnější důkaz kvalifikace chyběl přesně tam, kde se hodí
+         nejvíc: pod články.
+
+      ★ `sameAs` na GitHub je jediný externí odkaz, který o téhle entitě někdo
+        vede. Až přibudou další profily, patří sem, ne do patičky.
+    -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "ProfessionalService",
-        "@id": "__SITE_ORIGIN__/#identity",
-        "name": "bejcek.it · Jiří Bejček",
-        "url": "__SITE_ORIGIN__/",
-        "image": "__SITE_ORIGIN__/og.png",
-        "sameAs": ["https://github.com/bjkyz"],
-        "description": "AI a software inženýr. AI asistenti nad firemními daty a agenti, automatizace procesů, interní nástroje, SaaS produkty a weby na míru.",
-        "email": "bejcek.jirka@gmail.com",
-        "telephone": "+420607706102",
-        "areaServed": "CZ",
-        "knowsLanguage": "cs",
-        "priceRange": "$$",
-        "founder": {
-          "@type": "Person",
-          "@id": "__SITE_ORIGIN__/#person",
-          "name": "Jiří Bejček",
-          "jobTitle": "AI a software inženýr",
-          "email": "bejcek.jirka@gmail.com",
-          "telephone": "+420607706102",
-          "hasCredential": {
-            "@type": "EducationalOccupationalCredential",
-            "name": "Agentic Engineering",
-            "credentialCategory": "certificate",
-            "url": "__SITE_ORIGIN__/certifikat-agentic-engineering.pdf",
-            "dateCreated": "2026-05-29",
-            "recognizedBy": { "@type": "Organization", "name": "r_d by Laba" }
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "__SITE_ORIGIN__/#website",
+            "url": "__SITE_ORIGIN__/",
+            "name": "bejcek.it",
+            "alternateName": "Jiří Bejček · AI a software",
+            "inLanguage": "cs",
+            "publisher": { "@id": "__SITE_ORIGIN__/#identity" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "__SITE_ORIGIN__/#identity",
+            "name": "bejcek.it · Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "image": "__SITE_ORIGIN__/og.png",
+            "sameAs": ["https://github.com/bjkyz"],
+            "description": "AI a software inženýr. AI asistenti nad firemními daty a agenti, automatizace procesů, interní nástroje, SaaS produkty a weby na míru.",
+            "email": "bejcek.jirka@gmail.com",
+            "telephone": "+420607706102",
+            "areaServed": { "@type": "Country", "name": "Česko" },
+            "priceRange": "$$",
+            "founder": { "@id": "__SITE_ORIGIN__/#person" },
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "__SITE_ORIGIN__/#logo",
+              "url": "__SITE_ORIGIN__/og.png",
+              "width": 1200,
+              "height": 630
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "email": "bejcek.jirka@gmail.com",
+              "telephone": "+420607706102",
+              "areaServed": "CZ",
+              "availableLanguage": ["cs", "en"],
+              "url": "__SITE_ORIGIN__/kontakt"
+            },
+            "makesOffer": [
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI asistenti nad firemními daty, RAG a AI agenti" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Automatizace firemních procesů a vytěžování dokumentů" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Interní nástroje, klientské portály a dashboardy na míru" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "SaaS produkty od MVP po produkci" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Weby, webové aplikace a technické SEO" } }
+            ]
+          },
+          {
+            "@type": "Person",
+            "@id": "__SITE_ORIGIN__/#person",
+            "name": "Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "jobTitle": "AI a software inženýr",
+            "email": "bejcek.jirka@gmail.com",
+            "telephone": "+420607706102",
+            "knowsLanguage": ["cs", "en"],
+            "sameAs": ["https://github.com/bjkyz"],
+            "worksFor": { "@id": "__SITE_ORIGIN__/#identity" },
+            "hasCredential": {
+              "@type": "EducationalOccupationalCredential",
+              "name": "Agentic Engineering",
+              "credentialCategory": "certificate",
+              "url": "__SITE_ORIGIN__/certifikat-agentic-engineering.pdf",
+              "dateCreated": "2026-05-29",
+              "recognizedBy": { "@type": "Organization", "name": "r_d by Laba" }
+            }
           }
-        },
-        "makesOffer": [
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI asistenti nad firemními daty, RAG a AI agenti" } },
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Automatizace firemních procesů a vytěžování dokumentů" } },
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Interní nástroje, klientské portály a dashboardy na míru" } },
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "SaaS produkty od MVP po produkci" } },
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Weby, webové aplikace a technické SEO" } }
         ]
       }
     </script>

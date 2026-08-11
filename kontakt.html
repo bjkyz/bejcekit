@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="cs" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="__SITE_ORIGIN__/kontakt" />
+
+    <title>Kontakt · Poptávka na AI, automatizaci a software | bejcek.it</title>
+    <!-- Popisek je slib, ne výčet: co člověk dostane a jak rychle. Pod ~160 znaky. -->
+    <meta
+      name="description"
+      content="Napište, co potřebujete vyřešit. Nemusíte znát technologii ani mít zadání. Do 24 hodin víte, co to bude stát a kdy to bude hotové. Nezávazně a diskrétně."
+    />
+    <meta name="author" content="Jiří Bejček" />
+    <meta name="theme-color" content="#08090a" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:url" content="__SITE_ORIGIN__/kontakt" />
+    <meta property="og:site_name" content="bejcek.it" />
+    <meta property="og:title" content="Kontakt · bejcek.it" />
+    <meta
+      property="og:description"
+      content="Řekněte mi, co potřebujete vyřešit. Odpověď do 24 hodin, pevná cena písemně."
+    />
+    <meta property="og:image" content="__SITE_ORIGIN__/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="bejcek.it · kontakt a poptávka" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!--
+      ★★ JEDEN SOUVISLÝ @graph, NE TŘI ODPOJENÉ OSTRŮVKY.
+        `ContactPage` se přes `about` a `provider` váže na `#identity`, a ten se
+        tu MUSÍ i definovat. Google `@id` mezi dokumenty NEDEREFERENCUJE — parsuje
+        po stránkách, takže odkaz na uzel, který je definovaný jen na úvodu, je
+        pro něj uzel bez typu a bez jména.
+
+      ★ `ContactPage` + `ContactPoint`: dvojice, kterou Google u kontaktních
+        stránek očekává. `contactType: "sales"` říká, že sem chodí poptávky,
+        `availableLanguage` že se domluvíte česky i anglicky.
+
+      ★ `FAQPage` je vlastní uzel s `mainEntity`, ne pole přilepené k stránce —
+        jinak se jako časté dotazy vůbec nepřečte.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ContactPage",
+            "@id": "__SITE_ORIGIN__/kontakt#page",
+            "url": "__SITE_ORIGIN__/kontakt",
+            "name": "Kontakt · bejcek.it",
+            "description": "Poptávka na AI systémy, automatizaci procesů a software na míru. Odpověď do 24 hodin, pevná cena písemně.",
+            "inLanguage": "cs",
+            "isPartOf": { "@id": "__SITE_ORIGIN__/#website" },
+            "about": { "@id": "__SITE_ORIGIN__/#identity" },
+            "primaryImageOfPage": { "@id": "__SITE_ORIGIN__/#logo" }
+          },
+          {
+            "@type": "ProfessionalService",
+            "@id": "__SITE_ORIGIN__/#identity",
+            "name": "bejcek.it · Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "description": "AI a software inženýr. AI asistenti nad firemními daty a agenti, automatizace procesů, interní nástroje, SaaS produkty a weby na míru.",
+            "email": "bejcek.jirka@gmail.com",
+            "telephone": "+420607706102",
+            "areaServed": { "@type": "Country", "name": "Česko" },
+            "availableLanguage": ["cs", "en"],
+            "priceRange": "$$",
+            "sameAs": ["https://github.com/bjkyz"],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "email": "bejcek.jirka@gmail.com",
+              "telephone": "+420607706102",
+              "areaServed": "CZ",
+              "availableLanguage": ["cs", "en"]
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "__SITE_ORIGIN__/kontakt#faq",
+            "isPartOf": { "@id": "__SITE_ORIGIN__/kontakt#page" },
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Kolik to bude stát?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Cenu řeknu písemně předem, po půlhodinovém hovoru zdarma. Menší automatizace začínají v desítkách tisíc, software na míru podle rozsahu. Když se rozsah během práce změní, znáte novou cenu dřív, než se do změny pustím."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Musím vědět, co přesně chci?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ne. Stačí věta „tohle děláme ručně\" nebo „tohle nás zdržuje\". Technické zadání je moje práce, ne vaše."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Jak dlouho to trvá?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Menší automatizace jednotky týdnů, software na míru měsíce. Nasazuji průběžně, takže běžící verzi vidíte dřív, než je hotovo všechno."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Pracujete i mimo Prahu?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ano, celé Česko. Většina práce běží remote, na schůzku dojedu, když dává smysl."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Co když na to nejste ten pravý?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Řeknu vám to rovnou a pošlu vás za někým, kdo je. Zakázku, která se nevrátí, nevezmu."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Komu patří výsledný kód?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Vám. Dostanete kód, přístupy i dokumentaci. Nejste na mně závislí a nikde nemám zámek."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Úvod", "item": "__SITE_ORIGIN__/" },
+              { "@type": "ListItem", "position": 2, "name": "Kontakt" }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!--
+      ★★ NOSCRIPT MUSÍ NÉST FUNKČNÍ FORMULÁŘ, NE JEN ADRESU.
+        Tohle je jediná stránka webu, jejímž jediným úkolem je přijmout zprávu.
+        Bez JS se React nehydratuje, takže by tu bez tohohle bloku byla černá
+        plocha — a to přesně u člověka, který se právě rozhodl napsat.
+        Formulář míří na týž endpoint jako verze s JS; `api/contact.ts` pozná
+        podle hlavičky `Accept`, že má odpovědět přesměrováním, ne JSONem.
+    -->
+    <noscript>
+      <div style="max-width: 40rem; margin: 0 auto; padding: 4rem 1.5rem; color: #c1c8d1; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1 style="color: #d2d8df; font-size: 1.75rem">Kontakt · bejcek.it</h1>
+        <p>Řekněte mi, co potřebujete vyřešit. Odpovím do 24 hodin.</p>
+        <form method="post" action="/api/contact" style="display: grid; gap: 0.75rem; margin: 1.5rem 0">
+          <label>Jméno<br /><input name="name" required style="width: 100%; padding: 0.6rem" /></label>
+          <label>E-mail<br /><input name="email" type="email" required style="width: 100%; padding: 0.6rem" /></label>
+          <label>Co potřebujete vyřešit?<br /><textarea name="message" required rows="6" style="width: 100%; padding: 0.6rem"></textarea></label>
+          <button type="submit" style="padding: 0.7rem 1.2rem">Odeslat poptávku</button>
+        </form>
+        <p>
+          Nebo rovnou:<br />
+          E-mail: <a href="mailto:bejcek.jirka@gmail.com" style="color: #52aeff">bejcek.jirka@gmail.com</a><br />
+          Telefon: <a href="tel:+420607706102" style="color: #52aeff">+420 607 706 102</a><br />
+          WhatsApp: <a href="https://wa.me/420607706102" style="color: #52aeff">+420 607 706 102</a>
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/kontakt.tsx"></script>
+  </body>
+</html>

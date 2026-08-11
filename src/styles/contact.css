@@ -1,0 +1,391 @@
+/* ═══════════════════════════════════════════════════════════════
+   STRÁNKA /kontakt — formulář, kanály, časté dotazy.
+
+   ★ ŽÁDNÝ NOVÝ VIZUÁLNÍ JAZYK. Tokeny, tlačítka i `.channel` jsou sdílené
+     (tokens.css, sections.css). Nové je tu jen jedno: FORMULÁŘOVÁ POLE, která
+     na tomhle webu dosud nebyla vůbec.
+
+   ★★ POZOR NA POŘADÍ SOUBORŮ. `inlineCss()` ve vite.config.ts slepuje CSS
+     v pořadí ADRESÁŘE, ne importů, takže `sections.css` i `projects.css` můžou
+     skončit ZA tímhle souborem. Kde se přepisuje sdílená třída, musí mít
+     selektor VYŠŠÍ SPECIFICITU (`.page.page--contact`), ne jen pozdější pořadí.
+     Je to táž past, která už jednou roztáhla článek přes celou obrazovku.
+   ═══════════════════════════════════════════════════════════════ */
+
+.page.page--contact {
+  max-width: calc(70rem + 2 * var(--gutter));
+}
+
+.ctc-head {
+  max-width: var(--measure-text);
+}
+
+/* ── ROZVRŽENÍ ───────────────────────────────────────────────
+   Formulář vlevo a širší, kanály vpravo. Pod 62rem pod sebe — formulář
+   PRVNÍ, protože je to hlavní akce stránky a na telefonu se nesmí odsunout
+   pod tři kontaktní dlaždice. */
+.ctc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.75rem, 4vw, 3rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
+  align-items: start;
+}
+@media (min-width: 62rem) {
+  .ctc {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+}
+
+/* ── FORMULÁŘ ────────────────────────────────────────────────
+   Deska, ne holý text v prostoru. Je to jediná výjimka ze zákona „krabice
+   kolem textu = administrace" a má stejný důvod jako dlaždice sekce 05:
+   je to konverzní obrazovka a pole potřebují ohraničený prostor, aby se
+   četla jako věc, do které se píše. */
+.ctc-form {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgba(19, 22, 25, 0.66), rgba(11, 13, 15, 0.82)) padding-box,
+    linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04) 45%, rgba(79, 216, 232, 0.14))
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 40px -30px rgba(0, 0, 0, 0.95);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  /* Cíl kotvy #formular (nav „Napište mi", skip-link): bez rezervy by nadpis
+     po skoku zajel pod fixní navigaci. */
+  scroll-margin-top: 7rem;
+}
+.ctc-form__h {
+  /* Vlastní stupeň: `.headline` jede až na 52 px, což je nadpis SEKCE.
+     Tohle je nadpis bloku uvnitř stránky. */
+  font-size: clamp(1.375rem, 1.15rem + 0.8vw, 1.875rem);
+  margin-bottom: 1.25rem;
+}
+.ctc-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* Jméno a e-mail vedle sebe, jakmile je místo. Dvě krátká pole pod sebou
+   zbytečně natahují formulář a delší formulář se hůř dokončuje. */
+.ctc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.1rem;
+}
+@media (min-width: 34rem) {
+  .ctc-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ctc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.ctc-label {
+  /* `.label` nese mono a verzálky; tady se jen doladí barva a proklad.
+     Readout, ne štítek — „S čím potřebujete pomoct?" je věta. */
+  letter-spacing: var(--ls-readout);
+  color: var(--tx-3);
+}
+.ctc-opt {
+  /* „nepovinné" musí být vidět DŘÍV, než člověk začne přemýšlet, co tam psát. */
+  margin-left: 0.4rem;
+  color: var(--tx-4);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── POLE ────────────────────────────────────────────────────
+   ★★ `font: inherit` JE POVINNÉ. Formulářové prvky NEDĚDÍ písmo z rodiče —
+      prohlížeč jim dá systémové (na macOS ~13px Helvetica). Bez tohohle řádku
+      by byl jediný text na webu, do kterého člověk sám píše, sázený jiným
+      písmem a menší než všechno ostatní.
+   ★ `font-size` nesmí klesnout pod 16px na dotykových zařízeních: iOS Safari
+      při menším písmu na `focus` PŘIBLÍŽÍ celou stránku a už neodzoomuje.
+      --fs-body má spodní mez přesně 16px, takže to řeší sám. */
+.ctc-input {
+  font: inherit;
+  font-size: var(--fs-body);
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  color: var(--tx-1);
+  background: rgba(8, 9, 10, 0.55);
+  /* --line-3 (3.01:1): hranice ovládacího prvku, ne typografický předěl.
+     Při --line-2 (1.24:1) pole nevypadá jako pole. Viz WCAG 1.4.11. */
+  border: 1px solid var(--line-3);
+  border-radius: 2px;
+  transition:
+    border-color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui),
+    box-shadow var(--d-hover) var(--e-ui);
+}
+.ctc-input::placeholder {
+  /* --tx-4 (5.7:1) je nejtišší token a na nápovědu v poli je to správně:
+     musí být čitelná, ale nesmí vypadat jako vyplněná hodnota. */
+  color: var(--tx-4);
+  opacity: 1; /* Firefox jinak přidá vlastní průhlednost navrch */
+}
+.ctc-input:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+}
+.ctc-input:focus {
+  outline: none; /* nahrazeno vlastním prstencem níž, aby seděl na radius pole */
+  border-color: var(--neon-3);
+  background: rgba(8, 9, 10, 0.75);
+  box-shadow: var(--focus);
+}
+/* Pole, které server odmítl. Barva NENÍ jediný nosič informace — hlášku nese
+   text pod formulářem s `role="alert"`, tohle je jen ukazatel, kam se podívat. */
+.ctc-input.is-bad {
+  border-color: #ff8a7a;
+}
+.ctc-textarea {
+  resize: vertical;
+  min-height: 9rem;
+  line-height: var(--lh-body);
+}
+
+/* ── VÝBĚR TÉMATU ────────────────────────────────────────────
+   Radiobuttony schované za štítky. Vstup zůstává v DOM (klávesnice, odečítač,
+   odeslání bez JS), jen se nekreslí. */
+.ctc-kinds {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0; /* jinak fieldset ignoruje šířku rodiče a přeteče mřížku */
+}
+.ctc-kinds__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+.ctc-chip {
+  cursor: pointer;
+}
+.ctc-chip input {
+  /* Ne `display: none` ani `visibility: hidden` — obojí vyřadí prvek
+     z pořadí tabulátoru a z odečítače. Musí zůstat zaměřitelný. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.ctc-chip span {
+  display: inline-block;
+  padding: 0.45rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-readout);
+  text-transform: uppercase;
+  color: var(--tx-3);
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  transition:
+    color var(--d-hover) var(--e-ui),
+    border-color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui);
+}
+.ctc-chip:hover span {
+  color: var(--tx-2);
+  border-color: var(--line-3);
+}
+/* ★ Prstenec musí být vidět na ŠTÍTKU, ne na skrytém vstupu — ten je 1×1 px
+   v rohu a prstenec kolem něj by nikdo nenašel. */
+.ctc-chip input:focus-visible + span {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+.ctc-chip input:checked + span {
+  color: var(--neon-2);
+  border-color: rgba(79, 216, 232, 0.55);
+  background: rgba(79, 216, 232, 0.08);
+}
+
+/* ── HONEYPOT ────────────────────────────────────────────────
+   ★★★ NESMÍ TO BÝT `display: none` ANI `type="hidden"`. Roboti obojí umí
+   poznat a takové pole přeskočí, čímž past přestane fungovat. Odsunutí
+   mimo plátno vypadá v DOM jako úplně normální viditelné pole.
+   `aria-hidden` na obalu (v TSX) zajistí, že o něm neví ani odečítač. */
+.ctc-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.ctc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-top: 0.35rem;
+}
+.ctc-actions .btn:active {
+  transform: scale(0.98);
+}
+.ctc-actions .btn[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+.ctc-trust {
+  color: var(--tx-4);
+  letter-spacing: var(--ls-readout);
+}
+
+.ctc-error {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(255, 138, 122, 0.4);
+  border-left: 2px solid #ff8a7a;
+  border-radius: 2px;
+  background: rgba(255, 138, 122, 0.08);
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-1);
+}
+
+/* ── POTVRZENÍ ───────────────────────────────────────────────
+   Zelená = stav/dostupnost, stejně jako štítek kapacity na úvodu a rámeček
+   VÝSTUP u sekcí. Tady znamená „hotovo", což do té rodiny přesně patří. */
+.ctc-ok {
+  padding: 1.25rem;
+  border: 1px solid var(--green-line);
+  border-left: 2px solid var(--green);
+  border-radius: 2px;
+  background: var(--green-bg);
+}
+.ctc-ok:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+.ctc-ok__k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--green);
+}
+.ctc-ok__t {
+  margin-top: 0.5rem;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+}
+.ctc-ok__t a {
+  color: var(--blue);
+  border-bottom: 1px solid rgba(82, 174, 255, 0.4);
+}
+
+/* ── BOČNÍ SLOUPEC ───────────────────────────────────────────── */
+.ctc-side {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+}
+.ctc-block__h {
+  color: var(--tx-3);
+  margin-bottom: 0.75rem;
+}
+/* `.channels` a `.channel` jsou sdílené se sekcí 05 (sections.css) —
+   schválně: kontaktní dlaždice má vypadat všude stejně. */
+.ctc-side .channels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ctc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  counter-reset: none;
+}
+.ctc-step {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0 0.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--line-1);
+}
+.ctc-step:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.ctc-step__i {
+  grid-row: 1 / 3;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--neon-3);
+  font-variant-numeric: tabular-nums;
+}
+.ctc-step__k {
+  font-size: var(--fs-bullet);
+  font-weight: 500;
+  color: var(--tx-1);
+}
+.ctc-step__v {
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+
+/* ── ČASTÉ DOTAZY ────────────────────────────────────────────── */
+.ctc-faq {
+  margin-top: clamp(3rem, 6vw, 5rem);
+  padding-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid var(--line-1);
+}
+.ctc-faq__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+  gap: 0 clamp(1.5rem, 4vw, 3rem);
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+}
+.ctc-faq__item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line-1);
+}
+.ctc-faq__item dt {
+  font-size: var(--fs-bullet);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--tx-1);
+}
+.ctc-faq__item dd {
+  margin: 0.45rem 0 0;
+  font-size: var(--fs-bullet);
+  /* Souvislá próza, ne odrážka — proklad podle míry řádku. */
+  line-height: var(--lh-long);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.ctc-faq__more {
+  margin-top: 1.25rem;
+  color: var(--tx-3);
+  letter-spacing: var(--ls-readout);
+}
+.ctc-faq__more a {
+  color: var(--blue);
+  text-transform: none;
+}
+
+@media (max-width: 640px) {
+  .ctc-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

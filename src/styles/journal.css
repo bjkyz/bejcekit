@@ -328,7 +328,10 @@
   max-width: calc(68rem + 2 * var(--gutter));
 }
 .art {
-  max-width: var(--measure-text);
+  /* ★ 34rem, ne 37. Při novém stupni 18px to dá ~60 znaků. Žurnál je „text na
+     deset minut" a tam je horní mez 75 znaků příliš vysoko — 69.6 znaků při
+     prokladu 1.6 byla nejtěsnější kombinace na webu. */
+  max-width: var(--measure-long);
   margin-inline: auto;
 }
 /* Výzva k akci pod článkem musí stát v téže ose jako text nad ní, jinak
@@ -371,8 +374,11 @@
 }
 .art__p {
   margin: 1.15rem 0 0;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  /* ★ Vlastní stupeň i proklad JEN pro článek — viz --fs-body-long v tokens.css.
+     18 px / 1.72 dá mezi řádky 31 px místo 28; na souvislém textu, kterým se
+     člověk prokousává deset minut, je to rozdíl mezi „čte se" a „dá se přečíst". */
+  font-size: var(--fs-body-long);
+  line-height: var(--lh-long);
   color: var(--tx-2);
   text-wrap: pretty;
 }
@@ -392,7 +398,7 @@
   flex-direction: column;
   gap: var(--sp-bullets-gap);
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  line-height: var(--lh-long);
   color: var(--tx-2);
 }
 .art__list li::marker {
@@ -407,8 +413,10 @@
 .art__quote blockquote {
   margin: 0;
   font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
-  line-height: 1.55;
-  color: var(--tx-1);
+  line-height: 1.6;
+  /* ★ --tx-2: je to souvislý text o velikosti 17–19 px, ne nadpis. Na --tx-1
+     to byl nejsvětlejší běžný text webu a zároveň nejdelší řádky. */
+  color: var(--tx-2);
   text-wrap: pretty;
 }
 .art__quote figcaption {
@@ -429,7 +437,7 @@
 .art__note p:last-child {
   margin: 0;
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  line-height: var(--lh-long);
   color: var(--tx-2);
   text-wrap: pretty;
 }
@@ -453,7 +461,7 @@
 .art__takeaway p:not(.art__takeaway-k) {
   margin: 0;
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  line-height: var(--lh-long);
   color: var(--tx-2);
   text-wrap: pretty;
 }
@@ -489,7 +497,11 @@
      firma, ne slovo" — a hlavně jistota, že jméno v textu a entita ve
      strukturovaných datech pocházejí z jednoho zápisu (ui/ArticleBody.tsx). */
 .ent {
-  color: var(--tx-1);
+  /* ★ --tx-2, ne --tx-1. Entita sedí UPROSTŘED odstavce sázeného v --tx-2;
+     světlejší barva uvnitř řádku je vizuální zádrhel — oko na ní zakopne
+     pokaždé, co kolem projde. Že jde o firmu, a ne o slovo, řekne dost
+     tučnost a azurové podtržení. */
+  color: var(--tx-2);
   font-weight: 500;
   border-bottom: 1px solid rgba(79, 216, 232, 0.28);
 }
@@ -513,7 +525,7 @@
 .art__faq dd {
   margin: 0.45rem 0 0;
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  line-height: var(--lh-long);
   color: var(--tx-2);
   text-wrap: pretty;
 }
@@ -537,7 +549,7 @@
   gap: 0.85rem;
   margin: 0;
   font-size: var(--fs-bullet);
-  line-height: var(--lh-bullet);
+  line-height: var(--lh-long);
 }
 .entlist {
   list-style: none;
@@ -635,6 +647,7 @@
 }
 .byline__links a {
   color: var(--tx-3);
+  letter-spacing: var(--ls-readout);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: color var(--d-hover) var(--e-ui), border-color var(--d-hover) var(--e-ui);

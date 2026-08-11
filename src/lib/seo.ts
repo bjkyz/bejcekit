@@ -76,18 +76,23 @@ function personNode() {
     '@id': ID.person,
     name: AUTHOR_NAME,
     url: abs('/'),
-    jobTitle: 'IT a AI inženýr',
+    jobTitle: 'AI a software inženýr',
     knowsLanguage: ['cs', 'en'],
+    /* ★ SLADĚNO S NABÍDKOU. Byly tu ještě „IT infrastruktura", „virtualizace"
+       a „kybernetická bezpečnost" — obory, které při přepozicování na
+       AI · Software · Automatizace z webu odešly. `knowsAbout` je signál
+       o tom, čemu se ten člověk věnuje; obor, který nikde na webu není
+       doložený obsahem, ho jen ředí. */
     knowsAbout: [
       'umělá inteligence',
       'jazykové modely',
+      'AI agenti',
       'automatizace procesů',
+      'vývoj softwaru na míru',
+      'SaaS',
       'webový vývoj',
       'SEO',
       'Core Web Vitals',
-      'IT infrastruktura',
-      'virtualizace',
-      'kybernetická bezpečnost',
     ],
     sameAs: ['https://github.com/bjkyz'],
     worksFor: { '@id': ID.identity },
@@ -105,6 +110,83 @@ function webSiteNode() {
   }
 }
 
+/**
+ * ★★★ PROVOZOVATEL. MUSÍ BÝT V KAŽDÉM GRAFU, KDE SE NA NĚJ ODKAZUJE.
+ *
+ * Tohle byla nejdražší chyba v celém SEO enginu a nebyla vidět: `#identity` se
+ * definovalo VÝHRADNĚ v `index.html`, ale odkazovalo se na něj z pěti dalších
+ * typů stránek — `webSiteNode().publisher`, `personNode().worksFor`
+ * a hlavně `BlogPosting.publisher` u každého článku.
+ *
+ * ★ GOOGLE `@id` MEZI DOKUMENTY NEDEREFERENCUJE. Parsuje po stránkách, takže
+ *   uzel definovaný jinde je pro něj prázdný odkaz: `{"@id": "…#identity"}`
+ *   bez `@type` a bez `name`. V Rich Results Testu to vypadá jako
+ *   „Missing field name (in publisher)" a u článků to shazuje celý uzel.
+ *
+ * A hlavně tím nefungovalo přesně to, kvůli čemu celý tenhle soubor vznikl:
+ * hlavička výš slibuje, že „Google ví, že autor článku je tentýž člověk jako
+ * provozovatel služby na úvodní stránce". Autor (`#person`) se do grafu vkládal
+ * celý, provozovatel ne — takže se autorita nesčítala.
+ *
+ * ★★ `Organization`, NE `ProfessionalService`. `ProfessionalService` je podtyp
+ *   `LocalBusiness` a ten má `address` jako POVINNÉ pole; bez něj je to tvrdá
+ *   chyba, ne varování. Provozovna ale neexistuje (práce běží remote po celém
+ *   Česku), takže vymýšlet adresu jen kvůli typu je horší než typ změnit.
+ *   `Organization` + `ContactPoint` popisuje realitu přesně a nic se tím
+ *   neztrácí: nárok na místní výsledky bez adresy stejně nevzniká.
+ */
+function identityNode() {
+  return {
+    '@type': 'Organization',
+    '@id': ID.identity,
+    name: `${SITE_NAME} · ${AUTHOR_NAME}`,
+    url: abs('/'),
+    description:
+      'AI a software inženýr. AI asistenti nad firemními daty a agenti, automatizace procesů, interní nástroje, SaaS produkty a weby na míru.',
+    email: 'bejcek.jirka@gmail.com',
+    telephone: '+420607706102',
+    areaServed: { '@type': 'Country', name: 'Česko' },
+    sameAs: ['https://github.com/bjkyz'],
+    founder: { '@id': ID.person },
+    logo: {
+      '@type': 'ImageObject',
+      '@id': `${SITE_ORIGIN}/#logo`,
+      url: abs('/og.png'),
+      width: 1200,
+      height: 630,
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      email: 'bejcek.jirka@gmail.com',
+      telephone: '+420607706102',
+      areaServed: 'CZ',
+      availableLanguage: ['cs', 'en'],
+    },
+  }
+}
+
+/**
+ * ★★ KOLEKCE ČLÁNKŮ. Táž chyba jako u `#identity`, jen menší dopad: `ID.blog`
+ *   se definoval VÝHRADNĚ v `headForHub`, ale odkazovalo se na něj z každého
+ *   článku (`isPartOf`) i z každého tématu. Na těch stránkách to byl prázdný
+ *   odkaz, takže Google nevěděl, že článek do nějakého blogu vůbec patří.
+ *   Tahle „štíhlá" varianta uzlu (bez `blogPost`, ten patří jen na rozcestník)
+ *   stačí: nese `@type`, jméno a zařazení.
+ */
+function blogNode() {
+  return {
+    '@type': 'Blog',
+    '@id': ID.blog,
+    url: abs('/clanky'),
+    name: `Žurnál · ${SITE_NAME}`,
+    inLanguage: 'cs',
+    author: { '@id': ID.person },
+    publisher: { '@id': ID.identity },
+    isPartOf: { '@id': ID.website },
+  }
+}
+
 /** Drobečky. Bez nich ukáže Google ve výsledku holou URL místo cesty webem. */
 function breadcrumb(trail: { name: string; path: string }[]) {
   return {
@@ -113,7 +195,10 @@ function breadcrumb(trail: { name: string; path: string }[]) {
       '@type': 'ListItem',
       position: i + 1,
       name: t.name,
-      item: abs(t.path),
+      /* ★ POSLEDNÍ POLOŽKA BEZ `item`. Je to stránka, na které návštěvník právě
+         stojí, takže odkaz sám na sebe nic nepřidá — a Google to u posledního
+         prvku výslovně nedoporučuje. */
+      ...(i < trail.length - 1 ? { item: abs(t.path) } : {}),
     })),
   }
 }
@@ -161,6 +246,7 @@ export function headForHub(articles: Article[]): Head {
         '@context': 'https://schema.org',
         '@graph': [
           webSiteNode(),
+          identityNode(),
           personNode(),
           {
             '@type': 'Blog',
@@ -205,7 +291,9 @@ export function headForTopic(topic: Topic): Head {
         '@context': 'https://schema.org',
         '@graph': [
           webSiteNode(),
+          identityNode(),
           personNode(),
+          blogNode(),
           {
             '@type': 'CollectionPage',
             '@id': `${abs(topicPath(topic.slug))}#page`,
@@ -288,7 +376,9 @@ export function headForArticle(a: Article): Head {
 
   const graph: unknown[] = [
     webSiteNode(),
+    identityNode(),
     personNode(),
+    blogNode(),
     article,
     breadcrumb([
       { name: 'Úvod', path: '/' },
@@ -345,6 +435,13 @@ export function renderHead(head: Head): string {
     `<link rel="canonical" href="${attr(url)}" />`,
     `<meta name="author" content="${attr(AUTHOR_NAME)}" />`,
     `<meta name="theme-color" content="#08090a" />`,
+    /* ★ ROBOTS S `max-image-preview:large`. Bez toho Google u odkazu ukáže jen
+       miniaturu velikosti nehtu místo velkého náhledu — a `max-snippet:-1`
+       zase pustí delší úryvek textu. Je to jeden řádek a mění to, jak web
+       vypadá ve výsledcích vyhledávání. `index,follow` je sice výchozí,
+       ale explicitní zápis je levná pojistka proti tomu, aby to někdo
+       omylem přepnul jinde. */
+    `<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />`,
     `<link rel="alternate" type="application/rss+xml" title="Žurnál · ${esc(SITE_NAME)}" href="${attr(abs('/rss.xml'))}" />`,
     `<meta property="og:type" content="${head.ogType}" />`,
     `<meta property="og:locale" content="cs_CZ" />`,
@@ -355,7 +452,7 @@ export function renderHead(head: Head): string {
     `<meta property="og:image" content="${attr(abs('/og.png'))}" />`,
     `<meta property="og:image:width" content="1200" />`,
     `<meta property="og:image:height" content="630" />`,
-    `<meta property="og:image:alt" content="${attr(`${SITE_NAME} · IT a AI inženýr`)}" />`,
+    `<meta property="og:image:alt" content="${attr(`${SITE_NAME} · AI, software a automatizace`)}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     ...(head.meta ?? []).map((m) => `<meta property="${attr(m.property)}" content="${attr(m.content)}" />`),
     ...head.jsonLd.map(jsonLdScript),
@@ -382,6 +479,10 @@ export function renderSitemap(articles: Article[], liveTopics: Topic[]): string 
   const urls: { loc: string; priority: string; lastmod?: string }[] = [
     { loc: abs('/'), priority: '1.0' },
     { loc: abs('/sluzby'), priority: '0.9' },
+    /* ★ Kontakt má prioritu 0.9, ne 0.5. Je to konverzní stránka webu a od
+       zavedení formuláře cíl VŠECH výzev k akci — tedy stránka, na které
+       záleží nejvíc hned po úvodu. */
+    { loc: abs('/kontakt'), priority: '0.9' },
     { loc: abs('/projekty'), priority: '0.8' },
     { loc: abs('/clanky'), priority: '0.9', lastmod: newest },
     ...liveTopics.map((t) => ({

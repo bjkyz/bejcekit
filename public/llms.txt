@@ -36,7 +36,7 @@ Přehled: [__SITE_ORIGIN__/projekty](__SITE_ORIGIN__/projekty)
 - Módní značka, USA: značkový web zakázkové dílny, video hero a animace řízené scrollem. Vue, GSAP, Cloudflare. Anglicky. Pod NDA.
 - [bejcek.it](__SITE_ORIGIN__/): tento web, portfolio se 3D scénou počítanou v prohlížeči, jediná veřejná ukázka. React, TypeScript, three.js, Vite. Lighthouse 100/100/100/100 na desktopu, CLS 0, scéna se na slabém stroji sama vzdá.
 
-Zakázky na interní systémy a infrastrukturu se nezveřejňují vůbec: u firemních dat to skoro nikdy nedovolí smlouva. Reference na vyžádání.
+Zakázky na interní systémy se nezveřejňují vůbec: u firemních dat to skoro nikdy nedovolí smlouva. Reference na vyžádání.
 
 __JOURNAL__
 

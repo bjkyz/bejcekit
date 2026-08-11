@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { INQUIRY_ANCHOR, PROJECTS } from './content/projects'
-import { MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
+import { CONTACT_HREF, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import { tilt } from './lib/tilt'
@@ -70,7 +70,7 @@ export default function ProjectsPage() {
 
       {/* Navigace i patička jsou od přidání žurnálu společné pro všechny
           podstránky — viz ui/PageShell.tsx (a NAV_PAGES v content/sections.ts). */}
-      <PageNav active="/projekty" ctaHref={`#${INQUIRY_ANCHOR}`} />
+      <PageNav active="/projekty" ctaHref={CONTACT_HREF} />
 
       <main className="page" ref={main}>
         {/* ── HLAVIČKA STRÁNKY ─────────────────────────────────────
@@ -85,17 +85,21 @@ export default function ProjectsPage() {
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
             Weby běží naživo. Jména kryje mlčenlivost.
           </h1>
+          {/* Třetí věta („celé reference ukazuji na schůzce") stála na stránce
+              třikrát: tady, v poznámce pod tím a v CTA dole. Zůstává jen v CTA,
+              kde je z ní akce místo popisu. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
-            Klientské práce tu visí jen v obrysech: rozmazaný snímek, obor a technická fakta.
-            Víc smlouvy o mlčenlivosti nedovolí. Celé reference ukazuji na schůzce nebo v hovoru,
-            i se jmény a čísly, na která se můžete ptát.
+            Klientské práce tu visí jen v obrysech: rozmazaný snímek, obor a technická fakta. Víc smlouva
+            o mlčenlivosti nedovolí.
           </p>
           <p className="page__note reveal" style={revealDelay(1.8, 5)}>
             <span className="page__note-k">Proč zámky</span>
-            Diskrétnost není překážka, je součást služby. Stejná smlouva, která dnes kryje tyhle
-            klienty, bude jednou krýt i vás: váš web, vaše čísla, vaše data. Co nesmím pověsit
-            veřejně, ukážu rád osobně. Platí to i pro zakázky na IT infrastrukturu, které tu
-            nevisí vůbec.
+            {/* ★ POSLEDNÍ VĚTA MUSELA PRYČ Z JINÉHO DŮVODU NEŽ KVŮLI DÉLCE:
+                nabízela zakázky na IT infrastrukturu, a ta z nabídky odešla při
+                přepozicování na AI · Software · Automatizace. Slib služby, kterou
+                web nikde jinde nezmiňuje, je horší než žádný text. */}
+            Diskrétnost není překážka, je součást služby. Stejná smlouva, která dnes kryje tyhle klienty, bude
+            jednou krýt i vás: váš web, vaše čísla, vaše data.
           </p>
         </header>
 
@@ -104,7 +108,11 @@ export default function ProjectsPage() {
             naklápění (viz ProjectCard.tsx a projects.css). */}
         <ul className="pgrid" id="projekty" ref={grid}>
           {PROJECTS.map((p, i) => (
-            <li className="pgrid__cell reveal" style={revealDelay(i, PROJECTS.length)} key={p.id}>
+            <li
+              className={`pgrid__cell reveal${i === 0 ? ' pgrid__cell--wide' : ''}`}
+              style={revealDelay(i, PROJECTS.length)}
+              key={p.id}
+            >
               <ProjectCard p={p} i={i} />
             </li>
           ))}
@@ -124,7 +132,7 @@ export default function ProjectsPage() {
             i výsledky.
           </p>
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
-            <a className="btn btn--solid" href={MAILTO}>
+            <a className="btn btn--solid" href={CONTACT_HREF}>
               <Icon name="mail" size={15} />
               Napsat e-mail
             </a>

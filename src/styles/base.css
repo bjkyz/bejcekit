@@ -36,9 +36,54 @@ body {
   line-height: var(--lh-body);
   color: var(--tx-2);
   background: var(--bg-0);
+  /* ★ Na tmavém podkladu ubírá antialiasing tah písma, a tím i halaci. Právě
+     proto se kontrast v tokens.css nesmí srazit ještě níž — tenhle řádek už
+     kus té práce odvedl. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/**
+ * ★★ DĚLENÍ SLOV JEN NA ÚZKÉM DISPLEJI — A TA PODMÍNKA JE CELÁ PODSTATA.
+ *
+ * Čeština má výrazně delší průměrné slovo než angličtina, takže na telefonu
+ * (320–380 px) klesne řádek na 35–40 znaků, tedy POD čtenářské minimum 45.
+ * Tam nepomůže menší písmo ani `text-wrap: pretty` (ten řeší jen poslední řádek
+ * odstavce) — jediná páka je dělení. `lang="cs"` je ve všech čtyřech vstupních
+ * HTML, takže Chrome i Safari mají česká pravidla připravená.
+ *
+ * ★ NA ŠIROKÉM DISPLEJI SE ALE DĚLIT NESMÍ. Zkusil jsem to plošně na <body>
+ *   a hero na 1440 px si rozlomilo „software" na „soft-ware" a „používá" na
+ *   „pou-žívá" — v centrovaném odstavci o 64 znacích, kde je místa dost a dost.
+ *   Rozdělené slovo je vada sazby, ne řešení; má smysl výhradně tam, kde je
+ *   alternativou díra přes půl řádku. Práh 720 px: nad ním má i nejužší sloupec
+ *   webu přes 45 znaků.
+ *
+ * ★ A nikdy na nadpisech, tlačítkách a verzálkových readoutech — u velkého
+ *   displeje je rozlomené slovo nejnápadnější možná chyba a u mono readoutu
+ *   („PEVNÁ CENA A TERMÍN") se rozpadne význam.
+ */
+@media (max-width: 720px) {
+  .body,
+  .bullet,
+  .proof,
+  .deliverable__t,
+  .step__t,
+  .hero-spec__v,
+  .pcard__sum,
+  .pcard__fact-v,
+  .svc__lead,
+  .svc__item-v,
+  .svc__punch,
+  .page__note,
+  .art__p,
+  .art__perex,
+  .art__list li,
+  .art__faq dd,
+  .acard__perex {
+    hyphens: auto;
+  }
 }
 
 /* Lenis drží scroll sám; tohle je jen pojistka, když se neinicializuje. */

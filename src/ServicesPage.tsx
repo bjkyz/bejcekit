@@ -1,5 +1,5 @@
 import { SERVICE_GROUPS, TECH_STACK } from './content/services'
-import { MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
+import { CONTACT_HREF, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { latestArticles } from './content/journal'
 import { czechDate } from './content/journal'
 import { useReducedMotion, useReveal } from './lib/hooks'
@@ -51,7 +51,7 @@ export default function ServicesPage() {
         <span />
       </div>
 
-      <PageNav active="/sluzby" ctaHref="#poptavka" />
+      <PageNav active="/sluzby" ctaHref={CONTACT_HREF} />
 
       <main className="page page--services" ref={main}>
         <header className="page__head svc-head">
@@ -61,13 +61,17 @@ export default function ServicesPage() {
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
             Neprodávám technologie. Řeším problémy.
           </h1>
+          {/* První věta byla doslova hero úvodu („Nemusíte vědět, jestli
+              potřebujete agenta, API nebo databázi") — úvod PRODÁVÁ, tahle
+              stránka VYJMENOVÁVÁ, takže si silnější formulaci nechává úvod. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
-            Nemusíte vědět, jestli potřebujete AI agenta, API, databázi nebo automatizaci. Řekněte mi, co dnes
-            zabírá vašemu týmu čas, co nefunguje nebo co chcete vytvořit. Vhodné řešení najdu a postavím.
+            Řekněte mi, co dnes zabírá vašemu týmu čas, co nefunguje nebo co chcete vytvořit. Řešení najdu
+            a postavím.
           </p>
-          <p className="svc-head__claim reveal" style={revealDelay(1.8, 5)}>
-            Méně manuální práce. Méně zbytečných nástrojů. Víc času na to podstatné.
-          </p>
+          {/* ★ `.svc-head__claim` odstraněn. Byly to tři nominální fráze bez
+              konkrétního obsahu („Méně manuální práce. Méně zbytečných nástrojů.
+              Víc času na to podstatné.") a navíc kopie punchu skupiny AUTOMATION
+              o kus níž na téže stránce. Prázdné místo po nich je zisk, ne díra. */}
         </header>
 
         {/* ── KATALOG ────────────────────────────────────────────── */}
@@ -144,14 +148,16 @@ export default function ServicesPage() {
             <h2 className="headline" id="about-h">
               Jsem Jiří Bejček.
             </h2>
+            {/* ★ JEDEN ODSTAVEC, NE DVA. Původní znění mělo 57 slov a obojí, co
+                z nich vypadlo, tam bylo dvakrát: výčet za dvojtečkou („webové
+                aplikace, interní nástroje, SaaS…") je katalog, kterým návštěvník
+                právě prorolloval o šest skupin výš, a druhý odstavec říkal touž
+                věc dvěma způsoby („nechci proto, že lze" / „chci, co má důvod").
+                Hierarchii tohohle bloku stejně nese `svc-about__method` pod ním —
+                pět sloves, která řeknou o práci víc než dva odstavce prózy. */}
             <p className="body">
-              Baví mě hledat místa, kde může software udělat práci místo člověka. Proto se zaměřuji na AI,
-              automatizaci a vývoj vlastního softwaru: webové aplikace, interní nástroje, SaaS produkty a AI systémy,
-              které propojují moderní technologie s tím, co firma opravdu potřebuje.
-            </p>
-            <p className="body">
-              Nechci stavět další software jen proto, že ho postavit lze. Chci stavět software, který má důvod
-              existovat.
+              Baví mě hledat místa, kde může software udělat práci místo člověka. Nechci stavět software proto, že to
+              jde, ale proto, že má důvod existovat.
             </p>
             <p className="svc-about__method label">Pochopit · Navrhnout · Postavit · Zjednodušit · Automatizovat</p>
           </div>
@@ -186,13 +192,12 @@ export default function ServicesPage() {
           <h2 className="headline" id="cta-h">
             Co bychom mohli vytvořit?
           </h2>
-          <p className="body">
-            Máte proces, který je zbytečně pomalý? Nápad na produkt? Potřebujete interní nástroj, nebo chcete do
-            firmy smysluplně zapojit AI? Řekněte mi, co potřebujete vyřešit. Nemusíte znát technologii, to je moje
-            práce.
-          </p>
+          {/* ★ TŘI ŘEČNICKÉ OTÁZKY BYLY KATALOG POTŘETÍ. A poslední dvě věty byly
+              doslovná kopie nadpisu i odstavce sekce KONTAKT na úvodu — tedy dva
+              indexované dokumenty se stejným odstavcem. */}
+          <p className="body">Napište, co potřebujete vyřešit. Technologii vyberu já.</p>
           <div className="page__cta-row">
-            <a className="btn btn--solid" href={MAILTO}>
+            <a className="btn btn--solid" href={CONTACT_HREF}>
               <Icon name="mail" size={15} />
               Pojďme začít
             </a>

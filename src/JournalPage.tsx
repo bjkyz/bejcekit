@@ -1,6 +1,6 @@
 import type { Article, Topic } from './content/journal'
 import { articlesByTopic, ARTICLES, LIVE_TOPICS } from './content/journal'
-import { MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
+import { CONTACT_HREF, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { topicPath } from './lib/journal-route'
 import { revealDelay } from './lib/reveal'
@@ -38,7 +38,10 @@ export default function JournalPage({ topic }: { topic?: Topic }) {
   const title = topic ? topic.title : 'Co se v technologiích právě mění. A co s tím.'
   const lead = topic
     ? topic.description
-    : 'Novinky z umělé inteligence a technologií, přeložené do řeči firem. U každého dílu stojí, odkud vychází, a odstavec o tom, co to znamená v praxi. Píšu sem proto, že většina toho, co se o AI píše, je buď tisková zpráva, nebo panika.'
+    : /* Druhá věta popisovala rozvržení, které čtenář uvidí o 200 px níž
+         („Co to znamená v praxi", „Odkud to vychází"). Věta o tiskové zprávě
+         a panice je jediná v odstavci, která má hlas — ta zůstává. */
+      'Novinky z umělé inteligence a technologií přeložené do řeči firem. Většina toho, co se o AI píše, je buď tisková zpráva, nebo panika. Tohle je pokus o třetí možnost.'
 
   return (
     <>
@@ -168,7 +171,7 @@ export function JournalCta() {
         stát a kdy to bude hotové. Když se to nevrátí, řeknu to rovnou.
       </p>
       <div className="page__cta-row">
-        <a className="btn btn--solid" href={MAILTO}>
+        <a className="btn btn--solid" href={CONTACT_HREF}>
           <Icon name="mail" size={15} />
           Napsat e-mail
         </a>

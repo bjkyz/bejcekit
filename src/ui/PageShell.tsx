@@ -1,4 +1,4 @@
-import { GITHUB, NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
+import { CONTACT_HREF, GITHUB, NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
 import Icon from './Icons'
 import Mark from './Mark'
 
@@ -91,6 +91,18 @@ export function PageFooter({ active }: { active?: string }) {
             <span aria-hidden="true">·</span>
           </span>
         ))}
+        {/* ★ KONTAKT NENÍ V `NAV_PAGES` SCHVÁLNĚ. Lišta unese pět položek
+            (dvě sekce + tři stránky) a šestá by se na 1280 px začala tlačit ke
+            značce — v liště ho navíc zastupuje tlačítko „Napište mi", které na
+            něj od zavedení formuláře míří. V patičce ale být musí: je to
+            poslední místo, kde návštěvník ještě může někam jít místo zavření
+            karty, a konverzní stránka tam nesmí chybět. */}
+        {active !== CONTACT_HREF && (
+          <span className="footer__pair">
+            <a href={CONTACT_HREF}>Kontakt</a>
+            <span aria-hidden="true">·</span>
+          </span>
+        )}
         <a href={GITHUB} target="_blank" rel="noreferrer">
           <Icon name="github" size={14} />
           github.com/bjkyz

@@ -202,10 +202,14 @@ export default function ArticlePage({ a }: { a: Article }) {
               <h2 className="byline__name" id="author-h">
                 {AUTHOR_NAME}
               </h2>
-              <p className="byline__role label">IT a AI inženýr · Česko</p>
+              {/* ★ Sladěno s přepozicováním webu. „IT a AI inženýr" je starý titul. */}
+              <p className="byline__role label">AI a software inženýr · Česko</p>
+              {/* ★ „Držím v chodu servery" prodávalo správu infrastruktury, která
+                  po přepozicování z nabídky odešla — a tenhle text je pod KAŽDÝM
+                  článkem, takže to byl nejrozšířenější zastaralý slib na webu. */}
               <p className="byline__bio">
-                Stavím weby, které Google najde, nasazuji AI tam, kde ušetří hodiny týdně, a držím v chodu servery,
-                aby výpadek nestál tržby. Jeden inženýr místo agentury: pevná cena písemně, odpověď do 24 hodin.
+                Stavím AI systémy, automatizace a software na míru. Jeden inženýr místo agentury: pevná cena
+                písemně, odpověď do 24 hodin.
               </p>
               <p className="byline__links label">
                 <a href="/">O mně a službách</a>

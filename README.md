@@ -58,6 +58,36 @@ CSP v `vercel.json` je záměrně přísná (`default-src 'self'`) — web nedě
 požadavek na cizí doménu, takže si to může dovolit. Když někdy přidáš analytiku
 nebo externí skript, musíš ho do CSP doplnit, jinak ho prohlížeč zablokuje.
 
+### ★ Do `vercel.json` se NESMÍ psát komentáře
+
+Vercel validuje konfiguraci proti přísnému schématu a **každý neznámý klíč shodí
+celý deploy**, ne jen tu jednu hlavičku:
+
+```
+The `vercel.json` schema validation failed with the following message:
+`headers[4]` should NOT have additional property `comment`
+```
+
+Stalo se to 2026-08-11: do hlaviček se v dobré víře dopsaly klíče `comment`
+s vysvětlením cache pravidel. Web se lokálně stavěl, commit byl na GitHubu — a
+produkce přitom půl dne držela starší verzi, protože build padal ještě před
+prvním řádkem. **Vercel navíc hlásí vždy jen tu první chybu**, takže tři cizí
+klíče = tři spadlé deploye.
+
+Hlídá to teď `checkVercelJson()` v `scripts/prerender.mjs`: `npm run build`
+spadne dřív, než se dá něco takového odeslat. Vysvětlení patří sem, ne do JSONu.
+
+### Cache hlavičky a proč jsou takové
+
+| Cesta | Pravidlo | Důvod |
+|---|---|---|
+| `/assets/*`, `/fonts/*`, `/media/*`, `/models/*` | `max-age=31536000, immutable` | Mají otisk obsahu v názvu (nebo se nikdy nemění), takže se smí cachovat navždy. Nová verze = nový název. |
+| `/projects/*`, `og.png`, `favicon.svg`, `apple-touch-icon.png`, certifikát | `max-age=604800, stale-while-revalidate=86400` | Obrázky a PDF v `public/` **nemají otisk v názvu**, takže `immutable` nesmí být. Týden na CDN s revalidací na pozadí: návštěvník nikdy nečeká. |
+| všechno ostatní kromě `/api/*` | `max-age=0, must-revalidate, s-maxage=600, stale-while-revalidate=86400` | HTML prohlížeč revaliduje vždy, CDN si ho ale drží. Web se přestavuje jednou denně, takže drtivá většina požadavků skončí na edge a origin se skoro nevzbudí. |
+
+`Strict-Transport-Security` je nastavená na dva roky včetně subdomén a `preload`:
+web běží výhradně přes HTTPS a nikdy nebude jinak.
+
 ## Kde co upravit
 
 | Chci změnit | Soubor |

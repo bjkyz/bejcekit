@@ -53,7 +53,6 @@
       ]
     },
     {
-      "comment": "Obrázky, ikony a PDF v public/ nemají otisk v názvu, takže nesmí být immutable. Týden na CDN se stale-while-revalidate je kompromis: revalidace na pozadí, návštěvník nikdy nečeká.",
       "source": "/(projects|og.png|favicon.svg|apple-touch-icon.png|certifikat-agentic-engineering.pdf)(.*)",
       "headers": [
         {
@@ -63,7 +62,6 @@
       ]
     },
     {
-      "comment": "HTML: prohlížeč revaliduje vždy, CDN si ho ale drží. Web se přestavuje jednou denně, takže s-maxage=600 + SWR znamená, že drtivá většina požadavků skončí na edge a origin se skoro nevzbudí.",
       "source": "/((?!api/).*)",
       "headers": [
         {
@@ -80,7 +78,6 @@
           "value": "nosniff"
         },
         {
-          "comment": "Jediná bezpečnostní hlavička, která tu chyběla. Dva roky, subdomény i preload — web běží výhradně přes HTTPS a nikdy nebude jinak.",
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
         },

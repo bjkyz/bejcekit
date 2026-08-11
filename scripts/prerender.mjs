@@ -29,6 +29,66 @@ import { createServer } from 'vite'
 const dist = resolve(process.cwd(), 'dist')
 
 /**
+ * ★★★ POJISTKA `vercel.json`. Vercel validuje konfiguraci proti přísnému
+ * schématu a KAŽDÝ neznámý klíč je tvrdá chyba nasazení, ne varování:
+ *
+ *     The `vercel.json` schema validation failed with the following message:
+ *     `headers[4]` should NOT have additional property `comment`
+ *
+ * Stalo se to 2026-08-11. Do hlaviček se v dobré víře dopsaly klíče `comment`
+ * s vysvětlením, proč má která cesta jakou cache — jenže `vercel.json` je
+ * striktní JSON a **komentář se do něj napsat nedá, ani jako vlastní pole**.
+ * Vysvětlení se proto přestěhovala do README (sekce „Cache hlavičky").
+ *
+ * ★★ PROČ TO HLÍDÁ BUILD A NE REVIZE: chyba se projeví AŽ V NASAZENÍ, kde
+ *   shodí celý deploy — a lokální `npm run build` o ní neví, protože
+ *   `vercel.json` nečte. Výsledek byl web, který se lokálně staví, na GitHubu
+ *   je, a přitom v produkci půl dne visí starší verze. Ta ztráta půlden hledání
+ *   je přesně to, čemu tahle kontrola brání.
+ *
+ * ★ A HLÍDÁ VŠECHNY KLÍČE NARÁZ. Vercel hlásí vždycky jen tu PRVNÍ chybu,
+ *   takže tři cizí klíče znamenají tři spadlé deploye. Tohle je najde všechny
+ *   v jednom běhu.
+ *
+ * Seznam níž je podmnožina schématu, kterou tenhle projekt používá. Až sem
+ * někdy přibude `rewrites` nebo `redirects`, doplň i jejich povolené klíče —
+ * neznámá SEKCE se propustí (nevíme o ní nic), ale cizí klíč uvnitř známé
+ * sekce je chyba.
+ */
+function checkVercelJson() {
+  const file = resolve(process.cwd(), 'vercel.json')
+  const conf = JSON.parse(readFileSync(file, 'utf8'))
+
+  /* `has`/`missing` jsou podmínky, které schéma taky zná; jsou tu proto, aby
+     kontrola nezačala lhát, až je někdo použije. */
+  const ALLOWED = {
+    root: ['$schema', 'framework', 'buildCommand', 'installCommand', 'outputDirectory', 'cleanUrls', 'trailingSlash', 'crons', 'headers', 'redirects', 'rewrites', 'functions', 'regions', 'images'],
+    header: ['source', 'headers', 'has', 'missing'],
+    headerItem: ['key', 'value'],
+    cron: ['path', 'schedule'],
+  }
+
+  const bad = []
+  const check = (obj, allowed, where) => {
+    for (const k of Object.keys(obj)) if (!allowed.includes(k)) bad.push(`${where}: cizí klíč „${k}"`)
+  }
+
+  check(conf, ALLOWED.root, 'kořen')
+  conf.headers?.forEach((h, i) => {
+    check(h, ALLOWED.header, `headers[${i}]`)
+    h.headers?.forEach((it, j) => check(it, ALLOWED.headerItem, `headers[${i}].headers[${j}]`))
+  })
+  conf.crons?.forEach((c, i) => check(c, ALLOWED.cron, `crons[${i}]`))
+
+  if (bad.length) {
+    throw new Error(
+      `vercel.json neprojde schématem Vercelu (nasazení by spadlo):\n  ${bad.join('\n  ')}\n` +
+        '  → vercel.json je striktní JSON, komentáře v něm být nesmí. Vysvětlení patří do README.',
+    )
+  }
+}
+
+/**
  * ★ POJISTKA NDA. Reference jsou anonymizované (src/content/projects.ts) a
  * jména klientů NESMÍ do žádného textového souboru v dist/ — ani do HTML,
  * ani do llms.txt nebo strukturovaných dat. Data to vynucují typem, jenže
@@ -200,6 +260,9 @@ try {
 
   checkNda(dist)
   console.log('prerender: NDA kontrola čistá')
+
+  checkVercelJson()
+  console.log('prerender: vercel.json bez cizích klíčů')
 } catch (err) {
   console.error('prerender selhal:', err)
   process.exitCode = 1

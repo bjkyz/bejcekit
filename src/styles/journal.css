@@ -117,6 +117,26 @@
   border-color: var(--neon-2);
 }
 
+/* ★ DOTYK: pilulky filtru měly 33 px a odkazy hlavičky/bylinky 17–21 px na
+   výšku (naměřeno Playwrightem na 390px) — pod minimem pro prst. Pilulka smí
+   viditelně povyrůst (44px chip je na dotyku standard), u textových odkazů
+   roste jen neviditelný hitbox. */
+@media (pointer: coarse) {
+  .jtopic {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-block: 0;
+  }
+  .jhead__rss a,
+  .byline__links a,
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+}
+
 /* ── PEČEŤ S BÝKEM ────────────────────────────────────────────
    ★★ SPODNÍ PROLNUTÍ JE TO, CO Z VIDEA DĚLÁ ZNAČKU A NE OBDÉLNÍK.
      Video má tmavé pozadí skoro shodné s webem, takže bez masky je vidět

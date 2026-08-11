@@ -30,7 +30,6 @@ let heights: number[] = []
 /** Tangenty dP/dy v uzlech dráhy — viz computeGrades(). */
 let grades: number[] = []
 let cols: HTMLElement[] = []
-let allFit = true
 let rafId: number | null = null
 let lastIndex = 0
 let choreo = false
@@ -120,8 +119,6 @@ function measure(): void {
      krytí by nebylo na čem vidět. Sloupec navíc nese i závoj (::before), takže
      s textem pohasíná i podklad pod ním a nezůstane viset prázdný flek. */
   cols = els.map((el) => el.querySelector<HTMLElement>('.section__col')).filter((el) => el !== null)
-  // Vejde se KAŽDÁ sekce do jedné obrazovky?
-  allFit = heights.every((h) => h <= window.innerHeight + 2)
   computeGrades()
 }
 
@@ -162,28 +159,27 @@ function computeGrades(): void {
 }
 
 /**
- * ★ POVINNÝ SNAP SMÍ BÝT ZAPNUTÝ, JEN KDYŽ SE VŠECHNO VEJDE DO OKNA.
+ * ★★★ POVINNÝ SNAP JE ZRUŠENÝ ÚPLNĚ (2026-08-11, „přijde mi to těžkopádné").
  *
- * Česky psaná sekce je asi o 15 % delší než anglická a na nízkém notebooku
- * (1280×720) přeroste 100svh. Kdyby na ni v tu chvíli sedl `mandatory` snap,
- * scroll by uživatele odtrhl zpět na začátek sekce pokaždé, když by se pokusil
- * dočíst spodek — text, který nikdy nepřečte. Proto se v takovém případě
- * automaticky přepne na `proximity`.
+ * `mandatory` znamenal, že KAŽDÉ zastavení scrollu se dotáhne na hranici sekce —
+ * uživatel nemohl spočinout tam, kde chtěl, a každé kolečko myši skončilo
+ * sekundovou animací, kterou nevyvolal. Přesně to je ten pocit „stránka scrolluje
+ * za mě". Free scroll s jemnou výpomocí `proximity` (dotáhne jen to, co už je
+ * blízko hranice) zachová nástup sekcí na celou obrazovku a přitom nechá ruku
+ * vládnout. Čtení dlouhé sekce na nízkém okně to řeší mimochodem taky.
  *
  * ★★ NA DOTYKU SE NESNAPUJE VŮBEC — `null`, ne „jen proximity".
- * Původně tu proximity byla právě jako ústupek pro telefony. Jenže na telefonu
- * se česká sekce do okna nevejde skoro nikdy (naměřeno: 900–1020 px v okně
- * vysokém 844) a proximity má práh 30 %: uživatel dorolluje doprostřed sekce,
- * pustí prst — a snap ho i s momentum dojezdem odtáhne zpátky na začátek.
- * Text pod tím zlomem si nepřečte, protože se k němu fyzicky nedostane.
+ * Na telefonu se česká sekce do okna nevejde skoro nikdy (naměřeno: 900–1020 px
+ * v okně vysokém 844) a proximity má práh 30 %: uživatel dorolluje doprostřed
+ * sekce, pustí prst — a snap ho i s momentum dojezdem odtáhne zpátky na začátek.
  * Prst má vždycky přednost před choreografií.
  *
  * Krychli to nevadí: ta jede podle SPOJITÉHO progresu z offsetTop, ne ze snapu.
  * Snap je leštidlo, ne nosná konstrukce — o to se stará zákon dosednutí v Cube.tsx.
  */
-function snapType(): 'mandatory' | 'proximity' | null {
+function snapType(): 'proximity' | null {
   if (window.matchMedia('(pointer: coarse)').matches) return null
-  return allFit ? 'mandatory' : 'proximity'
+  return 'proximity'
 }
 
 function progressFromScroll(y: number): number {
@@ -263,8 +259,14 @@ export function initScroll(simple: boolean): () => void {
   lenis = new Lenis({
     autoRaf: false, // ★ jinak běží Lenis a GSAP na dvou rAF smyčkách a ScrollTrigger
     //   čte o 1–2 snímky starou pozici → viditelný jitter
-    lerp: 0.075, // nižší = delší doběh, hedvábnější. Pod ~0.06 už to plave.
-    wheelMultiplier: 0.85, // kolečko myši jinak „cuká" po velkých skocích
+    /* ★ 0.1, ne 0.075. Nižší lerp je „hedvábnější" jen na papíře: doběh je tak
+       dlouhý, že stránka reaguje se zpožděním a působí TĚŽCE (přesná slova
+       uživatele: „těžkopádné"). 0.1 drží plynulé dojezdy a vrací scrollu
+       bezprostřednost — ruka má cítit spojení, ne gumu. */
+    lerp: 0.1,
+    /* ★ 1, ne 0.85. Zpomalovat uživatelovo kolečko je přesně ten druh
+       choreografie, který se čte jako „stránka mi bere řízení". */
+    wheelMultiplier: 1,
 
     /**
      * ★ NA DOTYKU SE SCROLL NEHACKUJE. syncTouch: false, a je to schválně.
@@ -341,10 +343,12 @@ function buildSnap(l: Lenis): Snap | null {
   if (type === null) return null // dotyk — viz snapType()
   const s = new Snap(l, {
     type,
-    distanceThreshold: '30%',
-    // Delší a měkčí dojezd. Při 0.8 s a lineárním konci to „luplo" na místo;
-    // expo-out dojede rychle a poslední kus jen doplyne.
-    duration: type === 'mandatory' ? 1.05 : 0.85,
+    /* 25 %: výpomoc jen tam, kde už hranice sekce skoro je. Při 30 % byla
+       snap-zóna přes půl výšky okna a dotahovalo to i pozice, kde chtěl
+       člověk zůstat. */
+    distanceThreshold: '25%',
+    // Krátký expo-out dojezd: rychle dojede, poslední kus jen doplyne.
+    duration: 0.7,
     easing: (t) => 1 - Math.pow(1 - t, 4),
     debounce: 120, // ať snap nenaskočí uprostřed gesta
   })
@@ -375,4 +379,17 @@ export function scrollToSection(id: string): void {
 
 export function remeasure(): void {
   measure()
+}
+
+/**
+ * Zámek scrollu pod otevřeným mobilním menu. Musí fungovat i BEZ Lenisu:
+ * podstránky ho neinicializují vůbec a jednoduchý režim taky ne — tam zamyká
+ * jen CSS třída (base.css: `html.menu-locked { overflow: hidden }`).
+ * Lenis se navíc zastaví explicitně, jinak by po odemčení dohrával
+ * nastřádanou setrvačnost z kolečka.
+ */
+export function lockScroll(on: boolean): void {
+  document.documentElement.classList.toggle('menu-locked', on)
+  if (on) lenis?.stop()
+  else lenis?.start()
 }

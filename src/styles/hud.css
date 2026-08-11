@@ -29,7 +29,10 @@
   pointer-events: none;
 }
 .hud .rail a,
-.hud .nav a {
+.hud .nav a,
+.hud .nav button {
+  /* ★ I BUTTON: burger mobilního menu je <button>, ne <a> — bez téhle řádky by
+     na úvodu nešel stisknout (deska .nav je průchozí a klikají se jen děti). */
   pointer-events: auto;
 }
 
@@ -39,6 +42,14 @@
   top: 0;
   left: 0;
   right: 0;
+  /* ★★★ BEZ z-indexu BYLA NAVIGACE PODSTRÁNEK MRTVÁ. Na úvodu ji zvedá obal
+     .hud (z-index 4), ale na /sluzby, /projekty, /clanky i /kontakt stojí .nav
+     sama — a `main.page` má `position: relative; z-index: 2` a je v DOMu POZDĚJI.
+     Obsah stránky tedy fixní lištu překrýval i pro hit-testing: klik na „Napište
+     mi" i na všechny odkazy končil v <main>. Ověřeno skutečným klikem přes
+     Playwright (timeout — element pointer events intercepted). Uvnitř .hud je
+     tahle hodnota neškodná (řadí jen sourozence uvnitř stohu). */
+  z-index: var(--z-hud);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,9 +131,221 @@
   border-color: var(--neon-2);
   background: rgba(79, 216, 232, 0.08);
 }
+
+/* Pravý konec lišty: CTA + burger drží spolu, ať se o místo nehádají
+   se space-between rodiče. */
+.nav__end {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ── BURGER ──────────────────────────────────────────────────
+   Existuje jen pod 800 px — přesně tam, kde mizí .nav__links. Rám má stejný
+   jazyk jako CTA vedle (viz .nav__cta: --line-3 kvůli WCAG 1.4.11). */
+.nav__burger {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 1px solid var(--line-3);
+  border-radius: 2px;
+  background: none;
+  color: var(--tx-1);
+  cursor: pointer;
+  transition:
+    border-color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui);
+}
+.nav__burger:hover {
+  border-color: var(--neon-2);
+  background: rgba(79, 216, 232, 0.08);
+}
+.nav__burger span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform var(--d-lift) var(--e-out-expo);
+}
+/* Dvě linky → X. Posun = půl mezery + půl tloušťky (5/2 + 1.5/2 = 3.25). */
+.nav__burger[aria-expanded='true'] span:nth-child(1),
+.nav__burger.is-open span:nth-child(1) {
+  transform: translateY(3.25px) rotate(45deg);
+}
+.nav__burger[aria-expanded='true'] span:nth-child(2),
+.nav__burger.is-open span:nth-child(2) {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
 @media (max-width: 800px) {
   .nav__links {
     display: none;
+  }
+  .nav__burger {
+    display: inline-flex;
+  }
+}
+
+/* ── MOBILNÍ MENU ────────────────────────────────────────────
+   Plnoplošná modální deska (portál na <body>, viz ui/SiteMenu.tsx). Skoro
+   krytá + blur: obsah pod ní nesmí prosvítat do čitelnosti, ale scéna smí
+   tušit. Vlastní scroll pro telefony na šířku. */
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-menu);
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--gutter) 1.5rem;
+  background: rgba(8, 9, 10, 0.94);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: menu-in 240ms var(--e-ui) both;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Horní řádek zrcadlí .nav (1.5rem svislé odsazení, značka vlevo, křížek
+   přesně tam, kde byl burger) — menu tak nastupuje na místě, ne přes něj. */
+.menu__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0;
+  flex: none;
+}
+.menu__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tx-1);
+}
+.menu__brand b {
+  color: var(--neon-2);
+  font-weight: 600;
+}
+
+.menu__pages {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 auto;
+  padding: 0.5rem 0 1.5rem;
+}
+.menu__link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line-1);
+  font-size: clamp(1.5rem, 6.5vw, 1.9rem);
+  letter-spacing: var(--ls-d1);
+  line-height: 1.2;
+  color: var(--tx-1);
+  animation: menu-item 480ms var(--e-out-expo) both;
+  animation-delay: calc(40ms * var(--i, 0) + 60ms);
+  transition: color var(--d-hover) var(--e-ui);
+}
+.menu__link:first-child {
+  border-top: 1px solid var(--line-1);
+}
+.menu__link:hover {
+  color: var(--neon-1);
+}
+.menu__link.is-active {
+  color: var(--neon-2);
+}
+.menu__num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--tx-4);
+  font-variant-numeric: tabular-nums;
+}
+.menu__link.is-active .menu__num {
+  color: var(--neon-2);
+}
+/* Šipka doletí až na hover/aktivní — tichý ukazatel směru vpravo. */
+.menu__go {
+  margin-left: auto;
+  color: var(--tx-4);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity var(--d-hover) var(--e-ui),
+    transform var(--d-hover) var(--e-ui);
+}
+.menu__link:hover .menu__go,
+.menu__link.is-active .menu__go {
+  opacity: 1;
+  transform: none;
+  color: inherit;
+}
+@keyframes menu-item {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.menu__foot {
+  flex: none;
+  display: grid;
+  gap: 0.9rem;
+  animation: menu-item 480ms var(--e-out-expo) both;
+  animation-delay: 320ms;
+}
+.menu__cta {
+  justify-content: center;
+  width: 100%;
+}
+.menu__channels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 1rem;
+}
+.menu__channels a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--tx-3);
+  transition: color var(--d-hover) var(--e-ui);
+}
+.menu__channels a:hover {
+  color: var(--tx-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .menu__link,
+  .menu__foot {
+    animation: none;
   }
 }
 

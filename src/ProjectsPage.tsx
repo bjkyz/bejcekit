@@ -134,7 +134,7 @@ export default function ProjectsPage() {
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
             <a className="btn btn--solid" href={CONTACT_HREF}>
               <Icon name="mail" size={15} />
-              Napsat e-mail
+              Napsat poptávku
             </a>
             <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
               <Icon name="whatsapp" size={15} />

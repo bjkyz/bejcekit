@@ -91,6 +91,14 @@ html.lenis,
 html.lenis body {
   height: auto;
 }
+
+/* ★ ZÁMEK SCROLLU POD OTEVŘENÝM MOBILNÍM MENU (ui/SiteMenu.tsx).
+   `overflow: hidden` na kořeni v moderních prohlížečích DRŽÍ pozici scrollu
+   a blokuje kolečko i dotyk — a protože menu je plnoplošná deska, je to
+   jediné, co je potřeba. Žádné position: fixed hacky, žádné skákání na vrch. */
+html.menu-locked {
+  overflow: hidden;
+}
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }

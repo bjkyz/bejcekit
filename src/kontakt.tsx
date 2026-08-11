@@ -8,6 +8,13 @@ import './styles/base.css'
 import './styles/layout.css'
 import './styles/sections.css'
 import './styles/hud.css'
+/* ★ projects.css NENÍ jen pro karty projektů — žije v něm ZÁKLAD stránkové
+   kostry: `.page` (horní odsazení pod fixní lištou), `.page__head` i závoj
+   `.nav--page::before`. Bez něj se v devu hlavička vlepila POD navigaci
+   (kicker na y=14, H1 přes logo) a lišta jela bez podkladu. V produkci to
+   maskovalo slepování všech CSS do každé stránky — dev a produkce se musí
+   chovat stejně, jinak se testuje něco jiného, než se nasazuje. */
+import './styles/projects.css'
 import './styles/contact.css'
 
 /**

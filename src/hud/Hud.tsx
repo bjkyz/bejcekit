@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
+import { CONTACT_HREF, NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
 import { useActiveSection, useScrollIdle } from '../lib/hooks'
-import { scrollToSection } from '../lib/scroll'
+import { lockScroll, scrollToSection } from '../lib/scroll'
 import { sceneState } from '../lib/scene-state'
 import Mark from '../ui/Mark'
+import SiteMenu from '../ui/SiteMenu'
 import Status from './Status'
 
 export default function Hud() {
@@ -56,9 +57,18 @@ function Nav({ active }: { active: number }) {
           </a>
         ))}
       </div>
-      <a className="nav__cta" href="#kontakt" onClick={anchor('kontakt')}>
-        Napište mi
-      </a>
+      {/* ★★ NA FORMULÁŘ, NE NA KOTVU #kontakt. Sekce 05 je od zavedení /kontakt
+          rozcestník — a CTA v liště je jediné, které je vidět pořád. Posílat
+          z něj člověka na scroll přes pět obrazovek WebGL místo na tři pole
+          formuláře byl zbytečný práh navíc. */}
+      <div className="nav__end">
+        <a className="nav__cta" href={CONTACT_HREF}>
+          Napište mi
+        </a>
+        {/* Burger: na telefonu jediná cesta z úvodu na podstránky (odkazy
+            v liště jsou pod 800 px skryté). Scroll nahoru jde přes Lenis. */}
+        <SiteMenu active="/" onHomeNav={() => scrollToSection('ident')} onLock={lockScroll} />
+      </div>
     </nav>
   )
 }

@@ -275,6 +275,9 @@
   --z-main: 2;
   --z-hud: 4;
   --z-grain: 5;
+  /* Mobilní menu: nad zrnem (jinak by přes něj šuměla textura) a pod
+     preloaderem (ten žije jen při startu, kdy je menu stejně zavřené). */
+  --z-menu: 8;
   --z-preloader: 10;
 }
 

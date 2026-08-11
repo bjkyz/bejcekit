@@ -1,6 +1,7 @@
 import { CONTACT_HREF, GITHUB, NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
 import Icon from './Icons'
 import Mark from './Mark'
+import SiteMenu from './SiteMenu'
 
 /**
  * ═══════════ SPOLEČNÁ VÝZTUŽ PODSTRÁNEK ═══════════
@@ -54,12 +55,14 @@ export function PageNav({
           </a>
         ))}
       </div>
-      {/* ★ NA KONTAKT NA TÉHLE STRÁNCE, ne pryč na /#kontakt. Posílat člověka,
-          který právě čte, přes load jiné stránky je zbytečně ztracený kontext
-          (a pár procent z nich se cestou ztratí doslova). */}
-      <a className="nav__cta" href={ctaHref}>
-        Napište mi
-      </a>
+      {/* ★ CÍL URČUJE STRÁNKA: většinou /kontakt (formulář), na /kontakt samém
+          kotva #formular. Viz volání v jednotlivých stránkách. */}
+      <div className="nav__end">
+        <a className="nav__cta" href={ctaHref}>
+          Napište mi
+        </a>
+        <SiteMenu active={active} />
+      </div>
     </nav>
   )
 }

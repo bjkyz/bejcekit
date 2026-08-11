@@ -164,6 +164,13 @@
 .svc__anchor svg {
   transform: rotate(180deg);
 }
+/* ★ DOTYK: odkaz měl 22 px na výšku. Hitbox roste neviditelně — podtržení
+   je v klidu transparentní, takže se s vyšším boxem nikam neposune. */
+@media (pointer: coarse) {
+  .svc__anchor {
+    min-height: 2.75rem;
+  }
+}
 
 /* ── TECHNOLOGIE ─────────────────────────────────────────────── */
 .svc-tech {

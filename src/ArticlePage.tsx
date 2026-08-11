@@ -1,7 +1,7 @@
 import { resolveEntities } from './content/entities'
 import type { Article } from './content/journal'
 import { czechDate, relatedArticles } from './content/journal'
-import { SECTIONS } from './content/sections'
+import { CONTACT_HREF, SECTIONS } from './content/sections'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { topicPath } from './lib/journal-route'
 import { AUTHOR_NAME } from './lib/site'
@@ -9,7 +9,7 @@ import ArticleBody from './ui/ArticleBody'
 import BullSeal from './ui/BullSeal'
 import Icon from './ui/Icons'
 import { PageFooter, PageNav } from './ui/PageShell'
-import { JOURNAL_CTA_ANCHOR, JournalCta } from './JournalPage'
+import { JournalCta } from './JournalPage'
 
 /**
  * ═══════════ DETAIL ČLÁNKU ═══════════
@@ -66,7 +66,7 @@ export default function ArticlePage({ a }: { a: Article }) {
         <span />
       </div>
 
-      <PageNav active="/clanky" ctaHref={`#${JOURNAL_CTA_ANCHOR}`} />
+      <PageNav active="/clanky" ctaHref={CONTACT_HREF} />
 
       <main className="page page--article" ref={main}>
         <article className="art">
@@ -188,7 +188,7 @@ export default function ArticlePage({ a }: { a: Article }) {
                    důvěryhodnosti, ne proti ní. */
                 <p className="srclist__note">
                   Přehled sestavil ze zdrojů výše jazykový model ({a.generated.model}), vychází pod redakční
-                  odpovědností Jiřího Bejčka. Našli jste chybu? <a href={`#${JOURNAL_CTA_ANCHOR}`}>Napište mi</a>,
+                  odpovědností Jiřího Bejčka. Našli jste chybu? <a href={CONTACT_HREF}>Napište mi</a>,
                   opravím to.
                 </p>
               )}
@@ -216,7 +216,7 @@ export default function ArticlePage({ a }: { a: Article }) {
                 <span aria-hidden="true">·</span>
                 <a href="/projekty">Reference</a>
                 <span aria-hidden="true">·</span>
-                <a href={`#${JOURNAL_CTA_ANCHOR}`}>Napsat mi</a>
+                <a href={CONTACT_HREF}>Napsat mi</a>
               </p>
             </div>
           </section>

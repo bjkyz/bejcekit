@@ -58,7 +58,10 @@ export default function JournalPage({ topic }: { topic?: Topic }) {
         <span />
       </div>
 
-      <PageNav active="/clanky" ctaHref={`#${JOURNAL_CTA_ANCHOR}`} />
+      {/* ★ CTA lišty vede rovnou na formulář — jako všude. Blok pod seznamem
+          (JournalCta) zůstává pro čtenáře, který dočetl; lišta je pro toho,
+          který se už rozhodl. */}
+      <PageNav active="/clanky" ctaHref={CONTACT_HREF} />
 
       <main className="page page--journal" ref={main}>
         {/* ── HLAVIČKA ────────────────────────────────────────────
@@ -171,9 +174,11 @@ export function JournalCta() {
         stát a kdy to bude hotové. Když se to nevrátí, řeknu to rovnou.
       </p>
       <div className="page__cta-row">
+        {/* ★ „Napsat poptávku", ne „Napsat e-mail" — tlačítko vede na formulář
+            /kontakt a slib musí sedět s cílem. */}
         <a className="btn btn--solid" href={CONTACT_HREF}>
           <Icon name="mail" size={15} />
-          Napsat e-mail
+          Napsat poptávku
         </a>
         <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
           <Icon name="whatsapp" size={15} />

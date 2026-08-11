@@ -194,6 +194,17 @@
     border-color var(--d-hover) var(--e-ui),
     background-color var(--d-hover) var(--e-ui);
 }
+/* ★ DOTYK: chip s tématem měl 33 px. Na dotyku povyroste na 44 — je to
+   ovládací prvek formuláře, ne štítek. MUSÍ stát AŽ ZA základním pravidlem:
+   média dotaz specificitu nezvyšuje, o `display` by rozhodlo pořadí. */
+@media (pointer: coarse) {
+  .ctc-chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-block: 0;
+  }
+}
 .ctc-chip:hover span {
   color: var(--tx-2);
   border-color: var(--line-3);

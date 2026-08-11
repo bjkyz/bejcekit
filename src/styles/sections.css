@@ -713,6 +713,13 @@
   align-items: center;
   gap: 0.35rem;
 }
+/* ★ DOTYK: řádek odkazů v patičce měl na výšku jen výšku písma (~24 px).
+   Hitbox roste na 44 px neviditelně; zalomené řádky tím dostanou vzduch. */
+@media (pointer: coarse) {
+  .footer__links a {
+    min-height: 2.75rem;
+  }
+}
 .footer__legal {
   margin-top: 0.75rem;
 }

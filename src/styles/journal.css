@@ -1,0 +1,699 @@
+/* ═══════════════════════════════════════════════════════════════
+   ŽURNÁL — rozcestník, článek, pečeť se značkou.
+
+   ★ ŽÁDNÝ NOVÝ VIZUÁLNÍ JAZYK. Všechny barvy, křivky, časy i stupně písma
+     jsou tokeny z tokens.css a stránka stojí na týchž třídách jako reference
+     (`.page`, `.page__cta`, `.btn`, `.label`). Nová sekce webu, která si
+     přinese vlastní odstíny a vlastní rádiusy, je nejrychlejší způsob, jak
+     z jednoho webu udělat dva slepené.
+
+   ★★ ČTECÍ STRÁNKA MÁ JINÉ PRIORITY NEŽ PREZENTACE. Na úvodu vede kompozice,
+     tady vede MÍRA ŘÁDKU a svislý rytmus: text se má číst deset minut, ne
+     patnáct vteřin. Proto je článek úzký sloupec uprostřed a všechno ostatní
+     (bloky pod textem, karty) se od něj odvíjí.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── DROBEČKY ────────────────────────────────────────────────
+   Musí odpovídat BreadcrumbList v JSON-LD (lib/seo.ts). Rozpor mezi tím,
+   co vidí člověk, a tím, co čte robot, je přesně ten druh nesouladu, kvůli
+   kterému Google strukturovaná data celého webu odloží stranou. */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--tx-3);
+}
+.crumbs a {
+  color: var(--tx-3);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--d-hover) var(--e-ui), border-color var(--d-hover) var(--e-ui);
+}
+.crumbs a:hover {
+  color: var(--neon-2);
+  border-bottom-color: var(--neon-3);
+}
+.crumbs [aria-current] {
+  color: var(--tx-2);
+}
+
+/* ═══════════ ROZCESTNÍK ═══════════ */
+
+/* ── HLAVIČKA: TEXT + PEČEŤ ──────────────────────────────────
+   ★ `auto-fit` s minmax by tu neposloužilo: sloupce nejsou rovnocenné.
+     Text má nést míru řádku, pečeť má být tak velká, aby byla vidět, a ani
+     o pixel větší. Proto pevné dva sloupce a jeden média dotaz. */
+.jhead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+.jhead__text {
+  max-width: var(--measure-text);
+}
+.jhead__text .display {
+  margin-top: 0.25rem;
+}
+.jhead__text .body {
+  margin-top: var(--sp-body-top);
+}
+@media (min-width: 900px) {
+  .jhead {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+/* Řádek s RSS. Tichý, protože ho hledá jedno procento návštěvníků — ale to
+   procento ho hledá cíleně a pro roboty je to signál „tady obsah přibývá". */
+.jhead__rss {
+  margin-top: 1.5rem;
+}
+.jhead__rss a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--tx-3);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--d-hover) var(--e-ui), border-color var(--d-hover) var(--e-ui);
+}
+.jhead__rss a:hover {
+  color: var(--neon-2);
+  border-bottom-color: var(--neon-3);
+}
+
+/* ── PŘEPÍNAČ TÉMAT ───────────────────────────────────────────
+   Pilulky, ne záložky: záložky slibují, že se pod nimi obsah přepne bez
+   načtení. Tohle jsou odkazy na samostatné stránky s vlastní URL a vlastním
+   titulkem — a to je pro vyhledávače celý smysl témat. */
+.jtopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+}
+.jtopic {
+  display: inline-block;
+  padding: 0.34rem 0.7rem;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--tx-3);
+  text-decoration: none;
+  transition:
+    color var(--d-hover) var(--e-ui),
+    border-color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui);
+}
+.jtopic:hover {
+  color: var(--tx-1);
+  border-color: var(--neon-3);
+}
+.jtopic.is-active {
+  color: var(--bg-0);
+  background: var(--neon-2);
+  border-color: var(--neon-2);
+}
+
+/* ── PEČEŤ S BÝKEM ────────────────────────────────────────────
+   ★★ SPODNÍ PROLNUTÍ JE TO, CO Z VIDEA DĚLÁ ZNAČKU A NE OBDÉLNÍK.
+     Video má tmavé pozadí skoro shodné s webem, takže bez masky je vidět
+     jen tenká hrana kontejneru — a ta hrana je jediné, co prozradí, že jde
+     o „vložené video". S maskou stojí býk rovnou na stránce.
+
+   ★ ROZMĚRY DRŽÍ POMĚR 720:964 (viz ui/BullSeal.tsx). `aspect-ratio` je tu
+     pojistka navíc k `width`/`height` na elementu: dokud se nedotečou
+     metadata, drží místo poster, a když se nedotečou vůbec, drží ho tohle.
+     Bez obojího by stránka po dotečení videa poskočila (CLS). */
+.seal {
+  position: relative;
+  line-height: 0;
+}
+/**
+ * ★★★ MASKA JE TU DŮLEŽITĚJŠÍ NEŽ VIDEO SAMO.
+ *
+ * Býk je vyrenderovaný na tmavém, ale ne černém pozadí (kolem #0d1418), kdežto
+ * web má #08090a. Rozdíl je pár procent jasu a přesně tak vypadá: jako světlejší
+ * OBDÉLNÍK uprostřed stránky. Ať se video ořízne jakkoli, ta hrana je jediné,
+ * co na první pohled prozradí „sem někdo vložil video".
+ *
+ * ★ Nepomůže `mix-blend-mode`. `screen` odstraní jen ČERNOU, `lighten` bere
+ *   maximum — a pozadí videa je světlejší než stránka, takže obdélník přežije
+ *   obojí. Odstranit se dá jen tím, že se OKRAJE VYTRATÍ, a to dělá maska.
+ *
+ * Dvě masky přes `mask-composite: intersect`:
+ *   • lineární dolů — býk stojí na stránce místo na hraně kontejneru
+ *   • radiální ovál — zruší svislé hrany a rohy
+ * Střed obou je posunutý nad polovinu (42 %), protože tam je hlava; kdyby byl
+ * uprostřed, ubral by ovál z rohů, ale taky by rozostřil to jediné, na co se
+ * člověk dívá.
+ */
+.seal__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 720 / 964;
+  object-fit: cover;
+  mask-image:
+    linear-gradient(to bottom, #000 0, #000 56%, rgba(0, 0, 0, 0.35) 84%, transparent 100%),
+    radial-gradient(72% 62% at 42% 46%, #000 0 48%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 0, #000 56%, rgba(0, 0, 0, 0.35) 84%, transparent 100%),
+    radial-gradient(72% 62% at 42% 46%, #000 0 48%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
+  -webkit-mask-composite: source-in;
+}
+/**
+ * Záře POD býkem, ne rámeček kolem něj. Rámeček by vrátil přesně tu hranu,
+ * kterou maska odstranila; měkké světlo naopak posadí objekt do prostoru
+ * stejně, jako to na úvodní stránce dělá pata záře pod krychlí.
+ */
+.seal__ring {
+  position: absolute;
+  inset: -8% -12% 6%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(52% 42% at 42% 50%, rgba(79, 216, 232, 0.13), transparent 72%);
+}
+
+.seal--hero {
+  width: clamp(13rem, 26vw, 19rem);
+  margin-inline: auto;
+}
+@media (min-width: 900px) {
+  .seal--hero {
+    margin-inline: 0;
+  }
+}
+
+/* Podpis pod článkem. Malý, protože tam nese jméno, ne obraz. */
+.seal--byline {
+  flex: 0 0 auto;
+  width: clamp(4.5rem, 14vw, 6rem);
+}
+
+/* ── MŘÍŽKA ČLÁNKŮ ────────────────────────────────────────────
+   `min()` uvnitř `minmax` je povinné: holých 24rem způsobí na 390px telefonu
+   vodorovný přetok (táž past jako u karet referencí, viz projects.css). */
+.jgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  gap: clamp(1rem, 2.2vw, 1.75rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── KARTA ČLÁNKU ─────────────────────────────────────────────
+   Vlasový rám místo desky. Karta se má číst jako záznam v rejstříku,
+   ne jako dlaždice v administraci — plné pozadí by z devíti článků udělalo
+   devět krabic a stránka by ztuhla. */
+.acard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.15rem 1.25rem 1.35rem;
+  border: 1px solid var(--line-1);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(19, 22, 25, 0.5), rgba(13, 15, 17, 0.25));
+  transition:
+    border-color var(--d-lift) var(--e-out-quint),
+    transform var(--d-lift) var(--e-out-quint),
+    box-shadow var(--d-lift) var(--e-out-quint);
+}
+.acard:hover {
+  border-color: var(--line-3);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-soft);
+}
+.acard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--tx-3);
+}
+.acard__title {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  line-height: 1.28;
+  letter-spacing: -0.018em;
+  color: var(--tx-1);
+  text-wrap: balance;
+}
+/* ★ NATAŽENÝ ODKAZ. Kliknout jde kamkoli do karty, ale odkaz zůstane JEDEN
+   a jeho textem je nadpis. Verze s <a> kolem celé karty by odečítači obrazovky
+   nabídla odkaz složený z data, štítků, nadpisu i perexu. */
+.acard__link {
+  color: inherit;
+  text-decoration: none;
+}
+.acard__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+}
+.acard:hover .acard__link {
+  color: var(--neon-1);
+}
+.acard__link:focus-visible {
+  outline: none;
+}
+.acard__link:focus-visible::after {
+  box-shadow: var(--focus);
+}
+.acard__perex {
+  margin: 0.55rem 0 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.acard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  /* `margin-top: auto` přišpendlí štítky na patu karty, takže mají všechny
+     karty v řádku štítky v jedné lince i při různě dlouhých perexech. */
+  margin: auto 0 0;
+  padding-top: 1rem;
+}
+.acard__tag {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line-1);
+  border-radius: 2px;
+  color: var(--tx-3);
+}
+.acard__tag--ent {
+  border-color: rgba(79, 216, 232, 0.22);
+  color: var(--neon-3);
+}
+.acard--slim {
+  background: none;
+}
+
+.jempty {
+  max-width: var(--measure-text);
+  color: var(--tx-2);
+}
+
+/* ═══════════ ČLÁNEK ═══════════ */
+
+/**
+ * ★★ ÚZKÝ SLOUPEC DRŽÍ `.art`, NE `.page`. A ta specificita je povinná.
+ *
+ * Sloupec se sází na samotném článku, protože souvisejícím kartám a výzvě
+ * k akci pod ním by 37rem bylo málo — tři karty v šířce odstavce jsou
+ * nečitelné proužky.
+ *
+ * ★ `.art` je vlastní třída, takže o pořadí souborů nejde. Kde se ale přepisuje
+ *   něco z `projects.css` (`.page`, `.page__cta`, `.footer`), MUSÍ mít selektor
+ *   vyšší specificitu, ne jen pozdější pořadí: `inlineCss()` ve vite.config.ts
+ *   slepuje stylesheety v pořadí, v jakém leží v adresáři, takže `projects.css`
+ *   skončí ZA `journal.css`. Stálo to jeden článek roztažený přes celé okno.
+ *
+ * Šířka: `--measure-text` je ~70 znaků při 17px, tedy horní okraj čtenářského
+ * optima (45–75). Nad 80 znaků oko ztrácí návaznost řádků a u textu na deset
+ * minut je to rozdíl mezi „přečetl" a „prolistoval".
+ */
+/* ★ DVĚ ŠÍŘKY, NE JEDNA. Stránka článku je užší než zbytek webu (90rem by
+   nechalo centrovaný sloupec plavat uprostřed prázdna), ale širší než text —
+   souvisejícím kartám a výzvě k akci pod článkem musí zbýt místo na tři
+   sloupce. `.page.page--article` má schválně specificitu (0,2,0), viz níž. */
+.page.page--article {
+  max-width: calc(68rem + 2 * var(--gutter));
+}
+.art {
+  max-width: var(--measure-text);
+  margin-inline: auto;
+}
+/* Výzva k akci pod článkem musí stát v téže ose jako text nad ní, jinak
+   se centrovaný sloupec „zlomí" do levého okraje. */
+.page--article .page__cta {
+  margin-inline: auto;
+}
+.art__head {
+  margin-bottom: clamp(1.75rem, 4vw, 2.75rem);
+}
+.art__title {
+  margin: 0.5rem 0 0;
+  /* Nadpis článku není hero: `--fs-d1` je stupeň sekcí, ne úvodní obrazovky.
+     `--fs-d0` by na čtecí stránce vytlačil první odstavec pod ohyb. */
+  font-size: var(--fs-d1);
+  line-height: var(--lh-d1);
+  letter-spacing: var(--ls-d1);
+}
+.art__perex {
+  margin: 1rem 0 0;
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+  line-height: 1.6;
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.art__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-1);
+  color: var(--tx-3);
+}
+
+/* ── TĚLO ───────────────────────────────────────────────────── */
+.art__body {
+  scroll-margin-top: 7rem;
+}
+.art__p {
+  margin: 1.15rem 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.art__h2 {
+  margin: clamp(2rem, 4vw, 2.75rem) 0 0;
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--tx-1);
+  text-wrap: balance;
+  scroll-margin-top: 7rem;
+}
+.art__list {
+  margin: 1.15rem 0 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-bullets-gap);
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+}
+.art__list li::marker {
+  color: var(--neon-3);
+}
+
+.art__quote {
+  margin: clamp(1.75rem, 3.5vw, 2.25rem) 0 0;
+  padding-left: 1.1rem;
+  border-left: 2px solid var(--neon-4);
+}
+.art__quote blockquote {
+  margin: 0;
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--tx-1);
+  text-wrap: pretty;
+}
+.art__quote figcaption {
+  margin-top: 0.5rem;
+  color: var(--tx-3);
+}
+
+/* Deska uvnitř textu. Neutrální rám — barva by tu nesla význam, který
+   poznámka nemá (zelená je na tomhle webu dostupnost, ne důraz). */
+.art__note {
+  margin: clamp(1.75rem, 3.5vw, 2.25rem) 0 0;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line-1);
+  border-left: 2px solid var(--line-3);
+  border-radius: 2px;
+  background: rgba(19, 22, 25, 0.45);
+}
+.art__note p:last-child {
+  margin: 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.art__note-k {
+  margin: 0 0 0.3rem;
+  color: var(--tx-3);
+}
+
+/* ── ZÁVĚR „CO TO ZNAMENÁ V PRAXI" ────────────────────────────
+   ★ ZELENÁ JE TU OPRÁVNĚNĚ. Token říká: zelená = pozitivní fakt, „co
+     dostanete". Tenhle odstavec je přesně to — jediné místo v článku, kde se
+     z novinky stane užitek pro čtenáře. Kdyby zezelenalo cokoli dalšího,
+     přestane to platit pro obojí. */
+.art__takeaway {
+  margin: clamp(2.25rem, 4.5vw, 3rem) 0 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--green-line);
+  border-radius: 2px;
+  background: var(--green-bg);
+}
+.art__takeaway p:not(.art__takeaway-k) {
+  margin: 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.art__takeaway-k {
+  margin: 0 0 0.35rem;
+  color: var(--green);
+}
+.art__takeaway-link {
+  margin-top: 0.75rem !important;
+}
+.art__takeaway-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--green);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--d-hover) var(--e-ui);
+}
+.art__takeaway-link a:hover {
+  border-bottom-color: var(--green-line);
+}
+/* Šipka „back" míří doleva; otočením ukazuje kupředu. Vlastní ikona kvůli
+   jednomu odkazu by byla další soubor v bundlu. */
+.art__takeaway-link svg {
+  transform: rotate(180deg);
+}
+
+/* ── ZNAČKA FIRMY V TEXTU ─────────────────────────────────────
+   ★★ NENÍ TO ODKAZ, A JE TO ZÁMĚR. Odkaz uprostřed věty odvádí čtenáře přesně
+     ve chvíli, kdy čte; odchozí odkazy proto článek soustředí do bloku
+     „Zmíněné společnosti" pod textem. Tady zbývá jen tichý signál „tohle je
+     firma, ne slovo" — a hlavně jistota, že jméno v textu a entita ve
+     strukturovaných datech pocházejí z jednoho zápisu (ui/ArticleBody.tsx). */
+.ent {
+  color: var(--tx-1);
+  font-weight: 500;
+  border-bottom: 1px solid rgba(79, 216, 232, 0.28);
+}
+
+/* ── ČASTÉ DOTAZY ────────────────────────────────────────────
+   Otevřené, ne v rozbalovátku. `<details>` sice indexovat jde, ale odpověď,
+   kterou musí člověk nejdřív rozkliknout, si přečte zlomek lidí — a FAQ je
+   tu od toho, aby ušetřilo dotaz, ne aby vypadalo úhledně. */
+.art__faq dl {
+  margin: 0;
+}
+.art__faq-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line-1);
+}
+.art__faq dt {
+  font-weight: 500;
+  color: var(--tx-1);
+  line-height: 1.45;
+}
+.art__faq dd {
+  margin: 0.45rem 0 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+
+/* ── BLOKY POD TEXTEM ────────────────────────────────────────── */
+.art__block {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--line-1);
+}
+.art__block-h {
+  margin: 0 0 1rem;
+  color: var(--tx-3);
+  font-weight: 400;
+}
+
+.entlist,
+.srclist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+}
+.entlist {
+  list-style: none;
+  padding: 0;
+}
+.srclist {
+  padding-left: 1.2rem;
+}
+.srclist li::marker {
+  color: var(--tx-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+}
+.entlist__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+}
+.entlist__name,
+.srclist a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--d-hover) var(--e-ui);
+}
+.entlist__name:hover,
+.srclist a:hover {
+  border-bottom-color: currentColor;
+}
+.entlist__note,
+.srclist__pub {
+  color: var(--tx-3);
+  font-size: var(--fs-mono);
+}
+.srclist__pub {
+  display: block;
+  font-family: var(--font-mono);
+  margin-top: 0.15rem;
+}
+.srclist__note {
+  margin: 1.25rem 0 0;
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+  color: var(--tx-4);
+  text-wrap: pretty;
+}
+.srclist__note a {
+  color: var(--tx-3);
+}
+
+/* ── PODPIS AUTORA ────────────────────────────────────────────
+   ★ E-E-A-T MÁ TVÁŘ. Google u odborného obsahu hodnotí, kdo ho napsal;
+     bez autorského bloku je článek anonymní text z internetu. Že tu tvář dělá
+     kovový býk, je věc značky — jméno, role i odkaz na doložitelnou práci
+     jsou vedle něj a to je to, co se čte. */
+.byline {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1rem, 3vw, 1.75rem);
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--line-1);
+}
+.byline__text {
+  min-width: 0;
+}
+.byline__name {
+  margin: 0;
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  letter-spacing: -0.015em;
+  color: var(--tx-1);
+}
+.byline__role {
+  margin: 0.25rem 0 0;
+  color: var(--tx-3);
+}
+.byline__bio {
+  margin: 0.7rem 0 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+.byline__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.85rem 0 0;
+  color: var(--tx-4);
+}
+.byline__links a {
+  color: var(--tx-3);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--d-hover) var(--e-ui), border-color var(--d-hover) var(--e-ui);
+}
+.byline__links a:hover {
+  color: var(--neon-2);
+  border-bottom-color: var(--neon-3);
+}
+
+/* ── SOUVISEJÍCÍ ─────────────────────────────────────────────
+   ★ Mřížka souvisejících se roztahuje přes sloupec článku. Článek je úzký
+     kvůli čtení, ale karty pod ním čtení nejsou — a tři karty vedle sebe
+     v šířce odstavce by byly nečitelné proužky. */
+.art__related {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--line-1);
+}
+.art__related .jgrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+}
+.art__related .acard {
+  padding: 0.9rem 1rem 1.1rem;
+}
+.art__related .acard__title {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+}
+
+.page--article .footer,
+.page--journal .footer {
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line-1);
+}
+/* Patička podstránek nese o položku víc než dřív (přibyl žurnál), takže
+   musí umět zalomit bez toho, aby oddělovací tečka zůstala viset na konci
+   řádku sama. `.footer__pair` drží odkaz a jeho tečku pohromadě. */
+.footer__pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .byline {
+    gap: 0.9rem;
+  }
+  .art__meta,
+  .acard__meta {
+    gap: 0.35rem;
+  }
+}
+
+/* ★ POHYB SE VYPÍNÁ CELÝ. Pečeť se nepřehraje (ui/BullSeal.tsx to řeší v JS),
+   karty se nezvedají. Zůstane statická, plně čitelná stránka. */
+@media (prefers-reduced-motion: reduce) {
+  .acard,
+  .acard:hover {
+    transition: none;
+    transform: none;
+  }
+}

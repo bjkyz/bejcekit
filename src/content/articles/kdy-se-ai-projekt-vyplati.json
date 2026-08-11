@@ -1,0 +1,81 @@
+{
+  "slug": "kdy-se-ai-projekt-vyplati",
+  "title": "Většina AI projektů se nevyplatí. Jak poznat ty zbylé",
+  "perex": "Rozdíl mezi automatizací, která ušetří hodiny týdně, a tou, co se rok ladí a pak vypne, se pozná propočtem na tři čísla. Ukazuju, jak ho udělat dřív, než se do toho pustíte.",
+  "published": "2026-08-10",
+  "topics": ["ai", "automatizace"],
+  "entities": ["openai", "anthropic", "n8n"],
+  "sources": [],
+  "service": "ai",
+  "blocks": [
+    {
+      "t": "p",
+      "text": "Za poslední dva roky jsem viděl dost firemních AI projektů zblízka, abych si všiml jedné věci: nezabíjí je technika. Modely od [[openai|OpenAI]] i [[anthropic|Anthropicu]] jsou dnes na drtivou většinu firemních úloh přeložené silnější, než je potřeba. Zabíjí je špatně vybraný proces. A ten se dá vybrat správně za odpoledne, ještě než někdo napíše první řádek."
+    },
+    { "t": "h2", "text": "Tři čísla, která rozhodují" },
+    {
+      "t": "p",
+      "text": "Než začnu cokoli stavět, chci od klienta tři údaje. Ne odhad podle pocitu, ale číslo, které si někdo ověřil aspoň týden."
+    },
+    {
+      "t": "ul",
+      "items": [
+        "Objem: kolikrát měsíčně ten úkon proběhne. Pod padesát opakování se skoro nikdy nevyplatí automatizovat cokoli.",
+        "Čas: kolik minut zabere jedno provedení člověku, včetně přepínání kontextu a hledání podkladů. Tohle číslo bývá dvakrát vyšší, než lidé odhadují.",
+        "Cena chyby: co se stane, když to výstup jednou za dvacet případů splete. Někde nic, jinde faktura špatnému odběrateli."
+      ]
+    },
+    {
+      "t": "p",
+      "text": "Objem krát čas dá měsíční úsporu v hodinách. Cena chyby rozhodne o tom, jestli musí být v lince člověk, který výstup schvaluje, a tím pádem kolik z té úspory zbude. Když po odečtení schvalování zbývá míň než osm hodin měsíčně, zakázku obvykle nevezmu, protože se nevrátí ani mně, ani klientovi."
+    },
+    {
+      "t": "note",
+      "k": "Hrubé pravidlo",
+      "text": "Automatizace se vyplatí, když měsíční úspora v hodinách převýší cenu provozu do šesti měsíců a zbyde rezerva na údržbu. Údržba není nula: modely se mění, formáty dokumentů taky, a linka bez majitele se do roka rozpadne."
+    },
+    { "t": "h2", "text": "Co se vyplácí skoro vždycky" },
+    {
+      "t": "p",
+      "text": "Existují úlohy, kde propočet vyjde tak často, že se dá začít u nich. Mají společné to, že jsou opakované, textové a jejich chybu někdo hned uvidí."
+    },
+    {
+      "t": "ul",
+      "items": [
+        "Vytěžování dokumentů. Faktury, dodací listy, objednávky z e-mailu. Data padají rovnou do systému místo ručního přepisu.",
+        "Odpovědi z vlastních podkladů. Asistent, který odpovídá výhradně z firemních dokumentů a u každé odpovědi ukáže, ze které stránky ji vzal.",
+        "Třídění a směrování. Příchozí poptávky, reklamace a tikety se roztřídí a přiřadí dřív, než je někdo otevře.",
+        "Propojení systémů, které spolu nemluví. Často to není ani AI, jen poctivě postavené workflow, třeba v [[n8n|n8n]]."
+      ]
+    },
+    { "t": "h2", "text": "Co se vyplácí zřídka" },
+    {
+      "t": "p",
+      "text": "Nejčastější zadání, které odmítám, zní „chceme chatbota na web\". Bývá za ním naděje, že nahradí zákaznickou podporu, jenže objem dotazů je malý, cena chyby vysoká a hodnota jedné odpovědi mizivá. Podobně dopadá generování marketingových textů bez korektury: úspora času je reálná, ale výsledek nikdo nechce podepsat."
+    },
+    {
+      "t": "p",
+      "text": "Špatně dopadá i každý projekt, který začíná nákupem nástroje. Nástroj je poslední rozhodnutí, ne první. Když se vybere dřív než proces, ohýbá se pak proces podle nástroje a úspora se vypaří v obcházení."
+    },
+    { "t": "h2", "text": "Jak to udělat u sebe" },
+    {
+      "t": "p",
+      "text": "Vezměte si tři úkony, na které si vaši lidé nejčastěji stěžují, a doplňte u nich ta tři čísla. Kde vyjde úspora přes deset hodin měsíčně a chyba se dá zachytit kontrolou, tam máte kandidáta. Zbytek nechte být, dokud objem nenaroste. Je to nudné a funguje to líp než jakákoli prezentace."
+    }
+  ],
+  "takeaway": "Nezačínejte výběrem nástroje, ale propočtem na tři čísla: objem, čas na jedno provedení a cena chyby. Když po odečtení lidské kontroly nezbude aspoň osm ušetřených hodin měsíčně, projekt odložte. Ušetříte si tím rok ladění něčeho, co se stejně vypne.",
+  "faq": [
+    {
+      "q": "Kolik stojí nasazení takové automatizace?",
+      "a": "Záleží na počtu napojených systémů, ne na modelu. Jednoduché vytěžování dokumentů bývá otázka jednotek dnů práce, propojení tří firemních systémů s kontrolou a reportem výrazně víc. Cenu i termín dávám písemně předem."
+    },
+    {
+      "q": "Musíme kvůli tomu posílat data ven?",
+      "a": "Ne nutně. U citlivých dat se dá provozovat model na vlastním serveru nebo v evropském cloudu s uzavřenou smlouvou o zpracování. Je to dražší na provoz a obvykle o něco slabší, takže se to rozhoduje podle toho, co se zpracovává."
+    },
+    {
+      "q": "Jak poznáme, že se to opravdu vrátilo?",
+      "a": "Změřením téhož ukazatele před a po. Proto před stavbou zapisuju výchozí čas a objem, a pak posílám měsíční report ušetřených hodin. Bez výchozího čísla se návratnost dokázat nedá."
+    }
+  ]
+}

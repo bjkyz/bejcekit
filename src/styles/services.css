@@ -1,0 +1,401 @@
+/* ═══════════════════════════════════════════════════════════════
+   STRÁNKA /sluzby — katalog nabídky, technologie, certifikát.
+
+   ★ ŽÁDNÝ NOVÝ VIZUÁLNÍ JAZYK. Tokeny, role písma i tlačítka jsou sdílené
+     (tokens.css, sections.css); tenhle soubor přidává jen rozvržení katalogu
+     a jednu novou věc na celém webu: SVĚTLÝ DOKUMENT NA TMAVÉM PODKLADU.
+
+   ★★ POZOR NA POŘADÍ SOUBORŮ. `inlineCss()` ve vite.config.ts slepuje CSS
+     v pořadí adresáře, ne importů — takže `projects.css` a `sections.css`
+     můžou skončit ZA tímhle souborem. Kde se přepisuje sdílená třída
+     (`.page`, `.page__cta`), musí mít selektor VYŠŠÍ SPECIFICITU
+     (`.page.page--services`), ne jen pozdější pořadí.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Katalog je čtecí stránka: sloupec užší než 90rem, ale širší než odstavec,
+   protože položky služeb běží ve dvou sloupcích. */
+.page.page--services {
+  max-width: calc(70rem + 2 * var(--gutter));
+}
+
+.svc-head {
+  max-width: var(--measure-text);
+}
+.svc-head .body {
+  margin-top: var(--sp-body-top);
+}
+/* Tři nároky za sebou. Není to odstavec, je to shrnutí, takže se sází jinak:
+   větší, světlejší, s vlastním rytmem. */
+.svc-head__claim {
+  margin-top: 1.5rem;
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--tx-1);
+  text-wrap: balance;
+}
+
+/* ── SKUPINA SLUŽEB ──────────────────────────────────────────
+   Dva sloupce: vlevo tvrzení a úvod, vpravo seznam konkrétních věcí.
+   Pod 900 px se to složí pod sebe. Vlasová linka nahoře odděluje skupiny
+   bez toho, aby z nich udělala krabice. */
+.svc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  padding-top: clamp(2rem, 4vw, 3rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid var(--line-1);
+  scroll-margin-top: 7rem;
+}
+@media (min-width: 900px) {
+  .svc {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  }
+  /* Pointa patří pod OBA sloupce, ne jen pod ten levý. */
+  .svc__punch {
+    grid-column: 1 / -1;
+  }
+}
+.svc__head {
+  position: sticky;
+  /* Nadpis skupiny drží u horní hrany, dokud se roluje jejím seznamem.
+     Na dlouhé skupině (SaaS má pět položek) je pak pořád vidět, o čem to je. */
+  top: 7rem;
+  align-self: start;
+}
+@media (max-width: 899px) {
+  .svc__head {
+    position: static;
+  }
+}
+.svc__code {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--tx-3);
+}
+.svc__num {
+  color: var(--neon-3);
+}
+.svc__title {
+  margin: 0.5rem 0 0;
+  text-wrap: balance;
+}
+.svc__lead {
+  margin: 0.9rem 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--tx-2);
+  max-width: var(--measure-body);
+  text-wrap: pretty;
+}
+
+/* Položky. Popisek a vysvětlení pod sebou, mezi položkami vlasová linka —
+   přístrojový štítek, ne odrážky. */
+.svc__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.svc__item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line-1);
+}
+.svc__item:first-child {
+  padding-top: 0;
+}
+.svc__item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.svc__item-k {
+  display: block;
+  font-size: var(--fs-bullet);
+  font-weight: 500;
+  color: var(--tx-1);
+}
+.svc__item-v {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+  text-wrap: pretty;
+}
+
+/* Pointa skupiny. Jedna věta, která má zůstat v hlavě. */
+.svc__punch {
+  margin: 0.25rem 0 0;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-1);
+  text-wrap: pretty;
+}
+.svc__anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.75rem;
+  color: var(--tx-3);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid transparent;
+  transition: color var(--d-hover) var(--e-ui), border-color var(--d-hover) var(--e-ui);
+}
+.svc__anchor:hover {
+  color: var(--neon-2);
+  border-bottom-color: var(--neon-3);
+}
+/* Ikona „back" míří doleva; otočením ukazuje kupředu. */
+.svc__anchor svg {
+  transform: rotate(180deg);
+}
+
+/* ── TECHNOLOGIE ─────────────────────────────────────────────── */
+.svc-tech {
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--line-1);
+}
+.techgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: clamp(1rem, 2.5vw, 2rem);
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+}
+.techgrid__cell dt {
+  color: var(--tx-3);
+  margin-bottom: 0.6rem;
+}
+.techgrid__cell dd {
+  margin: 0;
+}
+/* `.stack` a `.stack__chip` jsou sdílené se sekcemi úvodu (sections.css) —
+   schválně: chip technologie má vypadat všude stejně. */
+.techgrid__cell .stack {
+  margin-top: 0;
+}
+
+/* ── KDO TO STAVÍ + CERTIFIKÁT ───────────────────────────────── */
+.svc-about {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.75rem, 4vw, 3rem);
+  align-items: start;
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--line-1);
+}
+@media (min-width: 940px) {
+  .svc-about {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  }
+}
+.svc-about__text .headline {
+  margin-top: 0.4rem;
+}
+.svc-about__text .body {
+  margin-top: var(--sp-body-top);
+  max-width: var(--measure-body);
+}
+/* Metoda jako readout, ne jako věta. Pět sloves s tečkami mezi nimi je
+   nejkratší možný popis toho, jak se pracuje. */
+.svc-about__method {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-1);
+  color: var(--neon-3);
+}
+
+/* ── CERTIFIKÁT ──────────────────────────────────────────────
+   ★★ JEDINÉ MÍSTO NA WEBU, KDE JE SVĚTLÝ DOKUMENT NA TMAVÉM PODKLADU.
+     Neřeší se to ztlumením: šedý certifikát podvědomě vypadá jako neplatný.
+     Řeší se to tím, že dokument dostane RÁM a měkký stín, takže se čte jako
+     papír položený na stole, ne jako obrázek vsazený do stránky. */
+.cert {
+  margin: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(19, 22, 25, 0.6), rgba(13, 15, 17, 0.3));
+  overflow: hidden;
+}
+.cert__shot {
+  position: relative;
+  display: block;
+  line-height: 0;
+  /* Dokument se dá otevřít, takže musí vypadat klikatelně i bez hoveru. */
+  cursor: pointer;
+}
+.cert__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Náhled je jen náhled: mírně ztlumený, aby nekřičel na celou stránku,
+     a při najetí naplno. Ztlumení je na JASU, ne na sytosti — dokument tím
+     nepřestane vypadat jako platný. */
+  filter: brightness(0.88);
+  transition: filter var(--d-lift) var(--e-out-quint), transform var(--d-lift) var(--e-out-quint);
+}
+.cert__shot:hover img {
+  filter: brightness(1);
+  transform: scale(1.012);
+}
+/* Výzva k otevření. Leží na dokumentu dole, na tmavém pásu, takže se čte
+   i nad světlým papírem.
+   ★ VLEVO, NE VPRAVO. Vpravo dole je na certifikátu OVĚŘOVACÍ QR KÓD — a to je
+     jediná věc na tom obrázku, kterou si někdo může chtít vyfotit. Zakrýt ji
+     vlastním tlačítkem by z dokladu udělalo obrázek. */
+.cert__open {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 2px;
+  background: rgba(8, 9, 10, 0.86);
+  border: 1px solid var(--line-2);
+  color: var(--tx-2);
+  line-height: 1;
+}
+.cert__shot:hover .cert__open {
+  color: var(--neon-2);
+  border-color: var(--neon-3);
+}
+.cert__shot:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.cert__body {
+  padding: 1.15rem 1.25rem 1.35rem;
+}
+.cert__kicker {
+  margin: 0;
+  color: var(--green);
+}
+.cert__title {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  letter-spacing: -0.02em;
+  color: var(--tx-1);
+}
+.cert__issuer {
+  margin: 0.2rem 0 0;
+  color: var(--tx-3);
+}
+.cert__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0.9rem 0 0;
+  border-top: 1px solid var(--line-1);
+}
+.cert__facts li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: var(--fs-mono);
+}
+.cert__fact-k {
+  /* Pevná lišta popisků, aby hodnoty stály pod sebou v jedné ose. */
+  flex: 0 0 5.5rem;
+  color: var(--tx-3);
+}
+.cert__fact-v {
+  color: var(--tx-2);
+}
+.cert__lead {
+  margin: 1rem 0 0.4rem;
+  font-size: var(--fs-bullet);
+  color: var(--tx-3);
+}
+.cert__topics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: var(--fs-bullet);
+  line-height: var(--lh-bullet);
+  color: var(--tx-2);
+}
+.cert__topics li::marker {
+  color: var(--neon-3);
+}
+
+/* ── ODKAZ NA ŽURNÁL ─────────────────────────────────────────── */
+.svc-journal {
+  padding-top: clamp(2rem, 4vw, 3rem);
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--line-1);
+}
+.svc-journal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.svc-journal__list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line-1);
+}
+.svc-journal__list a {
+  font-size: var(--fs-bullet);
+  color: var(--tx-1);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--d-hover) var(--e-ui), border-color var(--d-hover) var(--e-ui);
+}
+.svc-journal__list a:hover {
+  color: var(--neon-1);
+  border-bottom-color: var(--neon-3);
+}
+.svc-journal__date {
+  color: var(--tx-4);
+  white-space: nowrap;
+}
+.svc-journal__more {
+  margin-top: 1rem;
+}
+.svc-journal__more a {
+  color: var(--tx-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-2);
+}
+.svc-journal__more a:hover {
+  color: var(--neon-2);
+  border-bottom-color: var(--neon-3);
+}
+
+/* Výzva k akci smí být na téhle stránce širší než měřítko odstavce —
+   je to závěr katalogu, ne poznámka pod ním. */
+.page--services .page__cta {
+  max-width: var(--measure-text);
+}
+.page--services .footer {
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cert__shot img,
+  .cert__shot:hover img {
+    transition: none;
+    transform: none;
+  }
+}

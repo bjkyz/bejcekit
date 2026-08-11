@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Zdrojová videa. Master pro public/media/* — do nasazení nepatří (15 MB),
+# překódovaná verze v public/media/bull.mp4 má 447 kB.
+media-src/

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="cs" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!--
+      ★★ ŠABLONA PRO CELÝ ŽURNÁL, NE JEN PRO ROZCESTNÍK.
+
+      Z tohohle jednoho souboru vyrábí `scripts/prerender.mjs` VŠECHNY stránky
+      žurnálu: `dist/clanky.html`, `dist/clanky/<slug>.html` pro každý článek
+      a `dist/clanky/tema/<téma>.html` pro každé téma. Sdílejí tedy tentýž
+      bundle, tentýž inlinovaný CSS a tutéž kostru — liší se obsahem `#root`
+      a blokem hlavičky níž.
+
+      ★ VŠECHNO MEZI `head:begin` A `head:end` SE PŘI BUILDU PŘEPÍŠE.
+        Skládá to `renderHead()` v `src/lib/seo.ts` — titulek, popisek,
+        kanonická adresa, náhled pro sdílení i strukturovaná data. Co je tu
+        napsané teď, platí jen pro dev server (a je to hlavička rozcestníku,
+        aby `npm run dev` nevypadal jako rozbitý build).
+
+        Neupravuj tyhle značky tady. Kdo je změní jen tady, změní je pro dev
+        a pro produkci ne — a pozná to za měsíc podle divného náhledu na
+        sociální síti.
+    -->
+    <!-- head:begin -->
+    <title>Žurnál · AI a technologie prakticky | bejcek.it</title>
+    <meta
+      name="description"
+      content="Novinky z umělé inteligence a technologií přeložené do řeči firem: co se změnilo, koho se to týká a co s tím udělat. Se zdroji, bez humbuku."
+    />
+    <link rel="canonical" href="__SITE_ORIGIN__/clanky" />
+    <meta name="author" content="Jiří Bejček" />
+    <meta name="theme-color" content="#08090a" />
+    <link rel="alternate" type="application/rss+xml" title="Žurnál · bejcek.it" href="__SITE_ORIGIN__/rss.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:url" content="__SITE_ORIGIN__/clanky" />
+    <meta property="og:site_name" content="bejcek.it" />
+    <meta property="og:title" content="Žurnál · AI a technologie prakticky" />
+    <meta
+      property="og:description"
+      content="Co se v technologiích právě mění a co s tím. Se zdroji, bez humbuku."
+    />
+    <meta property="og:image" content="__SITE_ORIGIN__/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="bejcek.it · IT a AI inženýr" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- head:end -->
+
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- ★ VIDEO SE ZÁMĚRNĚ NEPRELOADUJE. Pečeť s býkem má `preload="none"`
+         a stahuje se, teprve až se objeví v okně (ui/BullSeal.tsx). Na stránce,
+         kde je produktem TEXT, nesmí 447 kB smyčky soupeřit s prvním
+         vykreslením. Poster (35 kB) drží místo i vzhled do té doby. -->
+  </head>
+  <body>
+    <!-- Obsah sem vkládá prerender. Bez JS je stránka i tak celá čitelná:
+         `html:not(.js) .reveal { opacity: 1 }` v layout.css zruší odhalovací
+         animaci, takže se text ukáže i bez hydratace. Proto tu není noscript
+         s náhradním obsahem – ten by byl jen druhou, horší kopií článku. -->
+    <div id="root"></div>
+    <script type="module" src="/src/clanky.tsx"></script>
+  </body>
+</html>

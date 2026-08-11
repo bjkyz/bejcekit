@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SECTIONS } from '../content/sections'
+import { NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
 import { useActiveSection, useScrollIdle } from '../lib/hooks'
 import { scrollToSection } from '../lib/scroll'
 import { sceneState } from '../lib/scene-state'
@@ -20,11 +20,10 @@ export default function Hud() {
 }
 
 function Nav({ active }: { active: number }) {
-  /* Jen tři služby, ne čtyři: PROCES ustoupil odkazu na PROJEKTY. Pátá položka
-     by řádek na 1280px displeji přetáhla přes značku, a proces je věc, kterou
-     člověk čte až když ho zaujme práce — kdežto reference jsou to, kvůli čemu
-     na web přišel. Na PROCES se pořád dá skočit pravou lištou i scrollem. */
-  const links = SECTIONS.slice(1, 4)
+  /* Kolik sekcí se vejde vedle podstránek, rozhoduje NAV_SECTION_COUNT
+     v content/sections.ts — je tam i důvod, proč ustoupil zrovna SOFTWARE.
+     Na všech šest stěn se dá skočit pravou lištou i scrollem. */
+  const links = SECTIONS.slice(1, 1 + NAV_SECTION_COUNT)
   return (
     <nav className="nav" aria-label="Hlavní navigace">
       {/* ★ ZNAČKA JE OBRÁZEK, NE SLOVO — a proto potřebuje jméno pro odečítač
@@ -46,12 +45,16 @@ function Nav({ active }: { active: number }) {
             {s.plateCode}
           </a>
         ))}
-        {/* ★ SKUTEČNÝ ODKAZ NA JINOU STRÁNKU, TAKŽE ŽÁDNÝ preventDefault.
+        {/* ★ SKUTEČNÉ ODKAZY NA JINÉ STRÁNKY, TAKŽE ŽÁDNÝ preventDefault.
             Ostatní položky jsou kotvy a musí projít přes Lenis (jinak by skočily
-            natvrdo); tahle je navigace pryč z dokumentu a patří prohlížeči. */}
-        <a className="nav__link" href="/projekty">
-          PROJEKTY
-        </a>
+            natvrdo); tyhle jsou navigace pryč z dokumentu a patří prohlížeči.
+            Seznam je v content/sections.ts (NAV_PAGES) — týž, jaký vykresluje
+            navigace podstránek, aby se ty dvě lišty nemohly rozejít. */}
+        {NAV_PAGES.map((p) => (
+          <a className="nav__link" href={p.href} key={p.href}>
+            {p.label}
+          </a>
+        ))}
       </div>
       <a className="nav__cta" href="#kontakt" onClick={anchor('kontakt')}>
         Napište mi

@@ -260,7 +260,11 @@ function ContactBlock() {
 
 function Footer() {
   return (
-    <footer className="footer reveal" style={delay(5, 6)}>
+    /* ★ `footer--stage` je hák pro podlahový scrim (sections.css). Patička na
+       úvodu je JEDINÁ, která stojí přímo pod krychlí — a v sekci 05 je kamera
+       nejblíž, takže jí spodní rozsvícená hrana skla vede přesně přes řádek
+       s odkazy. Patičky podstránek ten scrim nemají a ani ho nepotřebují. */
+    <footer className="footer footer--stage reveal" style={delay(5, 6)}>
       {/* ★ ZNAČKA SE VRACÍ AŽ TADY. V navigaci je býk sám (viz ui/Mark.tsx), takže
           jméno webu musí mít někde v dokumentu i psanou podobu — pro člověka, který
           si ho chce opsat, i pro to, aby se lockup „býk + bejcek.it" vůbec někde

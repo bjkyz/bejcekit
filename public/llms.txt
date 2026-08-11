@@ -1,22 +1,29 @@
 # bejcek.it · Jiří Bejček
 
-> IT a AI inženýr z Česka. Stavím weby, které Google najde (SEO, Core Web Vitals v zeleném), spravuji IT infrastrukturu a servery, nasazuji AI asistenty a automatizace s propočtem návratnosti předem. Jeden inženýr místo agentury: pevná cena písemně, odezva do 24 hodin.
+> AI a software inženýr z Česka. Navrhuji a stavím AI systémy, automatizace, interní nástroje, SaaS produkty a weby na míru: od prvního nápadu po produkt, který firma opravdu používá. Jeden inženýr místo agentury: pevná cena písemně, odezva do 24 hodin.
 
 Klíčová fakta:
 
 - Kontakt: bejcek.jirka@gmail.com, telefon a WhatsApp +420 607 706 102
 - Působnost: Česko, remote i na místě; přístupy a kód zůstávají klientovi
-- Proces: analýza zdarma, pevná cena a termín písemně, týdenní iterace, provoz a monitoring po nasazení
+- Proces: analýza zdarma, pevná cena a termín písemně, průběžné nasazování, provoz a rozvoj po předání
+- Doložená kvalifikace: certifikát Agentic Engineering (r_d by Laba, 29. 5. 2026, 20 vyučovacích hodin) – architektura AI agentů, MCP nástroje, orchestrace agentů přes SDK. Dokument: __SITE_ORIGIN__/certifikat-agentic-engineering.pdf
 - Reference: anonymizované ukázky (NDA) na __SITE_ORIGIN__/projekty, celé reference na vyžádání
-- Web má dvě stránky: úvod (__SITE_ORIGIN__/), kde jsou služby kotvami, a projekty (__SITE_ORIGIN__/projekty)
+- Web má čtyři části: úvod (__SITE_ORIGIN__/), služby (__SITE_ORIGIN__/sluzby), projekty (__SITE_ORIGIN__/projekty) a žurnál (__SITE_ORIGIN__/clanky)
+- Žurnál vychází denně; přehled článků je na konci tohoto souboru a v kanálu __SITE_ORIGIN__/rss.xml
 
 ## Služby
 
-- [Weby a SEO](__SITE_ORIGIN__/#web): weby s SEO od prvního řádku, Core Web Vitals v zeleném, Search Console a měsíční report pozic
-- [IT infrastruktura](__SITE_ORIGIN__/#infra): správa serverů, monitoring 24/7, testované zálohy, Proxmox, Linux, Docker, Microsoft 365
-- [AI a automatizace](__SITE_ORIGIN__/#ai): AI asistenti nad firemními daty (RAG), vytěžování dokumentů, n8n workflow, propočet návratnosti před stavbou
-- [Pracovní postup](__SITE_ORIGIN__/#proces): čtyři kroky od analýzy po provoz, žádné překvapení na faktuře
+Kompletní katalog je na [__SITE_ORIGIN__/sluzby](__SITE_ORIGIN__/sluzby). Na úvodní stránce jsou tři nejčastější kotvami:
+
+- [AI systémy](__SITE_ORIGIN__/#ai): asistenti, kteří odpovídají z firemních dokumentů a ukážou zdroj (RAG); vytěžování smluv, faktur a objednávek; AI agenti a nástroje MCP; propočet návratnosti před stavbou
+- [Automatizace](__SITE_ORIGIN__/#automatizace): přepis dat z e-mailů a PDF do systémů, propojení nástrojů přes API a webhooky, kontroly a hlídače, automatické reporty, n8n
+- [Software na míru](__SITE_ORIGIN__/#software): interní nástroje, klientské portály, dashboardy, SaaS od MVP po produkci, weby a webové aplikace
+- [Anonymizace dat](__SITE_ORIGIN__/sluzby): detekce a odstranění osobních údajů z dokumentů dřív, než je zpracuje další systém nebo model
+- [Pracovní postup](__SITE_ORIGIN__/#proces): analýza, návrh s pevnou cenou, průběžná stavba, provoz a rozvoj
 - [Kontakt](__SITE_ORIGIN__/#kontakt): e-mail, WhatsApp, telefon; odpověď do 24 hodin
+
+Technologie: Anthropic API, OpenAI API, RAG, MCP, Next.js, React, TypeScript, Node.js, Python, PostgreSQL, Prisma, Supabase, n8n, Vercel, Docker.
 
 ## Projekty
 
@@ -29,7 +36,9 @@ Přehled: [__SITE_ORIGIN__/projekty](__SITE_ORIGIN__/projekty)
 - Módní značka, USA: značkový web zakázkové dílny, video hero a animace řízené scrollem. Vue, GSAP, Cloudflare. Anglicky. Pod NDA.
 - [bejcek.it](__SITE_ORIGIN__/): tento web, portfolio se 3D scénou počítanou v prohlížeči, jediná veřejná ukázka. React, TypeScript, three.js, Vite. Lighthouse 100/100/100/100 na desktopu, CLS 0, scéna se na slabém stroji sama vzdá.
 
-Zakázky na IT infrastrukturu se nezveřejňují vůbec: u serverů, sítí a interních systémů to skoro nikdy nedovolí smlouva. Reference na vyžádání.
+Zakázky na interní systémy a infrastrukturu se nezveřejňují vůbec: u firemních dat to skoro nikdy nedovolí smlouva. Reference na vyžádání.
+
+__JOURNAL__
 
 ## Odkazy
 

@@ -4,12 +4,14 @@
 se žhavým reaktorem uvnitř; kamera ji podle scrollu obíhá po stěnách a každá
 stěna je jedna sekce webu.
 
-Web má **dvě stránky** (vícestránkový build, žádný router):
+Web má **čtyři části** (vícestránkový build, žádný router):
 
 | URL | Soubor | Co to je |
 |---|---|---|
 | `/` | `index.html` → `src/main.tsx` → `App.tsx` | úvod s krychlí, šest sekcí |
+| `/sluzby` | `sluzby.html` → `src/sluzby.tsx` → `ServicesPage.tsx` | celý katalog nabídky + technologie + certifikát |
 | `/projekty` | `projekty.html` → `src/projekty.tsx` → `ProjectsPage.tsx` | reference, 3D karty, **bez WebGL a bez Lenisu** |
+| `/clanky`, `/clanky/<článek>`, `/clanky/tema/<téma>` | `clanky.html` → `src/clanky.tsx` → `JournalRoot.tsx` | žurnál. **Z jedné šablony vyrábí prerender všechny stránky** – viz níž |
 
 **Lighthouse (desktop): 100 / 100 / 100 / 100** na obou stránkách (výkon,
 přístupnost, best practices, SEO), agentic-browsing 100. Mobil: `/projekty` 97,
@@ -43,7 +45,7 @@ npx vercel --prod   # produkce
 Nebo přes web: naimportuj repozitář na vercel.com, framework se detekuje sám
 (build `npm run build`, výstup `dist`).
 
-**Doména je na JEDINÉM místě: konstanta `SITE_ORIGIN` ve `vite.config.ts`.**
+**Doména je na JEDINÉM místě: konstanta `SITE_ORIGIN` v `src/lib/site.ts`.**
 Do souborů se dosazuje za token `__SITE_ORIGIN__` (plugin `siteOrigin`, funguje
 i v dev režimu). Až se koupí `bejcek.it`, mění se jen ten jeden řádek — nikde
 jinde adresa napsaná není. Nový soubor v `public/`, který má obsahovat adresu,
@@ -61,14 +63,25 @@ nebo externí skript, musíš ho do CSP doplnit, jinak ho prohlížeč zablokuje
 | Chci změnit | Soubor |
 |---|---|
 | **Texty, služby, kontakty, telefon** | `src/content/sections.ts` — jediný soubor s obsahem úvodu |
+| **Katalog služeb, technologie, certifikát** | `src/content/services.ts` |
 | **Projekty a reference** | `src/content/projects.ts` + snímky v `public/projects/` |
+| **Článek** (opravit, stáhnout) | `src/content/articles/<slug>.json` — jeden soubor = jeden článek |
+| **Témata žurnálu** | `src/content/topics.ts` |
+| **Firmy, které jde v článcích označit** | `src/content/entities.ts` |
+| **Zdroje, ze kterých robot čerpá** | `FEEDS` v `api/cron/publish-article.ts` |
+| **Titulky, popisky a JSON-LD žurnálu** | `src/lib/seo.ts` — jediné místo, kde vzniká hlavička |
 | Barvy, písma, rozestupy, časování | `src/styles/tokens.css` — jediný zdroj pravdy |
 | Vzhled karet projektů | `src/styles/projects.css`, pohyb v `src/lib/tilt.ts` |
 | Pozice a odstup kamery po sekcích | `src/lib/scene-state.ts` (`ORBIT_RADIUS`, `ORBIT_PAN`) |
-| Adresa webu | `SITE_ORIGIN` ve `vite.config.ts` (jediné místo) |
+| Adresa webu | `SITE_ORIGIN` v `src/lib/site.ts` (jediné místo) |
 
 **Pořadí služeb** se mění přeuspořádáním pole v `sections.ts`. Do `src/lib/faces.ts`
 nesahej — tam je pořadí dané geometrií krychle (viz níž).
+
+**Nabídka žije na dvou místech a je to záměr.** Úvod PRODÁVÁ (tři obrazovky,
+každá jeden slib), `/sluzby` VYJMENOVÁVÁ (celý katalog, ať si člověk najde svůj
+případ). Texty se proto nesmí opisovat: dvě stránky s týmž obsahem jsou pro
+vyhledávač duplicita a jedna z nich vypadne.
 
 **★ DO `SECTIONS` NEPŘIDÁVEJ SEDMOU POLOŽKU.** Pole je 1:1 svázané s geometrií
 krychle: šest stěn, šest sekcí. Sedmá položka scénu nezhorší, ale **shodí** —
@@ -110,6 +123,13 @@ Za každým bodem je chyba, která se těžko hledá. Všechny už se jednou sta
 - **`Scene.tsx` — rozměr plátna se nastavuje z `documentElement.clientWidth`.**
   `position: fixed; inset: 0` se sází podle *layoutového* viewportu, který se na
   mobilu liší od viditelného (iPhone 15: 521 vs 393 px) → krychle by utekla mimo obraz.
+
+- **Pořadí stylesheetů v produkci NENÍ pořadí importů.** `inlineCss()` slepuje
+  všechny `.css` z `dist/assets` v pořadí, v jakém leží v adresáři – takže
+  `projects.css` skončí ZA `journal.css`, i když se importuje dřív. Pravidlo
+  v novém stylesheetu, které přepisuje starší třídu (`.page`, `.footer`,
+  `.page__cta`), proto musí mít **vyšší specificitu**, ne jen pozdější pořadí.
+  Stálo to jeden článek roztažený přes celé okno.
 
 - **`vite.config.ts` — skupina `react` musí být PRVNÍ.** Jinak Rolldown přilepí
   react-dom k `@react-three` a hlavní bundle si kvůli `createRoot` stáhne celou
@@ -228,3 +248,111 @@ pár řádků v `src/lib/spring.ts` a canvas textura.
 
 (`og:image` už je hotový: `public/og.png` + meta v `index.html`. Přegenerovat jde
 ze šablony v repu úpravou `public/og.png` — 1200×630, tmavé pozadí, krychle.)
+
+## Žurnál: obsah, který si web píše sám
+
+`/clanky` je třetí část webu. Články **zakládá jednou denně robot** a web se z nich
+při buildu přestaví na statické stránky. Nikde není databáze ani API za běhu:
+článek je JSON soubor v repozitáři, stránka je HTML v `dist/`.
+
+```
+05:00 UTC   Vercel Cron  →  /api/cron/publish-article
+                            ├─ stáhne RSS kanály (FEEDS)
+                            ├─ zjistí, o čem se už psalo
+                            ├─ Claude napíše článek v pevném schématu
+                            ├─ kontrola (délky, zdroje, entity, NDA)
+                            └─ commit src/content/articles/<slug>.json
+                                    ↓ push do master
+                            Vercel build → prerender → hotové stránky
+```
+
+### Proč si model nemůže nic vymyslet
+
+To je celý smysl té konstrukce a je dobré ji nerozbít:
+
+- **Odkazy.** Model URL nepíše. Dostane očíslovaný seznam položek z kanálů
+  a vrací **čísla** (`sourceIndexes`); adresu i vydavatele k nim dopíše kód.
+- **Firmy.** Značkují se klíčem do ručně ověřeného rejstříku
+  (`src/content/entities.ts`), který je ve schématu jako výčet. Firma, kterou
+  nikdo ručně neschválil, se do článku nedostane – a s ní ani odkaz na ni.
+- **Entity v datech se berou z TEXTU**, ne ze seznamu, který model vrátí. Blok
+  „Zmíněné společnosti" tedy nemůže obsahovat firmu, o které článek nemluví.
+- **Datum** se bere z hodin serveru.
+- **Vadný článek shodí build** (`assertArticle` v `src/content/journal.ts`).
+  Radši červené CI než stránka s prázdným nadpisem.
+
+### Co je potřeba nastavit na Vercelu
+
+Settings → Environment Variables:
+
+| Proměnná | K čemu |
+|---|---|
+| `ANTHROPIC_API_KEY` | klíč z console.anthropic.com |
+| `GITHUB_TOKEN` | fine-grained token, práva **Contents: Read and write** na tenhle repozitář |
+| `GITHUB_REPO` | `bjkyz/bejcekit` |
+| `GITHUB_BRANCH` | `master` (nepovinné) |
+| `CRON_SECRET` | libovolný náhodný řetězec; Vercel ho sám posílá v hlavičce `Authorization` |
+| `JOURNAL_MODEL` | nepovinné, přepíše model (výchozí `claude-haiku-4-5`) |
+
+Ruční spuštění (stejná hlavička, jakou posílá plánovač):
+
+```bash
+curl -X GET https://bejcekit.vercel.app/api/cron/publish-article \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+**★ Změna modelu není jen změna řetězce.** Rodiny se liší v tom, co API přijme:
+Haiku 4.5 nezná `effort` (vrátí 400), Opus 5 nezná `budget_tokens`. Parametry
+proto skládá `modelOptions()` podle jména modelu – když přidáváš další, přidej
+ho do té větve, jinak vydávání tiše přestane fungovat.
+
+**★ Doba běhu.** Haiku se vejde do 60 s (strop tarifu Hobby). Silnější model
+počítej v minutách a potřebuje tarif Pro (`maxDuration = 300`).
+
+### Rozcestníky témat vznikají samy
+
+Téma dostane vlastní stránku `/clanky/tema/<téma>` **až od třetího článku**
+(`TOPIC_MIN_ARTICLES`). Do té doby na něj nikde nevede odkaz a není ani
+v sitemapě – stránka se dvěma odkazy je slabý obsah a Google ji buď
+nezaindexuje, nebo si o webu udělá horší obrázek. Práh čte prerender i klient
+ze stejné konstanty, jinak by se rozešla hydratace.
+
+### Co se generuje při buildu
+
+`sitemap.xml`, `rss.xml` a sekce žurnálu v `llms.txt` (token `__JOURNAL__`)
+vyrábí `scripts/prerender.mjs` z reálného seznamu článků. **Needituj je ručně,
+přepíšou se.** Proto taky `public/sitemap.xml` už neexistuje.
+
+## Pečeť s býkem (video)
+
+`public/media/bull.mp4` je značka v pohybu – býk ze `ui/Mark.tsx` jako 3D render.
+Používá se na `/clanky` (velká) a pod každým článkem u jména autora (malá).
+
+- Zdrojové video je **mimo `public/`**, v `media-src/bejkule.mp4` (15 MB, gitignorováno).
+  Web verze má **447 kB**: `ffmpeg -i media-src/bejkule.mp4 -an -vf scale=720:-2
+  -c:v libx264 -preset slow -crf 27 -movflags +faststart public/media/bull.mp4`.
+- Zvuková stopa je zahozená ve zdroji, ne jen vypnutá atributem.
+- `preload="none"` + poster: do sítě nejde ani bajt videa, dokud se pečeť
+  neobjeví v okně. Přehrává se jen když je vidět, a vůbec ne při
+  `prefers-reduced-motion` nebo `Save-Data`.
+- **Rozměry 720 × 964 jsou v `ui/BullSeal.tsx` i v CSS.** Když se video vymění
+  za jiné, musí se změnit obojí, jinak poskočí layout (CLS).
+- Obdélník kolem videa maže **maska**, ne blend mode: pozadí renderu je
+  světlejší než web, takže `screen` ani `lighten` ho neodstraní.
+
+
+## Doložená kvalifikace (certifikát)
+
+Certifikát Agentic Engineering (r_d by Laba) je na `/sluzby` v bloku „Kdo to staví".
+Data jsou v `CERTIFICATE` v `src/content/services.ts`, komponenta v `src/ui/Certificate.tsx`.
+
+- Soubor má **URL-bezpečné jméno** `public/certifikat-agentic-engineering.pdf`.
+  Originál se jmenoval „Jiri Bejcek – Certifikát – Agentic Engineering.pdf" a mezery
+  s pomlčkami by se v adrese zakódovaly do šňůry, kterou nejde nikam poslat.
+- Náhled `public/media/certifikat.jpg` (1200 × 674). **Rozměry jsou i v `CERTIFICATE`
+  a čte je `<img width height>`** – bez nich poskočí layout, až obrázek doteče (CLS).
+- Ve strukturovaných datech je jako `hasCredential` na osobě, a to na **dvou**
+  místech: `index.html` (founder u ProfessionalService) a `sluzby.html`. Obě míří
+  na `@id` `#person` / `#identity`, takže Google nevidí dva různé lidi.
+- ★ Tlačítko „Otevřít certifikát" leží **vlevo dole**, protože vpravo dole je
+  v dokumentu ověřovací QR kód. Zakrýt ho vlastním prvkem by z dokladu udělalo obrázek.

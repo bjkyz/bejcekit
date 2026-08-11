@@ -1,0 +1,77 @@
+{
+  "slug": "jak-vznika-tenhle-zurnal",
+  "title": "Tenhle žurnál píše robot. A přesně proto tu stojí, jak vzniká",
+  "perex": "Články sem každý den zakládá jazykový model ze zdrojů, které si přečte sám. Popisuju, jak ta linka funguje, kde má pojistky a proč jsem se rozhodl to nezamlčet.",
+  "published": "2026-08-11",
+  "topics": ["ai", "automatizace"],
+  "entities": ["anthropic", "claude", "vercel", "github"],
+  "sources": [],
+  "service": "ai",
+  "blocks": [
+    {
+      "t": "p",
+      "text": "Nejrychlejší způsob, jak přijít o důvěru čtenáře, je nechat ho, aby si sám všiml, že text psal stroj. Tak to řeknu rovnou: většinu článků v téhle rubrice zakládá jazykový model [[claude|Claude]] od [[anthropic|Anthropicu]] a spouští ho plánovač na [[vercel|Vercelu]] jednou denně, aniž bych u toho seděl. Co k tomu ale patří říct, je zbytek: co ten model dostane na vstupu, co s tím nesmí udělat a kde je hranice, za kterou se bez člověka nedostane."
+    },
+    { "t": "h2", "text": "Proč vůbec žurnál na webu jednoho inženýra" },
+    {
+      "t": "p",
+      "text": "Prodávám mimo jiné nasazování AI do firem. Je docela nekonzistentní tvrdit klientovi, že mu automatizace ušetří hodiny týdně, a přitom si vlastní obsah psát ručně po večerech. Tahle rubrika je proto zároveň ukázka: běží na stejné technice, jakou stavím na zakázku, a její provozní náklad jsou řádově koruny denně."
+    },
+    {
+      "t": "p",
+      "text": "Druhý důvod je obyčejnější. Většina toho, co se o technologiích píše česky, je buď přeložená tisková zpráva, nebo panika. Chybí ta prostřední věc: co se doopravdy změnilo, koho se to týká a co s tím má dělat firma, která nemá vlastní IT oddělení. Přesně tuhle větu má každý článek na konci, v zeleném rámečku."
+    },
+    { "t": "h2", "text": "Jak ta linka vypadá" },
+    {
+      "t": "p",
+      "text": "Celé to má čtyři kroky a žádný z nich není chytrý. Chytrost je až v tom, co se v nich zakazuje."
+    },
+    {
+      "t": "ul",
+      "items": [
+        "Sběr. Plánovač si stáhne kanály oborových zdrojů a vezme z nich titulky, perexy a odkazy z posledních dvou dnů. Nestahuje celé články a nic z cizího textu se nikam nepřepisuje.",
+        "Výběr. Model dostane seznam už vydaných článků a musí navrhnout téma, které se s ničím nepřekrývá. Duplicitní obsah je v SEO trest, ne úspora.",
+        "Psaní. Výstup není text, ale struktura: nadpis, perex, bloky, zdroje, seznam zmíněných firem, praktický závěr. Model nemůže zapsat HTML, takže si nemůže vymyslet ani vzhled, ani skript.",
+        "Kontrola a nasazení. Strojová kontrola projde, jestli sedí délky, jestli má článek aspoň dva zdroje s odkazem a jestli neuniklo jméno klienta pod mlčenlivostí. Teprve pak se soubor commitne do repozitáře na [[github|GitHubu]] a web se přestaví."
+      ]
+    },
+    { "t": "h2", "text": "Kde jsou pojistky" },
+    {
+      "t": "p",
+      "text": "Halucinace se nedají vyprosit prompt inženýrstvím, dají se jen zúžit. Nejsilnější zábrana téhle linky je, že model si nesmí vymyslet ani jednu z věcí, na kterých záleží nejvíc."
+    },
+    {
+      "t": "note",
+      "k": "Tvrdé zákazy",
+      "text": "Odkazy na zdroje musí být doslova ty, které přišly z kanálu; model je smí jen vybrat, ne napsat. Firmy se neoznačují jménem, ale klíčem do ručně ověřeného rejstříku, takže žádná společnost ani odkaz na ni nemůžou vzniknout za běhu. A datum vydání se bere z hodin serveru, ne z textu."
+    },
+    {
+      "t": "p",
+      "text": "Vedle toho platí měkčí věci, které hlídá kontrola: článek bez praktického závěru neprojde, článek kratší než tři sta slov taky ne a titulek delší než sedmdesát znaků se odmítne, protože by ho vyhledávač stejně usekl."
+    },
+    { "t": "h2", "text": "Co z toho plyne pro čtenáře" },
+    {
+      "t": "p",
+      "text": "Beru za tyhle texty redakční odpovědnost, i když je nepíšu větu po větě. Když v nich najdete chybu, napište mi a opravím ji, případně článek stáhnu. Pod každým dílem je z toho důvodu vidět seznam zdrojů i poznámka o tom, že text sestavil model."
+    },
+    {
+      "t": "p",
+      "text": "A jestli vás na tomhle zajímá spíš ta linka než ty články: je to úplně obyčejná automatizace, jen postavená poctivě. Přesně takové stavím i pro firmy, které místo článků potřebují zpracovat faktury, odpovídat na dotazy z vlastních dokumentů nebo přestat přepisovat data mezi dvěma systémy."
+    }
+  ],
+  "takeaway": "Automatizace psaní obsahu dnes zvládne i jeden člověk za pár korun denně. Rozdíl mezi použitelnou a trapnou verzí není v modelu, ale v tom, co všechno mu zakážete vymyslet: odkazy, jména firem a data patří do ověřených seznamů, ne do promptu.",
+  "faq": [
+    {
+      "q": "Kontroluje ty články před vydáním člověk?",
+      "a": "Ne větu po větě. Před vydáním projde článek strojovou kontrolou (délky, povinné zdroje, zakázaná jména) a já ho čtu po vydání. Za obsah ručím a chyby opravuju, jakmile se o nich dozvím."
+    },
+    {
+      "q": "Nepoškodí obsah psaný AI vaše pozice ve vyhledávání?",
+      "a": "Google od roku 2023 nehodnotí způsob vzniku, ale užitečnost a doložitelnost. Trestá se obsah bez přidané hodnoty a bez původu. Proto má každý díl uvedené zdroje, konkrétní praktický závěr a jasně uvedeného odpovědného člověka."
+    },
+    {
+      "q": "Kolik takový provoz stojí?",
+      "a": "Řádově jednotky korun za článek na modelu a nulu za hosting, protože se web přestavuje jako statické stránky. Nejdražší položka je čas strávený stavbou pojistek, ne provoz."
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { INQUIRY_ANCHOR, PROJECTS } from './content/projects'
-import { GITHUB, MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
+import { MAILTO, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import { tilt } from './lib/tilt'
 import Icon from './ui/Icons'
-import Mark from './ui/Mark'
 import ProjectCard from './ui/ProjectCard'
+import { PageFooter, PageNav } from './ui/PageShell'
 
 /**
  * ═══════════ STRÁNKA /projekty ═══════════
@@ -68,39 +68,9 @@ export default function ProjectsPage() {
         <span />
       </div>
 
-      {/* ★ `nav--page` NENÍ KOSMETIKA. Navigace je fixní deska bez pozadí a na
-          úvodu jí to projde, protože tam sekce snapují a pod lištou nikdy nic
-          nestojí. Tady se scrolluje volně, takže jí obsah PROJÍŽDÍ POD RUKAMA
-          a přes značku by se míhaly snímky karet. Modifikátor přidává závoj —
-          a musí být, protože stylesheet je pro obě stránky společný, takže by
-          holé `.nav::before` zasáhlo i úvod. */}
-      <nav className="nav nav--page" aria-label="Hlavní navigace">
-        <a className="nav__mark" href="/">
-          <Mark size={30} />
-          <span className="sr-only">bejcek.it, úvod</span>
-        </a>
-        <div className="nav__links">
-          <a className="nav__link" href="/#web">
-            WEB
-          </a>
-          <a className="nav__link" href="/#infra">
-            INFRA
-          </a>
-          <a className="nav__link" href="/#ai">
-            AI
-          </a>
-          <a className="nav__link is-active" href="/projekty" aria-current="page">
-            PROJEKTY
-          </a>
-        </div>
-        {/* ★ NA KONTAKT NA TÉHLE STRÁNCE, ne pryč na /#kontakt. Dole je plný
-            blok s e-mailem, WhatsAppem i telefonem — posílat člověka, který se
-            právě dívá na reference, přes load jiné stránky je zbytečně ztracený
-            kontext (a pár procent z nich se cestou ztratí doslova). */}
-        <a className="nav__cta" href={`#${INQUIRY_ANCHOR}`}>
-          Napište mi
-        </a>
-      </nav>
+      {/* Navigace i patička jsou od přidání žurnálu společné pro všechny
+          podstránky — viz ui/PageShell.tsx (a NAV_PAGES v content/sections.ts). */}
+      <PageNav active="/projekty" ctaHref={`#${INQUIRY_ANCHOR}`} />
 
       <main className="page" ref={main}>
         {/* ── HLAVIČKA STRÁNKY ─────────────────────────────────────
@@ -175,28 +145,7 @@ export default function ProjectsPage() {
           </p>
         </section>
 
-        {/* ── PATIČKA ──────────────────────────────────────────────
-            Kratší než na hlavní stránce, a schválně: atribuce CC BY se váže
-            k 3D modelu, a ten na téhle stránce neběží. Licenční doložka patří
-            tam, kde se dílo doopravdy užívá, ne na každou stránku webu. */}
-        <footer className="footer">
-          <p className="footer__mark">
-            <Mark size={24} />
-            <span>
-              bejcek<b>.it</b>
-            </span>
-          </p>
-          <p className="footer__links">
-            <a href="/">Úvod</a>
-            <span aria-hidden="true">·</span>
-            <a href={GITHUB} target="_blank" rel="noreferrer">
-              <Icon name="github" size={14} />
-              github.com/bjkyz
-            </a>
-            <span aria-hidden="true">·</span>
-            <span>© {new Date().getFullYear()} Jiří Bejček</span>
-          </p>
-        </footer>
+        <PageFooter active="/projekty" />
       </main>
 
       <div className="grain" aria-hidden="true" />

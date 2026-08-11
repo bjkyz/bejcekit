@@ -2,13 +2,16 @@ import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App.tsx'
 import ProjectsPage from './ProjectsPage.tsx'
+import ServicesPage from './ServicesPage.tsx'
+import JournalRoot from './JournalRoot.tsx'
+import type { JournalRoute } from './lib/journal-route.ts'
 
 /**
  * ═══════════ VSTUP PRO BUILD-TIME PRERENDER ═══════════
  *
- * Spouští ho scripts/prerender.mjs po `vite build`: vyrenderuje obě stránky
- * do řetězce a vloží je do <div id="root"> v hotovém dist/*.html. Klient pak
- * v main.tsx/projekty.tsx hotové DOM jen HYDRATUJE, nerenderuje od nuly.
+ * Spouští ho scripts/prerender.mjs po `vite build`: vyrenderuje stránky do
+ * řetězce a vloží je do <div id="root"> v hotovém dist/*.html. Klient pak
+ * v main.tsx/projekty.tsx/clanky.tsx hotové DOM jen HYDRATUJE.
  *
  * Proč: web byl čistě klientský, takže FCP i LCP čekaly na stažení a spuštění
  * Reactu — mobilní Lighthouse tím měl strop ~82. S obsahem přímo v HTML je
@@ -39,4 +42,28 @@ export const PAGES: Record<string, () => string> = {
         <ProjectsPage />
       </StrictMode>,
     ),
+  'sluzby.html': () =>
+    renderToString(
+      <StrictMode>
+        <ServicesPage />
+      </StrictMode>,
+    ),
+}
+
+/**
+ * ★ ŽURNÁL NEMÁ PEVNÝ SEZNAM STRÁNEK, PROTOŽE HO NEZNÁ NIKDO PŘEDEM.
+ *
+ * Články zakládá plánovač (`api/cron/publish-article.ts`) a jejich počet se
+ * mění mezi dvěma buildy. `PAGES` výš je proto slovník napevno, kdežto tady
+ * je funkce: prerender si projde `ARTICLES` a pro každý článek zavolá tohle
+ * s jeho cestou. Cesta je JEDINÝ vstup — přesně ten, který si v prohlížeči
+ * odvodí `clanky.tsx` z `location.pathname`, takže se serverový a klientský
+ * render nemají jak rozejít.
+ */
+export function renderJournal(route: JournalRoute): string {
+  return renderToString(
+    <StrictMode>
+      <JournalRoot route={route} />
+    </StrictMode>,
+  )
 }

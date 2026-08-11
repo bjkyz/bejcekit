@@ -610,6 +610,60 @@
   text-align: center;
   text-wrap: pretty;
 }
+/* ═══════════ PODLAHA POD PATIČKOU (jen úvod) ═══════════
+   ★★ KONEC STRÁNKY BYL JEDINÉ MÍSTO, KDE TEXT LEŽEL PŘÍMO NA ROZSVÍCENÉ HRANĚ.
+
+   V sekci 05 je kamera nejblíž ze všech (ORBIT_RADIUS 9.6) a stroj svítí nejvíc,
+   takže spodní hrana skla protne obrazovku přesně ve výšce řádku
+   „Projekty · github.com · © …" a atribuce pod ním. Naměřeno na 1440×900:
+   světlá hrana ~#8fd8e6 pod textem --tx-4 (#797e86) dává kontrast pod 2:1,
+   tedy hluboko pod AA — a hlavně to vypadá jako nedopatření, ne jako efekt.
+
+   Řeší to týž idiom jako pás specifikací na úvodu (`.hero-spec::before`), jen
+   RADIÁLNÍ místo lineárního: patička je úzký vycentrovaný blok, takže lineární
+   spád přes celou šířku by pod ní udělal viditelnou desku s ostrými svislými
+   hranami. Elipsa je uprostřed skoro krytá a k okrajům mizí do ztracena, takže
+   krychle kolem textu dál prosvítá a žádná hrana nevznikne.
+
+   Vedle čitelnosti to dělá i kompozici: stroj se spodkem zaboří do tmy místo
+   aby se uřízl o patu obrazovky, a scroll tím dostane dno. Konec stránky má
+   vypadat jako přistání, ne jako střih.
+
+   ★ `isolation: isolate` je povinná: bez vlastního stohu by se `z-index: -1`
+     propadl POD plátno a scrim by nebyl vidět vůbec. Stejný idiom jako
+     u `.section__col` a `.hero-spec`. */
+.footer--stage {
+  position: relative;
+  isolation: isolate;
+  /* ★★ PATIČKA JE PŘES CELOU ŠÍŘKU SLOUPCE, TEXT V NÍ DRŽÍ SVOU MÍRU.
+     Přesně týž trik jako u `.hero-spec` a ze stejného důvodu: scrim níž je
+     pseudo-element TOHOHLE prvku, takže by se scvrkl s ním. Při šířce 60ch
+     končil gradient na hraně boxu s nenulovým krytím a pod patičkou byl vidět
+     TMAVÝ OBDÉLNÍK se svislými hranami (naměřeno na 1440: x = 389 a 1051).
+     Řešit to roztažením přes záporné odsazení nejde — na 390px displeji by
+     těch pár rem přeteklo z okna a vyrobilo vodorovný scroll. */
+  max-width: none;
+  width: 100%;
+  padding-inline: max(0px, calc((100% - var(--measure-wide)) / 2));
+}
+.footer--stage::before {
+  content: '';
+  position: absolute;
+  /* Dolů se táhne až na spodní hranu sekce, aby pod patičkou nezůstal světlý
+     pruh mezi koncem scrimu a koncem obrazovky. */
+  inset: -1.75rem 0 calc(var(--sp-sec-bottom) * -1);
+  z-index: -1;
+  /* ★ Průhledné musí být DŘÍV, než dojde box (92 %, ne 100 %). Gradient, který
+     se ořízne s nenulovou alfou, je zase ta hrana, kvůli které to celé vzniklo. */
+  background: radial-gradient(
+    92% 96% at 50% 52%,
+    rgba(8, 9, 10, 0.94) 0 42%,
+    rgba(8, 9, 10, 0.7) 68%,
+    rgba(8, 9, 10, 0) 92%
+  );
+  pointer-events: none;
+}
+
 .footer a {
   color: var(--tx-3);
 }
@@ -770,6 +824,16 @@
   cursor: grab;
   pointer-events: auto;
   z-index: 0;
+  /**
+   * ★★ TOHLE JEDNO PRAVIDLO ZPŘÍSTUPNILO ÚCHOP NA TELEFONU.
+   *
+   * Dřív byla plocha na dotyku úplně vypnutá (`display: none` níž), protože by
+   * kradla scroll. `pan-y` říká prohlížeči: SVISLÉ tahy jsou tvoje, vodorovné
+   * jsou moje. Stránka tedy roluje nativně a krychli jde přitom otáčet
+   * přejetím do stran — a nikde se nevolá `preventDefault`, takže se scroll
+   * nemá jak zaseknout. Zámek osy v ui/GrabPlate.tsx dělá totéž z druhé strany.
+   */
+  touch-action: pan-y;
 }
 .grab-plate:active {
   cursor: grabbing;
@@ -782,6 +846,9 @@
 .grab-hint {
   position: relative;
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
   font-family: var(--font-mono);
   font-size: var(--fs-label);
@@ -790,18 +857,53 @@
   color: var(--tx-4);
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 600ms var(--e-out-expo);
+  /* Nastupuje i zdola: pouhé prolnutí splyne se zrnem, posun o 6 px z něj
+     udělá věc, která přišla, a ne skvrnu, která tam vždycky byla. */
+  transform: translateY(6px);
+  transition:
+    opacity 600ms var(--e-out-expo),
+    transform 600ms var(--e-out-expo);
   pointer-events: none;
 }
 .grab-hint.is-on {
   opacity: 1;
+  transform: none;
+}
+/* Tepající tečka. Je to jediná animace, která na úvodu běží bez příčiny,
+   takže musí být pomalá a slabá — jinak z nápovědy udělá kontrolku poplachu. */
+.grab-hint__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--neon-3);
+  box-shadow: 0 0 8px rgba(79, 216, 232, 0.6);
+  animation: grab-pulse 2.4s var(--e-ui) infinite;
+}
+@keyframes grab-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
-/* Na dotyku je úchop mrtvý — tam scroll patří prstu. */
-@media (hover: none) {
-  .grab-plate,
-  .grab-hint {
-    display: none;
+/* ★ ÚCHOP UŽ NA DOTYKU NEMIZÍ. Fungoval jen na myši, protože by jinak kradl
+   scroll; `touch-action: pan-y` výš to řeší lépe — svislý tah patří stránce,
+   vodorovný krychli. Zůstává jediné omezení: nápověda se nesmí tlačit do
+   místa, kde je na úzkém displeji beztak nabito. */
+@media (prefers-reduced-motion: reduce) {
+  .grab-hint,
+  .grab-hint.is-on {
+    transition: none;
+    transform: none;
+  }
+  .grab-hint__dot {
+    animation: none;
+    opacity: 0.7;
   }
 }
 

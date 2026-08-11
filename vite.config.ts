@@ -4,27 +4,24 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
 /**
- * ★★ JEDINÉ MÍSTO NA CELÉM WEBU, KDE JE NAPSANÁ JEHO ADRESA.
+ * ★★ ADRESA WEBU SE PŘESTĚHOVALA DO `src/lib/site.ts`.
  *
- * Kanonická adresa se v projektu opakovala DVANÁCTKRÁT ve čtyřech souborech:
- * index.html (canonical, og:url, og:image, JSON-LD url a image), sitemap.xml,
- * robots.txt a llms.txt (sedm odkazů na kotvy sekcí). Při stěhování domény se
- * na jedno z těch míst zaručeně zapomene — a zrovna u kanonické adresy je
- * zapomenuté místo drahé: `<link rel="canonical">` mířící jinam, než web
- * doopravdy stojí, říká Googlu „pravá verze je jinde". Když to jinde
- * neodpovídá, nemusí se web zaindexovat vůbec.
+ * Bydlela tady, dokud ji potřeboval jen build. Od přidání žurnálu ji potřebuje
+ * i `scripts/prerender.mjs` (sitemapa, RSS, strukturovaná data každého článku)
+ * a ten se konfigurace na její konstanty zeptat neumí — Vite vrací resolvovanou
+ * konfiguraci, ne modul. Adresa by tedy musela být napsaná dvakrát, a přesně
+ * proti tomu celá tahle konstrukce vznikla.
  *
- * Přesně tohle se stalo: všech dvanáct míst ukazovalo na https://bejcek.it/,
- * jenže ta doména nebyla (a k 2026-08-03 pořád není) zaregistrovaná — whois
- * hlásí AVAILABLE a NXDOMAIN i z 1.1.1.1 a 8.8.8.8. Web přitom běžel na
- * https://bejcekit.vercel.app.
- *
- * ★ AŽ SE DOMÉNA KOUPÍ, MĚNÍ SE JEN TENHLE ŘÁDEK. Nic jiného. Bez lomítka na konci.
+ * ★ AŽ SE KOUPÍ `bejcek.it`, MĚNÍ SE JEN JEDEN ŘÁDEK — v `src/lib/site.ts`.
  */
-const SITE_ORIGIN = 'https://bejcekit.vercel.app'
+import { SITE_ORIGIN } from './src/lib/site.js'
 
-/** Soubory v public/ se kopírují doslova, takže se v nich token nahrazuje až nad dist/. */
-const ORIGIN_FILES = ['sitemap.xml', 'robots.txt', 'llms.txt']
+/**
+ * Soubory v public/ se kopírují doslova, takže se v nich token nahrazuje až nad dist/.
+ * ★ `sitemap.xml` v seznamu SCHVÁLNĚ NENÍ: od přidání žurnálu se generuje
+ *   v prerenderu z reálného seznamu článků (viz scripts/prerender.mjs).
+ */
+const ORIGIN_FILES = ['robots.txt', 'llms.txt']
 const TOKEN = /__SITE_ORIGIN__/g
 
 /**
@@ -63,6 +60,56 @@ function siteOrigin(): Plugin {
         if (!existsSync(file)) continue
         writeFileSync(file, readFileSync(file, 'utf8').replace(TOKEN, SITE_ORIGIN))
       }
+    },
+  }
+}
+
+/**
+ * ═══════════ ŽURNÁL V DEV REŽIMU ═══════════
+ *
+ * ★ V PRODUKCI ŽÁDNÝ ROUTER NENÍ A TENHLE PLUGIN NIC NEDĚLÁ. Každá stránka
+ *   žurnálu je vyrobený soubor (`dist/clanky/<slug>.html`) a Vercel ho servíruje
+ *   napřímo. Jenže ty soubory vyrábí až prerender po buildu, takže `npm run dev`
+ *   by na `/clanky/neco` vrátil 404 a vývoj článků by se dal dělat jen přes
+ *   `npm run build`. To je přesně ten druh tření, po kterém se na sekci
+ *   vykašle i její autor.
+ *
+ * Middleware proto v devu podstrčí šablonu `clanky.html`; komponenta si
+ * z adresy odvodí, co má vykreslit (`lib/journal-route.ts`) — stejně jako
+ * v prohlížeči na produkci. Dev se tedy chová jako produkce, jen bez prerenderu.
+ *
+ * ★★ SITEMAPU A RSS TU TAKY GENERUJEME, A NENÍ TO KOSMETIKA. Odkaz na
+ *   `/rss.xml` visí v hlavičce každé stránky žurnálu; kdyby v devu vracel 404,
+ *   vypadalo by to jako rozbitý build a někdo by ten odkaz „opravil" pryč.
+ */
+function journalDev(): Plugin {
+  return {
+    name: 'journal-dev',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const path = (req.url ?? '').split('?')[0]
+
+        if (path === '/sitemap.xml' || path === '/rss.xml') {
+          try {
+            const { ARTICLES, LIVE_TOPICS } = await server.ssrLoadModule('/src/content/journal.ts')
+            const seo = await server.ssrLoadModule('/src/lib/seo.ts')
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+            res.end(path === '/rss.xml' ? seo.renderRss(ARTICLES) : seo.renderSitemap(ARTICLES, LIVE_TOPICS))
+            return
+          } catch {
+            return next()
+          }
+        }
+
+        /* Jen „hezké" adresy bez přípony — požadavky na /assets, obrázky
+           a moduly musí projít beze změny, jinak by se dev server servíroval
+           HTML místo JavaScriptu. */
+        if (/^\/clanky(\/[a-z0-9/-]*)?$/.test(path)) {
+          req.url = '/clanky.html'
+        }
+        next()
+      })
     },
   }
 }
@@ -119,7 +166,7 @@ export default defineConfig({
   /* ★ siteOrigin PŘED inlineCss. Oba sahají na dist/index.html v closeBundle;
      siteOrigin ho ale mění přes transformIndexHtml (tedy dřív, než se soubor
      vůbec zapíše), takže inlineCss už čte hotovou adresu a nemá co přepsat. */
-  plugins: [react(), siteOrigin(), inlineCss()],
+  plugins: [react(), siteOrigin(), journalDev(), inlineCss()],
   // Keeps the dev server from re-optimising (and full-reloading) mid-session.
   optimizeDeps: {
     include: ['three', '@react-three/fiber', '@react-three/drei', 'postprocessing'],
@@ -149,9 +196,16 @@ export default defineConfig({
       /* resolve(process.cwd(), …), ne __dirname: tenhle soubor je ESM (package.json
          má "type": "module"), kde __dirname neexistuje. Stejný postup používají
          i oba pluginy výš. */
+      /* ★ TŘETÍ VSTUP NENÍ TŘETÍ STRÁNKA, ALE ŠABLONA CELÉHO ŽURNÁLU.
+         `clanky.html` se přeloží jednou a `scripts/prerender.mjs` z něj pak
+         naklonuje rozcestník, každý článek i každé téma. Kdyby měl mít každý
+         článek vlastní vstup, musel by se s každým novým článkem měnit tenhle
+         soubor — a ten se mění, jen když se mění stavba webu, ne obsah. */
       input: {
         index: resolve(process.cwd(), 'index.html'),
         projekty: resolve(process.cwd(), 'projekty.html'),
+        sluzby: resolve(process.cwd(), 'sluzby.html'),
+        clanky: resolve(process.cwd(), 'clanky.html'),
       },
       output: {
         // Vite 8 běží na Rolldownu, který `manualChunks` sice zavolá, ale výsledek

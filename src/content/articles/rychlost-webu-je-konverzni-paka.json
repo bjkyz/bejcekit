@@ -1,0 +1,97 @@
+{
+  "slug": "rychlost-webu-je-konverzni-paka",
+  "title": "Rychlost webu není kosmetika. Je to konverzní páka",
+  "perex": "Core Web Vitals rozhodují o pozici ve vyhledávání i o tom, kolik lidí odejde dřív, než se web vykreslí. Ukazuju na vlastním webu, kde se ty vteřiny doopravdy berou.",
+  "published": "2026-08-09",
+  "topics": [
+    "weby-a-seo",
+    "vyvoj"
+  ],
+  "entities": [
+    "google",
+    "vercel"
+  ],
+  "sources": [
+    {
+      "title": "Web Vitals",
+      "publisher": "web.dev (Google)",
+      "url": "https://web.dev/articles/vitals"
+    }
+  ],
+  "service": "software",
+  "blocks": [
+    {
+      "t": "p",
+      "text": "Rychlost webu se v nabídkách agentur objevuje na konci, mezi „optimalizací obrázků\" a „SEO auditem\". Přitom je to jediná vlastnost webu, která současně ovlivňuje pozici ve vyhledávání i podíl lidí, kteří z něj odejdou dřív, než uvidí první větu. [[google|Google]] to měří třemi čísly a nazývá je Core Web Vitals."
+    },
+    {
+      "t": "h2",
+      "text": "Tři čísla a co doopravdy znamenají"
+    },
+    {
+      "t": "ul",
+      "items": [
+        "LCP (Largest Contentful Paint): za jak dlouho se objeví největší prvek na obrazovce, obvykle nadpis nebo hlavní obrázek. Cíl jsou 2,5 vteřiny.",
+        "INP (Interaction to Next Paint): jak dlouho web mlčí, když do něj člověk klikne. Cíl je 200 milisekund. Tohle číslo nahradilo starší FID a je mnohem přísnější, protože měří každou interakci, ne jen první.",
+        "CLS (Cumulative Layout Shift): kolik toho pod rukama poskočí, když se doloží obrázky a písma. Cíl je 0,1, ale slušná hodnota je nula."
+      ]
+    },
+    {
+      "t": "p",
+      "text": "Zásadní je, že se neměří v laboratoři, ale na skutečných návštěvnících. Web, který je rychlý na kanceláři s optikou, může mít v datech katastrofu, protože polovina lidí ho otevírá na tříletém telefonu v tramvaji."
+    },
+    {
+      "t": "h2",
+      "text": "Kde se ty vteřiny berou"
+    },
+    {
+      "t": "p",
+      "text": "Skoro nikdy v tom, co lidé tuší. Pořadí příčin, které vidím u českých firemních webů nejčastěji, je zhruba tohle."
+    },
+    {
+      "t": "ul",
+      "items": [
+        "JavaScript na kritické cestě. Web se vykreslí až poté, co prohlížeč stáhne a spustí několik set kilobajtů skriptů. Obrázky s tím nemají nic společného.",
+        "Cizí skripty. Chat, heatmapa, tři analytiky a cookie lišta. Každý z nich je požadavek na cizí server a čas, po který se nekreslí.",
+        "Písma. Fonty, které blokují vykreslení nebo se za běhu prohodí, vyrábějí druhý LCP a poskakující text.",
+        "Chybějící rozměry u obrázků a vložených prvků. Tohle je celý CLS a opravuje se dvěma atributy."
+      ]
+    },
+    {
+      "t": "note",
+      "k": "Nejlevnější oprava",
+      "text": "Doplnit šířku a výšku ke každému obrázku a videu. Prohlížeč si díky tomu rezervuje místo dřív, než soubor dorazí, a stránka pod rukama přestane poskakovat. Bývá to změna na hodinu a v datech je vidět hned."
+    },
+    {
+      "t": "h2",
+      "text": "Důkaz místo tvrzení"
+    },
+    {
+      "t": "p",
+      "text": "Web, na kterém právě jste, počítá uprostřed trojrozměrnou scénu ve WebGL a na desktopu má v Lighthouse plný počet ve všech čtyřech kategoriích. Není to tím, že by ta scéna byla malá: knihovna, která ji kreslí, váží víc než tři sta kilobajtů. Je to tím, že se stahuje až potom, co je text na obrazovce."
+    },
+    {
+      "t": "p",
+      "text": "Tenhle jeden trik stojí za většinou rozdílu. Obsah je produkt, efekt je bonus, a pořadí načítání to má odrážet. Stránky se navíc předrenderují do hotového HTML při buildu a hostuje je [[vercel|Vercel]] z edge sítě, takže první bajt odpovědi obsahuje celý text, ne prázdný div."
+    },
+    {
+      "t": "p",
+      "text": "Neberte to ode mě. Zadejte adresu do PageSpeed Insights a změřte si to. To je celý smysl toho, že tu ta čísla píšu."
+    }
+  ],
+  "takeaway": "Rychlost není položka na konci nabídky, ale rozhodnutí v architektuře: co se stahuje dřív než text. Začněte tím, že vyhodíte cizí skripty, které nikdo nepoužívá, a doplníte rozměry obrázkům. Obojí je práce na hodiny a v Core Web Vitals je vidět okamžitě.",
+  "faq": [
+    {
+      "q": "Jak si rychlost webu změřím sám?",
+      "a": "Zadejte adresu do PageSpeed Insights od Googlu. Nahoře uvidíte data od skutečných návštěvníků za posledních 28 dní, dole laboratorní test. Rozhodují ta horní čísla, laboratorní slouží k hledání příčiny."
+    },
+    {
+      "q": "Pomůže, když přejdeme na rychlejší hosting?",
+      "a": "Většinou málo. Hosting ovlivňuje čas do prvního bajtu, ale hlavní zdržení bývá v tom, co prohlížeč musí stáhnout a spustit potom. Rychlý server neopraví pomalou stránku."
+    },
+    {
+      "q": "Musíme kvůli Core Web Vitals předělat celý web?",
+      "a": "Zpravidla ne. Na většině webů udělá největší kus práce vyhození nepoužívaných skriptů, náprava písem a doplnění rozměrů obrázkům. Přestavba se vyplatí, až když je web postavený na šabloně, která se s tím rozejít nedá."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "slug": "co-dela-model-kdyz-nevi",
+  "title": "Co dělá jazykový model, když neví. A jak mu v tom zabránit",
+  "perex": "Halucinace nejsou porucha, ale vlastnost. Popisuju čtyři zábrany, které z nespolehlivého modelu udělají použitelného firemního asistenta, a jednu, která nefunguje.",
+  "published": "2026-08-08",
+  "topics": ["ai"],
+  "entities": ["anthropic", "openai", "claude", "postgresql"],
+  "sources": [],
+  "service": "ai",
+  "blocks": [
+    {
+      "t": "p",
+      "text": "Když se firemního asistenta zeptáte na něco, co v jeho podkladech není, dostanete odpověď. Sebejistou, dobře napsanou a smyšlenou. Bývá to první moment, kdy si vedení firmy řekne, že AI ještě není zralá. Ve skutečnosti je to čekané chování: model odhaduje nejpravděpodobnější pokračování textu, a „nevím\" je v drtivé většině textů, na kterých se učil, málo pravděpodobné pokračování."
+    },
+    {
+      "t": "p",
+      "text": "Dobrá zpráva je, že se to neřeší lepším modelem. Řeší se to tím, jak je kolem něj postavená linka."
+    },
+    { "t": "h2", "text": "Zábrana první: odpovídej jen z toho, co dostaneš" },
+    {
+      "t": "p",
+      "text": "Asistent nemá odpovídat z paměti, ale z dokumentů, které mu linka najde k položené otázce. Odborně se tomu říká RAG. Prakticky to znamená, že se firemní podklady rozřežou na kusy, uloží do databáze s vektorovým indexem (běžně stačí [[postgresql|PostgreSQL]]) a k dotazu se nejdřív vyhledá pět nejrelevantnějších úryvků. Model je pak dostane spolu s instrukcí, že jiný zdroj použít nesmí."
+    },
+    {
+      "t": "p",
+      "text": "Samo o sobě to nestačí, ale posune to problém z „vymyslí si\" na „řekne něco, co v podkladech je, ale nesouvisí\". To už je chyba, kterou jde chytit."
+    },
+    { "t": "h2", "text": "Zábrana druhá: u každé odpovědi ukaž, odkud je" },
+    {
+      "t": "p",
+      "text": "Nejúčinnější věc, jakou jsem u firemních asistentů nasadil, je povinná citace. Každá odpověď musí nést odkaz na konkrétní stránku konkrétního dokumentu. Má to dva efekty. První je, že si člověk může tvrzení ověřit za tři vteřiny. Druhý je zajímavější: model, který ví, že musí ukázat zdroj, si výrazně méně vymýšlí, protože nemá co citovat."
+    },
+    {
+      "t": "note",
+      "k": "Detail, na kterém to stojí",
+      "text": "Citace musí vést na místo v dokumentu, ne na dokument. Odkaz na dvěstěstránkovou směrnici je z hlediska ověřitelnosti totéž jako žádný odkaz."
+    },
+    { "t": "h2", "text": "Zábrana třetí: dovol mu odmítnout" },
+    {
+      "t": "p",
+      "text": "Modely od [[anthropic|Anthropicu]] i [[openai|OpenAI]] umí odpověď odmítnout, ale musí k tomu dostat výslovné svolení a příklad, jak má odmítnutí vypadat. Instrukce typu „když v podkladech odpověď není, napiš, že ji nemáš, a navrhni, koho se zeptat\" zvedne spolehlivost víc než většina ladění promptu."
+    },
+    {
+      "t": "p",
+      "text": "Nefunguje naopak to, co lidé zkoušejí nejčastěji: přidat do zadání větu „nevymýšlej si\". Model nemá jak poznat, že si vymýšlí. Kdyby to poznal, neudělal by to."
+    },
+    { "t": "h2", "text": "Zábrana čtvrtá: měř to na vlastních otázkách" },
+    {
+      "t": "p",
+      "text": "Než asistenta pustíte mezi lidi, sestavte třicet až padesát skutečných otázek, na které znáte správnou odpověď, a nechte si je projet po každé změně. Je to nudná tabulka a je to jediný způsob, jak poznat, že úprava zadání něco zlepšila a něco jiného nerozbila. Bez ní se ladí podle dojmu a po měsíci nikdo neví, jestli je to lepší, nebo horší."
+    },
+    { "t": "h2", "text": "Kdy je to hotové" },
+    {
+      "t": "p",
+      "text": "Nikdy ne na sto procent, a to je v pořádku. Cílem není neomylný stroj, ale asistent, který se v devíti z deseti případů trefí, v desátém řekne, že neví, a u obojího ukáže, odkud to má. Takový nástroj ušetří lidem hledání a nikoho nepřivede do problémů. Neomylnost nemá ani ten kolega, kterého se ptáte teď."
+    }
+  ],
+  "takeaway": "Spolehlivost firemního asistenta nedělá volba modelu, ale čtyři zábrany kolem něj: odpovídat výhradně z dodaných podkladů, povinně citovat konkrétní místo, mít výslovné svolení odmítnout a měřit se na vlastní sadě otázek. Věta „nevymýšlej si\" v zadání nedělá nic.",
+  "faq": [
+    {
+      "q": "Dá se halucinacím zabránit úplně?",
+      "a": "Ne. Jde je srazit na úroveň, kdy je chyba vzácná a hlavně poznatelná, protože u každé odpovědi vidíte zdroj. Proto se asistenti nasazují tam, kde si člověk odpověď může ověřit, a ne tam, kde by na ni přímo navazovala nevratná akce."
+    },
+    {
+      "q": "Kolik dokumentů potřebujeme, aby to dávalo smysl?",
+      "a": "Řádově desítky stačí. Rozhoduje spíš to, jestli jsou aktuální a jestli mezi nimi nejsou dvě verze téhož předpisu. Rozporuplné podklady zhorší výsledek víc než jejich malý počet."
+    },
+    {
+      "q": "Musí ta data opustit firmu?",
+      "a": "Ne nutně. Vektorová databáze i vyhledávání běží u vás, ven odchází jen samotný dotaz s vybranými úryvky, a i to se dá provozovat na vlastním serveru. Rozhoduje citlivost dat a rozpočet, ne technická nemožnost."
+    }
+  ]
+}

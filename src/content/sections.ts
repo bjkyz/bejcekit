@@ -75,153 +75,150 @@ export const SECTIONS: Section[] = [
     kicker: '[ 00 / IDENT ]',
     plateCode: 'IDENT',
     plateNum: '00',
-    headline: 'Weby, které vydělávají. IT, které nespadne.',
+    headline: 'Software, který pracuje za vás.',
     /**
-     * ★ HERO SE ČTE NA TELEFONU, NE NA 27" MONITORU. Odstavec měl šest vět
-     *   a na 360px displeji z něj bylo DEVĚT ŘÁDKŮ — první, co návštěvník uvidí,
-     *   byla zeď textu, a tlačítka se odsunula pod spodní hranu obrazovky.
-     *   Fakta se neztratila, jen se přesunula do odrážek: ty se dají SKENOVAT,
-     *   kdežto odstavec se musí přečíst celý, nebo vůbec.
+     * ★ HERO SE ČTE NA TELEFONU, NE NA 27" MONITORU. Tři věty, ne šest:
+     *   na 360px displeji je z každé věty navíc řádek a tlačítka se odsouvají
+     *   pod spodní hranu obrazovky. Fakta patří do `specs` na patě, ty se dají
+     *   SKENOVAT — odstavec se musí přečíst celý, nebo vůbec.
+     *
+     * ★★ NABÍDKA JE POSTAVENÁ NA PROBLÉMU, NE NA TECHNOLOGII. Zákazník neví,
+     *   jestli potřebuje agenta, API nebo databázi, a vědět to nemá. Ví jen,
+     *   co mu bere čas. Proto hero říká „řekněte mi, co vás zdržuje", ne
+     *   výčet zkratek — ten je až ve stacku o dvě obrazovky níž.
      */
-    /* „hodiny týdně", ne jen „hodiny": stejný nárok, jaký AI sekce dokládá
-       propočtem („ušetří hodiny každý týden") — konkrétní číslo se pamatuje,
-       vágní ne. Žádný nový slib, jen dřívější slib řečený přesně. */
     body:
-      'Jsem Jiří Bejček, IT a AI inženýr. Stavím weby, které Google najde a zákazník neopustí. Nasazuji AI jen tam, kde ušetří hodiny týdně. A držím servery v chodu, aby vás výpadek nestál tržby.',
+      'Jsem Jiří Bejček. Navrhuji a stavím AI systémy, automatizace a software na míru: od prvního nápadu po produkt, který firma opravdu používá. Nemusíte vědět, jestli potřebujete agenta, API nebo databázi. Stačí říct, co vám dnes bere čas.',
     bullets: [],
-    /* Týž obsah, který tu dřív byl jako tři odrážky uprostřed sloupce.
-       Proč se přestěhoval na patu obrazovky, viz `specs` v rozhraní výš. */
     specs: [
-      { k: 'Jeden inženýr, ne agentura', v: 'Mluvíte přímo s tím, kdo tu práci dělá a kdo za ni ručí.' },
+      { k: 'Jeden inženýr, ne agentura', v: 'Mluvíte přímo s tím, kdo to staví a kdo za to ručí.' },
       { k: 'Pevná cena a termín', v: 'Písemně, ještě než začnu.' },
       { k: 'Odpovím do 24 hodin', v: 'I o víkendu. Celé Česko, remote i u vás.' },
     ],
     status: 'Volná kapacita: zbývá 1 místo',
-    cta: { label: 'Chci nezávaznou nabídku', href: '#kontakt' },
+    cta: { label: 'Pojďme vytvořit něco chytrého', href: '#kontakt' },
     /**
-     * ★ DRUHÉ TLAČÍTKO VEDE NA PROJEKTY, NE NA SLUŽBY.
-     *   „Prohlédnout služby" nabízelo přesně to, co udělá scroll dolů i pravá
-     *   lišta, tedy třetí cestu k témuž. Odkaz na reference je oproti tomu jediný
-     *   způsob, jak se z úvodu dostat na /projekty — a na telefonu ten úplně
-     *   jediný, protože odkazy v horní navigaci jsou pod 800 px schované.
-     *   Hotová práce je navíc silnější argument než seznam slibů pod ní.
+     * ★ DRUHÉ TLAČÍTKO VEDE NA SLUŽBY, NE NA SEKCE POD SEBOU.
+     *   Scroll dolů i pravá lišta nabízejí totéž co odkaz na sekci, takže by
+     *   to byla třetí cesta k témuž. `/sluzby` je oproti tomu obsah, který se
+     *   na šest stěn krychle nevešel — a na telefonu je tohle jediná cesta,
+     *   jak se k němu z úvodu dostat (odkazy v liště jsou pod 800 px skryté).
      */
-    ghostCta: { label: 'Prohlédnout projekty', href: '/projekty' },
+    ghostCta: { label: 'Co všechno stavím', href: '/sluzby' },
     align: 'center',
     subsystem: 'IDENTIFIKACE',
   },
   {
-    id: 'web',
-    kicker: '[ 01 / WEB ]',
-    plateCode: 'WEB',
+    id: 'ai',
+    kicker: '[ 01 / AI ]',
+    plateCode: 'AI',
     plateNum: '01',
-    headline: 'Nahoře ve vyhledávání. Bez placení za klik.',
+    headline: 'AI, která skutečně pracuje.',
     body:
-      'Zákazník, který vás najde ve vyhledávání, nestojí nic. Zákazník z reklamy stojí pokaždé znovu. Proto SEO nedělám jako přílepek na konci, ale od prvního řádku kódu. Čtyři důvody, proč to funguje:',
+      'AI nemusí být chatbot na webu. Může číst vaše dokumenty, hledat v interních znalostech a sama spouštět procesy. Stavím ji tak, aby odpovídala z vašich dat a u každé odpovědi ukázala zdroj. A nejdřív spočítám, jestli se to vrátí.',
     bullets: [
-      'Rychlost je rankovací faktor i konverzní páka. Core Web Vitals v zeleném, ne v oranžové.',
-      'Sémantické HTML, strukturovaná data, sitemap, čisté URL. Google nemusí hádat, o čem web je.',
-      'Google i Seznam. Seznam pořád drží kus českého trhu a většina šablon ho ignoruje.',
-      'Search Console, pozice a konverze od prvního dne. Vidíte, jestli se investice vrací.',
+      'Asistenti, kteří znají vaše dokumenty a procesy. Odpovídají z nich, ne z internetu.',
+      'Vytěžování smluv, faktur, objednávek a životopisů. Data padají rovnou do systému.',
+      'AI agenti, kteří úkol nejen popíšou, ale provedou. Nástroje MCP a orchestrace.',
+      'Propočet návratnosti dřív, než napíšu první řádek. Když se nevrátí, zakázku nevezmu.',
     ],
     /**
-     * Nejsilnější argument webu: ověřitelný důkaz místo tvrzení.
-     *
-     * ★ ČÍSLO MUSÍ SEDĚT S REALITOU, JINAK JE TO NEJDRAŽŠÍ VĚTA NA STRÁNCE.
-     *   Stálo tu „97 / 100 / 100 / 100" a bylo to zastaralé oběma směry: desktop
-     *   mezitím jede na plný počet, mobil na 80. Návštěvník, kterého tahle věta
-     *   vyzve „změřte si to", si to změří — a když mu vyjde něco jiného, ztratí
-     *   důvěru ve VŠECHNO ostatní na webu, protože zrovna tohle šlo ověřit.
-     *   Proto se říká i to, na čem se měřilo. Naměřeno lokálně, 3 běhy:
-     *   desktop 100/100/100/100, mobil perf 80–82 (LCP 3.8 s, TBT 240–290 ms, CLS 0).
-     *   ★ Po každé změně, která sáhne na výkon, tohle číslo přeměřit.
+     * Nejsilnější argument téhle sekce: ověřitelný důkaz místo tvrzení.
+     * ★ MUSÍ ZŮSTAT PRAVDA. Žurnál na `/clanky` opravdu píše denní linka
+     *   postavená na Claude (viz api/cron/publish-article.ts) a zdroje si
+     *   vymyslet nemůže, protože nedostane možnost napsat URL. Kdyby se ta
+     *   linka vypnula, tahle věta musí ze stránky zmizet jako první.
      */
     proof:
-      'Důkaz: web, který právě čtete, má na desktopu Lighthouse 100 / 100 / 100 / 100. Neberte to ode mě, změřte si to.',
+      'Důkaz: žurnál na tomhle webu píše každý den AI linka, kterou jsem postavil. Zdroje si nevymýšlí, protože k tomu nemá příležitost. Přečtěte si, jak je udělaná.',
     deliverable: {
       label: 'Co dostanete',
-      text: 'Nasazený běžící web, Core Web Vitals v zeleném, napojenou Search Console a měsíční report pozic a poptávek.',
+      text: 'Propočet návratnosti před stavbou, běžící řešení napojené na vaše systémy a měsíční report ušetřených hodin.',
     },
-    stack: ['SEO', 'Core Web Vitals', 'Search Console', 'React', 'TypeScript', 'Node.js'],
-    cta: { label: 'Chci web, který vydělává', href: '#kontakt' },
+    stack: ['Anthropic API', 'OpenAI API', 'RAG', 'MCP', 'Vektorová DB', 'Python'],
+    cta: { label: 'Chci nasadit AI', href: '#kontakt' },
+    ghostCta: { label: 'Číst žurnál', href: '/clanky' },
     align: 'left',
-    subsystem: 'WEB & SEO',
+    subsystem: 'AI SYSTÉMY',
   },
   {
-    id: 'infra',
-    kicker: '[ 02 / INFRA ]',
-    plateCode: 'INFRA',
+    id: 'automatizace',
+    kicker: '[ 02 / AUTO ]',
+    plateCode: 'AUTO',
     plateNum: '02',
-    headline: 'Servery, které vás nevzbudí ve tři ráno.',
+    headline: 'Automatizujte to, co se opakuje.',
     body:
-      'Převezmu vaše IT, zdokumentuju ho a vyházím z něj tiché miny. Zálohu, kterou nikdo nikdy nezkusil obnovit, za zálohu nepovažuji. O problému vím dřív, než vám zavolá zákazník. A hlavně: když se něco stane, zvedne telefon člověk, ne hlasová schránka.',
+      'Kopírování dat, e-maily, tabulky, reporty, přepisování informací mezi systémy. Když člověk dělá pořád totéž, dá se to skoro vždycky předat stroji. Propojím AI, API, databáze a vaše nástroje do jednoho workflow, které běží, i když se nikdo nedívá.',
     bullets: [
-      'Monitoring a alerting 24/7. Alert padá mně na telefon, i v noci a o víkendu.',
-      'Obnovení ze zálohy testujeme každé čtvrtletí nanečisto. Ne jednou za rok na papíře.',
-      'Proxmox, Linux, Windows Server, Docker. Servery a virtualizace bez pokusů na živém provozu.',
-      'Sítě, VPN, firewall, Microsoft 365 a koncové stanice. Jedno číslo na celé IT.',
-    ],
-    deliverable: {
-      label: 'Co dostanete',
-      text: 'Pasport infrastruktury, všechny přístupy ve svých rukou a reakci do 4 hodin v pracovní době.',
-    },
-    stack: ['Proxmox', 'Linux', 'Docker', 'Microsoft 365', 'WireGuard', 'Zabbix'],
-    cta: { label: 'Chci předat IT do správy', href: '#kontakt' },
-    align: 'right',
-    subsystem: 'INFRASTRUKTURA',
-  },
-  {
-    id: 'ai',
-    kicker: '[ 03 / AI ]',
-    plateCode: 'AI',
-    plateNum: '03',
-    headline: 'Většina AI projektů se nevyplatí.',
-    body:
-      'Ty zbylé ušetří hodiny každý týden. Rozdíl mezi nimi se pozná propočtem, ne prezentací. Nejdřív spočítám, kolik hodin měsíčně to sundá z lidí a co bude stát provoz. Teprve pak stavím. Když se to nevrátí, zakázku nevezmu.',
-    bullets: [
-      'AI asistent odpovídá z vašich dokumentů a dat, ne z internetu (RAG). Žádné vymýšlení.',
-      'Faktury, e-maily a formuláře bez ručního přepisování. Data padají rovnou do systému.',
-      'Obsah pro SEO ve velkém, řízený daty. Články a popisky, které by ručně stály stovky hodin.',
+      'Dřív: e-mail, člověk, otevřít dokument, přepsat data, zkontrolovat, uložit.',
+      'Teď: e-mail, extrakce, kontrola, databáze, hotovo. Člověk jen schvaluje výjimky.',
+      'Míň ruční práce, míň chyb a stopa o tom, co se kdy stalo.',
       'n8n, API, webhooky, CRM. Propojím systémy, které spolu dnes nemluví.',
     ],
     deliverable: {
       label: 'Co dostanete',
-      text: 'Propočet návratnosti ještě před stavbou, běžící workflow a měsíční report ušetřených hodin.',
+      text: 'Běžící workflow, dokumentaci k němu a měsíční report toho, kolik hodin sundalo z lidí.',
     },
-    stack: ['n8n', 'OpenAI API', 'Anthropic API', 'Python', 'Webhooks', 'Vektorová DB'],
+    stack: ['n8n', 'API', 'Webhooky', 'PostgreSQL', 'Node.js', 'Cron'],
     cta: { label: 'Chci zautomatizovat proces', href: '#kontakt' },
+    align: 'right',
+    subsystem: 'AUTOMATIZACE',
+  },
+  {
+    id: 'software',
+    kicker: '[ 03 / SOFTWARE ]',
+    plateCode: 'SOFTWARE',
+    plateNum: '03',
+    headline: 'Když hotové řešení nestačí.',
+    body:
+      'Nemusíte ohýbat svůj proces podle softwaru. Stavím interní nástroje, klientské portály, dashboardy i SaaS produkty přesně podle toho, jak pracujete. Od MVP, které ověří nápad, po produkt připravený na tisíce zákazníků.',
+    bullets: [
+      'Interní nástroje a portály: dokumenty, data a workflow na jednom místě.',
+      'SaaS od MVP po produkci: účty, předplatné, limity, platby, administrace.',
+      'Dashboardy a reporty: data převedená do rozhraní, ve kterém se dá rozhodovat.',
+      'Weby a webové aplikace, které jsou rychlé, protože se tak stavěly od začátku.',
+    ],
+    deliverable: {
+      label: 'Co dostanete',
+      text: 'Nasazenou aplikaci, přístupy i kód ve svých rukou a plán dalšího rozvoje. Produkt nekončí prvním nasazením.',
+    },
+    stack: ['Next.js', 'React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Vercel'],
+    cta: { label: 'Chci postavit software', href: '#kontakt' },
+    ghostCta: { label: 'Prohlédnout projekty', href: '/projekty' },
     align: 'left',
-    subsystem: 'AI & AUTOMATIZACE',
+    subsystem: 'SOFTWARE NA MÍRU',
   },
   {
     id: 'proces',
     kicker: '[ 04 / PROCES ]',
     plateCode: 'PROCES',
     plateNum: '04',
-    headline: 'Čtyři kroky. Žádné překvapení na faktuře.',
+    headline: 'Od nápadu k fungujícímu produktu.',
     body:
-      'Rozsah, termín a cena jsou na papíře dřív, než napíšu první řádek kódu. Pak pracuji v krátkých iteracích: každý týden vidíte postup, ne slib, že postup bude. Když se rozsah změní, znáte cenu dřív, než se do změny pustím.',
+      'Nemusíte mít technické zadání. Stačí věta „tohle děláme ručně" nebo „tohle chceme vytvořit". Rozsah, termín a cena jsou na papíře dřív, než napíšu první řádek kódu. Když se rozsah změní, znáte cenu dřív, než se do změny pustím.',
     bullets: [],
+    /* ★ ČTYŘI KROKY, NE PĚT. Sekce se musí vejít do 100svh i na notebooku
+       1440×900 (viz --sp-* v tokens.css); pátá dlaždice ji přetáhne a spodek
+       s tlačítkem se uřízne. „Nasazení" a „rozvoj" jsou navíc pro klienta
+       jedna fáze: běží to a dělá se to dál. */
     steps: [
       {
         title: 'Analýza',
-        text: 'Půlhodina hovoru zdarma. Vytáhnu z vás, co skutečně potřebujete. A hlavně co nepotřebujete.',
+        text: 'Půlhodina hovoru zdarma. Vytáhnu z vás, co potřebujete. A hlavně co nepotřebujete.',
       },
       {
         title: 'Návrh',
-        text: 'Rozsah, harmonogram a pevná cena. Písemně, před začátkem. Žádné „to se uvidí“.',
+        text: 'Řešení, architektura a pevná cena. Písemně, před začátkem. Žádné „to se uvidí“.',
       },
       {
-        title: 'Dodávka',
+        title: 'Stavba',
         text: 'Nasazuji průběžně. Vidíte běžící verzi, ne slidy o běžící verzi.',
       },
       {
-        title: 'Provoz',
-        text: 'Monitoring, zálohy, další rozvoj. Po vystavení faktury nemizím.',
+        title: 'Provoz a rozvoj',
+        text: 'Monitoring, úpravy, další funkce. Po vystavení faktury nemizím.',
       },
     ],
-    /* Kratší než „Domluvit úvodní hovor zdarma": ta se na 390px displeji lámala
-       uvnitř tlačítka do dvou řádků a šipka zůstala viset vedle prázdna. */
     cta: { label: 'Domluvit hovor zdarma', href: '#kontakt' },
     align: 'right',
     subsystem: 'PRACOVNÍ POSTUP',
@@ -231,9 +228,9 @@ export const SECTIONS: Section[] = [
     kicker: '[ 05 / KONTAKT ]',
     plateCode: 'KONTAKT',
     plateNum: '05',
-    headline: 'Napište mi. Do 24 hodin víte, na čem jste.',
+    headline: 'Řekněte mi, co potřebujete vyřešit.',
     body:
-      'Popište problém vlastními slovy, technickou část si přeložím sám. Žádný formulář o dvanácti polích a žádné čekání na obchodníka. A když na váš problém nejsem ten pravý, řeknu vám to rovnou a pošlu vás za někým, kdo je.',
+      'Nemusíte znát technologii, to je moje práce. Popište problém vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý, co to bude stát a kdy to bude hotové. A když ten pravý nejsem, řeknu vám to rovnou a pošlu vás za někým, kdo je.',
     bullets: [],
     align: 'center',
     subsystem: 'KONTAKT',
@@ -273,5 +270,39 @@ export const CONTACT_CHANNELS: {
 ]
 
 export const GITHUB = 'https://github.com/bjkyz'
+
+/**
+ * ═══════════ PODSTRÁNKY V NAVIGACI ═══════════
+ *
+ * ★ JEDEN SEZNAM PRO TŘI NAVIGACE. Úvod (`hud/Hud.tsx`), projekty i žurnál
+ *   (`ui/PageShell.tsx`) vykreslují tytéž odkazy. Dokud byla podstránka jedna,
+ *   byl seznam opsaný na dvou místech a šlo to; při přidání žurnálu by se
+ *   opisoval potřetí a první, co by se stalo, je že by někde chyběl.
+ *
+ * `label` je verzálkový štítek do lišty, `title` věta do patičky — je to týž
+ * cíl řečený dvěma hlasy, ne dvě různé věci.
+ *
+ * ★★ VÍC POLOŽEK SEM NEPŘIDÁVEJ BEZ ZMĚŘENÍ. Lišta nese ještě tři služby
+ *   (`SECTIONS.slice(1, 4)`), značku a tlačítko; na 1280px displeji je to
+ *   napjaté a šestá položka by řádek přetáhla přes značku. Kdyby přibyla další
+ *   stránka, ustoupí jedna služba — na ty se dá skočit i pravou lištou
+ *   a scrollem, kdežto na jinou stránku se jinak nedostaneš.
+ */
+export const NAV_PAGES: { label: string; title: string; href: string }[] = [
+  { label: 'SLUŽBY', title: 'Služby', href: '/sluzby' },
+  { label: 'PROJEKTY', title: 'Projekty', href: '/projekty' },
+  { label: 'ŽURNÁL', title: 'Žurnál', href: '/clanky' },
+]
+
+/**
+ * ★★ KOLIK SEKCÍ ÚVODU SE VEJDE DO LIŠTY VEDLE PODSTRÁNEK.
+ *
+ * Lišta nese značku, odkazy a tlačítko. S třemi podstránkami zbývá místo na
+ * DVĚ sekce, ne tři: šestá položka se na 1280px displeji začne tlačit ke značce.
+ * Vypadává SOFTWARE — schválně, protože ten má na `/sluzby` tři vlastní skupiny
+ * (interní nástroje, SaaS, web), kdežto na AI a automatizaci vede jinak jen
+ * scroll. Na všech šest stěn se dá pořád skočit pravou lištou.
+ */
+export const NAV_SECTION_COUNT = 2
 
 export const FACE_COUNT = SECTIONS.length

@@ -306,8 +306,11 @@ Haiku 4.5 nezná `effort` (vrátí 400), Opus 5 nezná `budget_tokens`. Parametr
 proto skládá `modelOptions()` podle jména modelu – když přidáváš další, přidej
 ho do té větve, jinak vydávání tiše přestane fungovat.
 
-**★ Doba běhu.** Haiku se vejde do 60 s (strop tarifu Hobby). Silnější model
-počítej v minutách a potřebuje tarif Pro (`maxDuration = 300`).
+**★ Doba běhu je 60 s a je to strop tarifu Hobby.** Vyšší `maxDuration`
+nasazením projde, ale funkce se pak při každém zavolání složí ještě před
+vlastním kódem a Vercel vrátí holé `FUNCTION_INVOCATION_FAILED` — chybu, ze
+které se příčina nepozná. Haiku se do 60 s vejde s rezervou; silnější model
+potřebuje tarif Pro **a zároveň** zvednout tohle číslo.
 
 ### Rozcestníky témat vznikají samy
 

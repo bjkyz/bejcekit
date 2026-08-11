@@ -40,16 +40,21 @@
  *                       v hlavičce Authorization u naplánovaných běhů
  *   JOURNAL_MODEL       nepovinné, přepíše model (viz MODEL níž)
  *
- * ★ DÉLKA BĚHU. `maxDuration` je 300 s (tarif Pro); na Hobby je strop 60 s.
- *   Výchozí Haiku 4.5 se do šedesáti vteřin vejde s rezervou. Když se
- *   `JOURNAL_MODEL` přepne na silnější model, počítej s několika minutami —
- *   a na Hobby se pak vydání může utnout uprostřed.
+ * ★★ DÉLKA BĚHU JE 60 s, A JE TO STROP TARIFU HOBBY, NE ODHAD.
+ *   Původně tu bylo 300 s (co dovolí Pro). Nasazení tím projde, ale funkce se
+ *   pak při KAŽDÉM zavolání složí ještě před vlastním kódem a Vercel vrátí
+ *   holé `FUNCTION_INVOCATION_FAILED` — tedy chybu, ze které se příčina nepozná
+ *   a která vypadá jako rozbitý kód. Šedesát vteřin platí na obou tarifech.
+ *
+ *   Výchozí Haiku 4.5 se do nich vejde s rezervou. Kdyby se `JOURNAL_MODEL`
+ *   přepnul na silnější model, počítej s minutami: pak je potřeba tarif Pro
+ *   A ZÁROVEŇ tohle číslo zvednout. Jedno bez druhého nestačí.
  */
 import Anthropic from '@anthropic-ai/sdk'
 import { ENTITIES } from '../../src/content/entities'
 import { TOPICS } from '../../src/content/topics'
 
-export const maxDuration = 300
+export const maxDuration = 60
 
 /**
  * ★ MODEL. Haiku 4.5 je nejrychlejší a nejlevnější člen rodiny a na tenhle

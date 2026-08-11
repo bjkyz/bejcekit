@@ -50,7 +50,6 @@
  *   přepnul na silnější model, počítej s minutami: pak je potřeba tarif Pro
  *   A ZÁROVEŇ tohle číslo zvednout. Jedno bez druhého nestačí.
  */
-import Anthropic from '@anthropic-ai/sdk'
 import { ENTITIES } from '../../src/content/entities'
 import { TOPICS } from '../../src/content/topics'
 
@@ -464,12 +463,34 @@ async function commit(slug: string, json: string, title: string): Promise<string
 
 /* ═══════════ VSTUPNÍ BOD ═══════════ */
 
-export default async function handler(req: Request): Promise<Response> {
-  const json = (status: number, body: unknown) =>
-    new Response(JSON.stringify(body, null, 2), {
+/**
+ * ★★ HANDLER ZVLÁDNE OBĚ KONVENCE, A NENÍ TO OPATRNICTVÍ.
+ *
+ * Serverless platformy volají funkci buď webovým způsobem (`Request` dovnitř,
+ * `Response` ven), nebo nodovským (`req`, `res`). Který z nich přijde, se pozná
+ * až za běhu — a když se to netrefí, vypadá to takhle: `req.headers.get` není
+ * funkce, vyletí TypeError ještě před vlastní logikou a odpovědí je holé
+ * `FUNCTION_INVOCATION_FAILED` bez jediného slova o příčině. Ladit to na dálku
+ * znamená hádat, protože se k logům nemusí nikdo dostat.
+ *
+ * Rozpoznání stojí dva řádky a odstraňuje celou tu třídu chyb natrvalo.
+ */
+type NodeRes = { status: (n: number) => NodeRes; json: (b: unknown) => unknown }
+
+export default async function handler(req: unknown, res?: NodeRes): Promise<Response | unknown> {
+  const headers = (req as { headers?: unknown } | null)?.headers
+  const auth =
+    headers && typeof (headers as Headers).get === 'function'
+      ? (headers as Headers).get('authorization')
+      : ((headers as Record<string, string> | undefined)?.authorization ?? null)
+
+  const json = (status: number, body: unknown) => {
+    if (res && typeof res.status === 'function') return res.status(status).json(body)
+    return new Response(JSON.stringify(body, null, 2), {
       status,
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     })
+  }
 
   /* ★ AUTORIZACE JE POVINNÁ. Bez ní je tohle veřejný endpoint, který za cizí
      peníze volá jazykový model a commituje do repozitáře. Vercel posílá
@@ -478,7 +499,7 @@ export default async function handler(req: Request): Promise<Response> {
      endpoint je horší než nefunkční. */
   const secret = process.env.CRON_SECRET
   if (!secret) return json(500, { error: 'CRON_SECRET není nastavený' })
-  if (req.headers.get('authorization') !== `Bearer ${secret}`) return json(401, { error: 'Neautorizováno' })
+  if (auth !== `Bearer ${secret}`) return json(401, { error: 'Neautorizováno' })
   if (!process.env.ANTHROPIC_API_KEY) return json(500, { error: 'ANTHROPIC_API_KEY není nastavený' })
   if (!process.env.GITHUB_TOKEN) return json(500, { error: 'GITHUB_TOKEN není nastavený' })
 
@@ -486,6 +507,13 @@ export default async function handler(req: Request): Promise<Response> {
     const [items, existing] = await Promise.all([collectItems(), existingSlugs()])
     if (items.length < 5) return json(503, { error: `z kanálů přišlo jen ${items.length} položek, vydání se přeskakuje` })
 
+    /* ★★ SDK SE NAČÍTÁ AŽ TADY, NE NA VRCHOLU MODULU. Dva důvody, oba praktické:
+       • Kdyby se balíček v nasazení nerozbalil, selže import ještě před prvním
+         řádkem handleru — a serverless platforma na to odpoví holým
+         `FUNCTION_INVOCATION_FAILED` bez jediného slova o příčině. Uvnitř `try`
+         se z téhle situace stane čitelná hláška v odpovědi.
+       • Odmítnutí neautorizovaného požadavku pak nestojí načtení celého SDK. */
+    const { default: Anthropic } = await import('@anthropic-ai/sdk')
     const client = new Anthropic()
 
     /* ★ STREAMOVANÝ POŽADAVEK. Při `max_tokens` v desítkách tisíc hrozí

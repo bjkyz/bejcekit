@@ -115,6 +115,43 @@ function journalDev(): Plugin {
 }
 
 /**
+ * ═══════════ ANGLICKÝ KOŘEN V DEVU A V NÁHLEDU ═══════════
+ *
+ * ★★★ `/en` BEZ LOMÍTKA VRACELO ČESKOU STRÁNKU, A NEBYLO TO POZNAT.
+ *
+ * Vite (dev i `preview`) umí adresář naservírovat jen s lomítkem: `/en/` najde
+ * `en/index.html`, kdežto `/en` propadne na SPA fallback a vrátí KOŘENOVÝ
+ * `index.html` — tedy českou stránku pod anglickou adresou, s HTTP 200
+ * a bez jediné chybové hlášky. A protože přepínač jazyka míří na `/en`
+ * (kanonický tvar, `ROUTES` v src/lib/lang.ts), znamenalo to, že kliknutí
+ * na „EN" na úvodu v devu NIC NEUDĚLALO.
+ *
+ * Na Vercelu je to v pořádku: `cleanUrls: true` servíruje `dist/en/index.html`
+ * na `/en` a `trailingSlash: false` naopak `/en/` přesměruje na `/en`. Právě
+ * proto je ten rozdíl zákeřný — v produkci by fungoval a laděním v devu by se
+ * hledala chyba, která tam není.
+ *
+ * ★ TÁŽ ZÁSADA JAKO U `journalDev()` A `siteOrigin()` VÝŠ: dev se musí chovat
+ *   jako produkce, jinak se testuje něco jiného, než se nasazuje.
+ * ★ Musí to platit i pro `vite preview` (`configurePreviewServer`) — náhled je
+ *   to, na čem se měří Lighthouse a dělají snímky.
+ */
+function enRootDev(): Plugin {
+  const rewrite = (server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) => {
+    server.middlewares.use((req, _res, next) => {
+      const [path, query] = (req.url ?? '').split('?')
+      if (path === '/en' || path === '/en/') req.url = '/en/index.html' + (query ? `?${query}` : '')
+      next()
+    })
+  }
+  return {
+    name: 'en-root',
+    configureServer: rewrite,
+    configurePreviewServer: rewrite,
+  }
+}
+
+/**
  * ★ CSS SE INLINUJE DO HTML. Celý stylesheet má ~6 kB gz — MÉNĚ než jedna
  * síťová otočka na pomalém mobilu. Jako samostatný <link> je render-blokující:
  * prohlížeč na něj čeká s prvním vykreslením ~150–300 ms, které HTML o 7 kB
@@ -194,7 +231,7 @@ export default defineConfig({
   /* ★ siteOrigin PŘED inlineCss. Oba sahají na dist/index.html v closeBundle;
      siteOrigin ho ale mění přes transformIndexHtml (tedy dřív, než se soubor
      vůbec zapíše), takže inlineCss už čte hotovou adresu a nemá co přepsat. */
-  plugins: [react(), siteOrigin(), journalDev(), inlineCss()],
+  plugins: [react(), siteOrigin(), journalDev(), enRootDev(), inlineCss()],
   // Keeps the dev server from re-optimising (and full-reloading) mid-session.
   optimizeDeps: {
     include: ['three', '@react-three/fiber', '@react-three/drei', 'postprocessing'],

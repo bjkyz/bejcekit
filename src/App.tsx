@@ -4,7 +4,8 @@ import Hud from './hud/Hud'
 import Section from './ui/Section'
 import Preloader from './ui/Preloader'
 import SceneBoundary from './ui/SceneBoundary'
-import { SECTIONS } from './content/sections'
+import { sections } from './content/i18n'
+import { t } from './lib/lang'
 import { detectTier } from './lib/quality'
 import { useReducedMotion } from './lib/hooks'
 import { initScroll } from './lib/scroll'
@@ -171,7 +172,7 @@ export default function App() {
   return (
     <>
       <a className="skip-link" href="#obsah">
-        Přeskočit na obsah
+        {t({ cs: 'Přeskočit na obsah', en: 'Skip to content' })}
       </a>
 
       <div className="bg-field" aria-hidden="true" />
@@ -193,7 +194,7 @@ export default function App() {
             a zbytek po kouskách s yieldy mezi úlohami. Server přitom fallback
             nikdy nekreslí — renderToString obsah vyrenderuje synchronně a při
             hydrataci zůstává serverové HTML na místě, dokud na sekci nedojde. */}
-        {SECTIONS.map((s, i) => {
+        {sections().map((s, i) => {
           const section = (
             <Section key={s.id} s={s} index={i} reduced={reduced} hasScene={showScene} dragRef={dragRef} />
           )

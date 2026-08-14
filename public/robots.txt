@@ -10,6 +10,8 @@ Disallow: /api/
 # Vyhledávače si nemají číst parametry stavu formuláře jako samostatné stránky.
 Disallow: /kontakt?odeslano=
 Disallow: /kontakt?chyba=
+Disallow: /en/contact?odeslano=
+Disallow: /en/contact?chyba=
 
 # ★ AI CRAWLERY PUŠTĚNÉ VĚDOMĚ. Web má `llms.txt` (rozcestník pro jazykové
 #   modely) a žurnál o AI, který sám AI píše — zavírat před nimi dveře by bylo

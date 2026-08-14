@@ -1,4 +1,5 @@
-import { CERTIFICATE as C } from '../content/services'
+import { certificate } from '../content/i18n'
+import { t } from '../lib/lang'
 import Icon from './Icons'
 
 /**
@@ -18,6 +19,7 @@ import Icon from './Icons'
  *   podkladem: dokument má vypadat jako dokument položený na stole.
  */
 export default function Certificate() {
+  const C = certificate()
   return (
     <figure className="cert">
       <a className="cert__shot" href={C.pdf} target="_blank" rel="noreferrer">
@@ -27,16 +29,19 @@ export default function Certificate() {
           height={C.imageH}
           loading="lazy"
           decoding="async"
-          alt={`Certifikát ${C.title} vydaný ${C.issuer} pro Jiřího Bejčka, 20 vyučovacích hodin.`}
+          alt={t({
+            cs: `Certifikát ${C.title} vydaný ${C.issuer} pro Jiřího Bejčka, 20 vyučovacích hodin.`,
+            en: `${C.title} certificate issued by ${C.issuer} to Jiří Bejček, 20 hours of instruction.`,
+          })}
         />
         <span className="cert__open label">
           <Icon name="external" size={13} />
-          Otevřít certifikát
+          {t({ cs: 'Otevřít certifikát', en: 'Open certificate' })}
         </span>
       </a>
 
       <figcaption className="cert__body">
-        <p className="cert__kicker label">Doložená kvalifikace</p>
+        <p className="cert__kicker label">{t({ cs: 'Doložená kvalifikace', en: 'Verified credential' })}</p>
         <h3 className="cert__title">{C.title}</h3>
         <p className="cert__issuer label">{C.issuer}</p>
 
@@ -49,7 +54,7 @@ export default function Certificate() {
           ))}
         </ul>
 
-        <p className="cert__lead">Co kurz obsahoval:</p>
+        <p className="cert__lead">{t({ cs: 'Co kurz obsahoval:', en: 'What the course covered:' })}</p>
         <ul className="cert__topics">
           {C.topics.map((t) => (
             <li key={t}>{t}</li>

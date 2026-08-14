@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  CONTACT_CHANNELS_PAGE,
-  CONTACT_ENDPOINT,
-  CONTACT_FAQ,
-  CONTACT_PATH,
-  HONEYPOT_FIELD,
-  INQUIRY_KINDS,
-  LIMITS,
-  WHAT_HAPPENS,
-} from './content/contact'
+import { CONTACT_ENDPOINT, CONTACT_PATH, HONEYPOT_FIELD, LIMITS } from './content/contact'
+import { contactChannelsPage, contactFaq, inquiryKinds, whatHappens } from './content/i18n'
 import { EMAIL, WHATSAPP } from './content/sections'
+import { getLang, isEn, localPath, t } from './lib/lang'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import Icon from './ui/Icons'
@@ -37,15 +30,35 @@ import { PageFooter, PageNav } from './ui/PageShell'
 
 type Status = 'idle' | 'sending' | 'ok' | 'error'
 
-/** Chybové hlášky z URL (verze bez JS) na text. Klíče posílá `api/contact.ts`. */
-const URL_ERRORS: Record<string, string> = {
-  jmeno: 'Napište prosím své jméno.',
-  email: 'Tahle adresa nevypadá platně.',
-  zprava: `Napište prosím aspoň ${LIMITS.message.min} znaků, ať vím, o co jde.`,
-  limit: 'Zpráv z jedné adresy přišlo moc. Zkuste to za chvíli, nebo napište přímo.',
-  konfigurace: 'Formulář teď není nastavený. Napište mi prosím přímo na e-mail nebo WhatsApp.',
-  odeslani: 'Zprávu se nepodařilo odeslat. Zkuste to prosím znovu, nebo napište na WhatsApp.',
-  obecna: 'Něco se pokazilo. Zkuste to prosím znovu, nebo napište přímo.',
+/**
+ * Chybové hlášky z URL (verze bez JS) na text. Klíče posílá `api/contact.ts`.
+ *
+ * ★★ KLÍČE ZŮSTÁVAJÍ ČESKÉ I V ANGLICKÉ VERZI (`?chyba=jmeno`). Je to protokol
+ *   mezi funkcí a stránkou, ne text pro člověka — a `api/contact.ts` se schválně
+ *   na nic neimportuje (viz jeho hlavička), takže každý přejmenovaný klíč je
+ *   dvojí změna na dvou místech, která se dřív nebo později rozejde. Překládá
+ *   se HLÁŠKA, ne klíč.
+ */
+function urlErrors(): Record<string, string> {
+  return isEn()
+    ? {
+        jmeno: 'Please enter your name.',
+        email: "That address doesn't look valid.",
+        zprava: `Please write at least ${LIMITS.message.min} characters so I know what this is about.`,
+        limit: 'Too many messages came from one address. Try again in a bit, or reach me directly.',
+        konfigurace: "The form isn't set up right now. Please email me or message me on WhatsApp.",
+        odeslani: "The message couldn't be sent. Please try again, or message me on WhatsApp.",
+        obecna: 'Something went wrong. Please try again, or reach me directly.',
+      }
+    : {
+        jmeno: 'Napište prosím své jméno.',
+        email: 'Tahle adresa nevypadá platně.',
+        zprava: `Napište prosím aspoň ${LIMITS.message.min} znaků, ať vím, o co jde.`,
+        limit: 'Zpráv z jedné adresy přišlo moc. Zkuste to za chvíli, nebo napište přímo.',
+        konfigurace: 'Formulář teď není nastavený. Napište mi prosím přímo na e-mail nebo WhatsApp.',
+        odeslani: 'Zprávu se nepodařilo odeslat. Zkuste to prosím znovu, nebo napište na WhatsApp.',
+        obecna: 'Něco se pokazilo. Zkuste to prosím znovu, nebo napište přímo.',
+      }
 }
 
 export default function ContactPage() {
@@ -72,16 +85,17 @@ export default function ContactPage() {
   /* Návrat z odeslání bez JS: `?odeslano=1` nebo `?chyba=...`. Až v efektu. */
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
+    const messages = urlErrors()
     if (q.get('odeslano') === '1') {
       setStatus('ok')
     } else if (q.get('chyba')) {
       setStatus('error')
-      setError(URL_ERRORS[q.get('chyba') ?? 'obecna'] ?? URL_ERRORS.obecna)
+      setError(messages[q.get('chyba') ?? 'obecna'] ?? messages.obecna)
     }
     /* Parametr se z adresy uklidí, aby obnovení stránky neukázalo hlášku znovu
        a aby se odkaz nedal poslat s cizím stavem. */
     if (q.has('odeslano') || q.has('chyba')) {
-      window.history.replaceState({}, '', CONTACT_PATH)
+      window.history.replaceState({}, '', localPath(CONTACT_PATH))
     }
   }, [])
 
@@ -114,18 +128,23 @@ export default function ContactPage() {
         return
       }
       setStatus('error')
-      setError(data.error || URL_ERRORS.obecna)
+      setError(data.error || urlErrors().obecna)
       setField(data.field ?? '')
     } catch {
       setStatus('error')
-      setError('Nepodařilo se spojit se serverem. Zkuste to prosím znovu, nebo napište na WhatsApp.')
+      setError(
+        t({
+          cs: 'Nepodařilo se spojit se serverem. Zkuste to prosím znovu, nebo napište na WhatsApp.',
+          en: "Couldn't reach the server. Please try again, or message me on WhatsApp.",
+        }),
+      )
     }
   }
 
   return (
     <>
       <a className="skip-link" href="#formular">
-        Přeskočit na formulář
+        {t({ cs: 'Přeskočit na formulář', en: 'Skip to the form' })}
       </a>
 
       <div className="bg-field" aria-hidden="true" />
@@ -136,19 +155,21 @@ export default function ContactPage() {
         <span />
       </div>
 
-      <PageNav active={CONTACT_PATH} ctaHref="#formular" />
+      <PageNav active={localPath(CONTACT_PATH)} ctaHref="#formular" />
 
       <main className="page page--contact" ref={main}>
         <header className="page__head ctc-head">
           <p className="kicker label reveal" style={revealDelay(0, 5)}>
-            [ KONTAKT ]
+            {t({ cs: '[ KONTAKT ]', en: '[ CONTACT ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            Řekněte mi, co potřebujete vyřešit.
+            {t({ cs: 'Řekněte mi, co potřebujete vyřešit.', en: 'Tell me what you need solved.' })}
           </h1>
           <p className="body reveal" style={revealDelay(1.2, 5)}>
-            Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin víte, co to bude
-            stát a kdy to bude hotové.
+            {t({
+              cs: 'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin víte, co to bude stát a kdy to bude hotové.',
+              en: "You don't need to know the technology or have a spec. Describe the problem in your own words. Within 24 hours you'll know what it costs and when it will be done.",
+            })}
           </p>
         </header>
 
@@ -160,7 +181,7 @@ export default function ContactPage() {
                 `minLength`) zůstávají — čte je odečítač obrazovky i server. */}
           <section className="ctc-form reveal" id="formular" style={revealDelay(1.8, 5)} aria-labelledby="form-h">
             <h2 className="ctc-form__h headline" id="form-h">
-              Napište mi
+              {t({ cs: 'Napište mi', en: 'Send me a message' })}
             </h2>
 
             {status === 'ok' ? (
@@ -168,10 +189,13 @@ export default function ContactPage() {
               <div className="ctc-ok" ref={okRef} tabIndex={-1} role="status">
                 <p className="ctc-ok__k">
                   <Icon name="check" size={16} />
-                  Odesláno
+                  {t({ cs: 'Odesláno', en: 'Sent' })}
                 </p>
                 <p className="ctc-ok__t">
-                  Díky. Ozvu se do 24 hodin, i o víkendu. Když to spěchá, napište mi rovnou na{' '}
+                  {t({
+                    cs: 'Díky. Ozvu se do 24 hodin, i o víkendu. Když to spěchá, napište mi rovnou na ',
+                    en: "Thanks. I'll get back to you within 24 hours, weekends included. If it's urgent, message me on ",
+                  })}
                   <a href={WHATSAPP} target="_blank" rel="noreferrer">
                     WhatsApp
                   </a>
@@ -193,15 +217,20 @@ export default function ContactPage() {
                     prohlížeč nepředvyplnil skutečnému člověku.
                     `aria-hidden` proto, aby o něm nevěděl ani odečítač. */}
                 <div className="ctc-trap" aria-hidden="true">
-                  <label htmlFor="ctc-website">Nevyplňujte, prosím</label>
+                  <label htmlFor="ctc-website">{t({ cs: 'Nevyplňujte, prosím', en: 'Please leave this empty' })}</label>
                   <input id="ctc-website" name={HONEYPOT_FIELD} type="text" tabIndex={-1} autoComplete="off" />
                 </div>
                 <input type="hidden" name="startedAt" defaultValue="" />
+                {/* ★★ JAZYK JDE S FORMULÁŘEM. Bez JS odpovídá `api/contact.ts`
+                    PŘESMĚROVÁNÍM — a bez tohohle pole by anglického návštěvníka
+                    poslalo na českou `/kontakt?odeslano=1`. Podle téhož pole
+                    funkce volí i jazyk chybových hlášek. */}
+                <input type="hidden" name="lang" value={getLang()} readOnly />
 
                 <div className="ctc-row">
                   <div className="ctc-field">
                     <label className="ctc-label label" htmlFor="ctc-name">
-                      Jméno
+                      {t({ cs: 'Jméno', en: 'Name' })}
                     </label>
                     <input
                       className={`ctc-input${field === 'name' ? ' is-bad' : ''}`}
@@ -212,12 +241,12 @@ export default function ContactPage() {
                       autoComplete="name"
                       minLength={LIMITS.name.min}
                       maxLength={LIMITS.name.max}
-                      placeholder="Jan Novák"
+                      placeholder={t({ cs: 'Jan Novák', en: 'Jane Doe' })}
                     />
                   </div>
                   <div className="ctc-field">
                     <label className="ctc-label label" htmlFor="ctc-email">
-                      E-mail
+                      {t({ cs: 'E-mail', en: 'Email' })}
                     </label>
                     <input
                       className={`ctc-input${field === 'email' ? ' is-bad' : ''}`}
@@ -227,14 +256,15 @@ export default function ContactPage() {
                       required
                       autoComplete="email"
                       maxLength={LIMITS.email.max}
-                      placeholder="jan@firma.cz"
+                      placeholder={t({ cs: 'jan@firma.cz', en: 'jane@company.com' })}
                     />
                   </div>
                 </div>
 
                 <div className="ctc-field">
                   <label className="ctc-label label" htmlFor="ctc-company">
-                    Firma <span className="ctc-opt">nepovinné</span>
+                    {t({ cs: 'Firma', en: 'Company' })}{' '}
+                    <span className="ctc-opt">{t({ cs: 'nepovinné', en: 'optional' })}</span>
                   </label>
                   <input
                     className="ctc-input"
@@ -243,7 +273,7 @@ export default function ContactPage() {
                     type="text"
                     autoComplete="organization"
                     maxLength={LIMITS.company.max}
-                    placeholder="Firma s.r.o."
+                    placeholder={t({ cs: 'Firma s.r.o.', en: 'Acme Inc.' })}
                   />
                 </div>
 
@@ -254,10 +284,11 @@ export default function ContactPage() {
                     a jeden klik je míň práce než otevřít a vybrat. */}
                 <fieldset className="ctc-kinds">
                   <legend className="ctc-label label">
-                    S čím potřebujete pomoct? <span className="ctc-opt">nepovinné</span>
+                    {t({ cs: 'S čím potřebujete pomoct?', en: 'What do you need help with?' })}{' '}
+                    <span className="ctc-opt">{t({ cs: 'nepovinné', en: 'optional' })}</span>
                   </legend>
                   <div className="ctc-kinds__row">
-                    {INQUIRY_KINDS.map((k) => (
+                    {inquiryKinds().map((k) => (
                       <label className="ctc-chip" key={k.value}>
                         <input type="radio" name="kind" value={k.value} />
                         <span>{k.label}</span>
@@ -268,7 +299,7 @@ export default function ContactPage() {
 
                 <div className="ctc-field">
                   <label className="ctc-label label" htmlFor="ctc-message">
-                    Co potřebujete vyřešit?
+                    {t({ cs: 'Co potřebujete vyřešit?', en: 'What do you need solved?' })}
                   </label>
                   <textarea
                     className={`ctc-input ctc-textarea${field === 'message' ? ' is-bad' : ''}`}
@@ -278,7 +309,10 @@ export default function ContactPage() {
                     rows={6}
                     minLength={LIMITS.message.min}
                     maxLength={LIMITS.message.max}
-                    placeholder="Například: každý den ručně přepisujeme objednávky z e-mailů do systému. Zabere to dvě hodiny denně a děláme v tom chyby."
+                    placeholder={t({
+                      cs: 'Například: každý den ručně přepisujeme objednávky z e-mailů do systému. Zabere to dvě hodiny denně a děláme v tom chyby.',
+                      en: 'For example: every day we retype orders from emails into our system by hand. It takes two hours a day and we keep making mistakes.',
+                    })}
                   />
                 </div>
 
@@ -292,9 +326,16 @@ export default function ContactPage() {
                 <div className="ctc-actions">
                   <button className="btn btn--solid" type="submit" disabled={status === 'sending'}>
                     <Icon name="mail" size={15} />
-                    {status === 'sending' ? 'Odesílám…' : 'Odeslat poptávku'}
+                    {status === 'sending'
+                      ? t({ cs: 'Odesílám…', en: 'Sending…' })
+                      : t({ cs: 'Odeslat poptávku', en: 'Send inquiry' })}
                   </button>
-                  <p className="ctc-trust label">Nezávazně · Odpověď do 24 hodin · Diskrétně</p>
+                  <p className="ctc-trust label">
+                    {t({
+                      cs: 'Nezávazně · Odpověď do 24 hodin · Diskrétně',
+                      en: 'No obligation · Reply within 24 hours · Confidential',
+                    })}
+                  </p>
                 </div>
               </form>
             )}
@@ -304,10 +345,10 @@ export default function ContactPage() {
           <aside className="ctc-side">
             <section className="ctc-block reveal" style={revealDelay(2.4, 5)} aria-labelledby="kanaly-h">
               <h2 className="ctc-block__h label" id="kanaly-h">
-                Nebo rovnou
+                {t({ cs: 'Nebo rovnou', en: 'Or reach me directly' })}
               </h2>
               <ul className="channels">
-                {CONTACT_CHANNELS_PAGE.map((c) => (
+                {contactChannelsPage().map((c) => (
                   <li key={c.label}>
                     <a
                       className={`channel${c.tone ? ` channel--${c.tone}` : ''}`}
@@ -333,10 +374,10 @@ export default function ContactPage() {
                 je nezávazná odpověď a ne obchodník na telefonu, odešle spíš. */}
             <section className="ctc-block reveal" style={revealDelay(3, 5)} aria-labelledby="dal-h">
               <h2 className="ctc-block__h label" id="dal-h">
-                Co bude dál
+                {t({ cs: 'Co bude dál', en: 'What happens next' })}
               </h2>
               <ol className="ctc-steps">
-                {WHAT_HAPPENS.map((s, i) => (
+                {whatHappens().map((s, i) => (
                   <li className="ctc-step" key={s.k}>
                     <span className="ctc-step__i" aria-hidden="true">
                       {String(i + 1).padStart(2, '0')}
@@ -356,10 +397,10 @@ export default function ContactPage() {
             je ta stránka, která má vydělávat. Značkování je v kontakt.html. */}
         <section className="ctc-faq reveal" aria-labelledby="faq-h">
           <h2 className="headline" id="faq-h">
-            Než napíšete
+            {t({ cs: 'Než napíšete', en: 'Before you write' })}
           </h2>
           <dl className="ctc-faq__list">
-            {CONTACT_FAQ.map((f) => (
+            {contactFaq().map((f) => (
               <div className="ctc-faq__item" key={f.q}>
                 <dt>{f.q}</dt>
                 <dd>{f.a}</dd>
@@ -367,12 +408,12 @@ export default function ContactPage() {
             ))}
           </dl>
           <p className="ctc-faq__more label">
-            Nenašli jste odpověď? Napište na{' '}
+            {t({ cs: 'Nenašli jste odpověď? Napište na ', en: "Didn't find your answer? Email " })}
             <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
           </p>
         </section>
 
-        <PageFooter active={CONTACT_PATH} />
+        <PageFooter active={localPath(CONTACT_PATH)} />
       </main>
 
       <div className="grain" aria-hidden="true" />

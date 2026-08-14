@@ -474,16 +474,52 @@ function xml(s: string): string {
  * `lastmod` je u článků skutečné datum úpravy. Vymyšlené „dnes" u všech stránek
  * je nejčastější způsob, jak si vyhledávač přestane sitemapy všímat.
  */
+/**
+ * ═══════════ DVOJJAZYČNÉ STRÁNKY ═══════════
+ *
+ * ★★★ KAŽDÁ URL V SITEMAPĚ MUSÍ VYJMENOVAT VŠECHNY SVÉ JAZYKOVÉ VARIANTY,
+ *   VČETNĚ SEBE SAMA. Google čte `xhtml:link` v sitemapě jako plnohodnotný
+ *   hreflang signál — ale jen když je klastr ÚPLNÝ a OBOUSMĚRNÝ. Neúplný
+ *   klastr se zahodí celý a obě jazykové verze pak soupeří jako duplicity.
+ *
+ * ★ `x-default` míří na češtinu: kořen webu a domovský trh.
+ * ★ Žurnál v seznamu není — anglickou verzi nemá (viz `ROUTES` v lib/lang.ts),
+ *   takže jeho URL zůstávají jednojazyčné a žádné alternativy nenesou.
+ */
+const BILINGUAL: { cs: string; en: string }[] = [
+  { cs: '/', en: '/en' },
+  { cs: '/sluzby', en: '/en/services' },
+  { cs: '/kontakt', en: '/en/contact' },
+  { cs: '/projekty', en: '/en/work' },
+]
+
+function alternates(path: string): string {
+  const pair = BILINGUAL.find((p) => p.cs === path || p.en === path)
+  if (!pair) return ''
+  return (
+    `<xhtml:link rel="alternate" hreflang="cs" href="${xml(abs(pair.cs))}"/>` +
+    `<xhtml:link rel="alternate" hreflang="en" href="${xml(abs(pair.en))}"/>` +
+    `<xhtml:link rel="alternate" hreflang="x-default" href="${xml(abs(pair.cs))}"/>`
+  )
+}
+
 export function renderSitemap(articles: Article[], liveTopics: Topic[]): string {
   const newest = articles[0]?.updated ?? articles[0]?.published
-  const urls: { loc: string; priority: string; lastmod?: string }[] = [
-    { loc: abs('/'), priority: '1.0' },
-    { loc: abs('/sluzby'), priority: '0.9' },
+  const urls: { loc: string; priority: string; lastmod?: string; path?: string }[] = [
+    { loc: abs('/'), priority: '1.0', path: '/' },
+    { loc: abs('/sluzby'), priority: '0.9', path: '/sluzby' },
     /* ★ Kontakt má prioritu 0.9, ne 0.5. Je to konverzní stránka webu a od
        zavedení formuláře cíl VŠECH výzev k akci — tedy stránka, na které
        záleží nejvíc hned po úvodu. */
-    { loc: abs('/kontakt'), priority: '0.9' },
-    { loc: abs('/projekty'), priority: '0.8' },
+    { loc: abs('/kontakt'), priority: '0.9', path: '/kontakt' },
+    { loc: abs('/projekty'), priority: '0.8', path: '/projekty' },
+    /* ★ ANGLICKÉ VERZE MAJÍ NIŽŠÍ PRIORITU, NE STEJNOU. Priorita je relativní
+       váha uvnitř webu a domovský trh je český; anglická větev je nabídka
+       navíc, ne rovnocenná druhá polovina webu. */
+    { loc: abs('/en'), priority: '0.8', path: '/en' },
+    { loc: abs('/en/services'), priority: '0.7', path: '/en/services' },
+    { loc: abs('/en/contact'), priority: '0.7', path: '/en/contact' },
+    { loc: abs('/en/work'), priority: '0.6', path: '/en/work' },
     { loc: abs('/clanky'), priority: '0.9', lastmod: newest },
     ...liveTopics.map((t) => ({
       loc: abs(topicPath(t.slug)),
@@ -499,7 +535,8 @@ export function renderSitemap(articles: Article[], liveTopics: Topic[]): string 
   const body = urls
     .map(
       (u) =>
-        `  <url><loc>${xml(u.loc)}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<priority>${u.priority}</priority></url>`,
+        `  <url><loc>${xml(u.loc)}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}` +
+        `${u.path ? alternates(u.path) : ''}<priority>${u.priority}</priority></url>`,
     )
     .join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -508,7 +545,7 @@ export function renderSitemap(articles: Article[], liveTopics: Topic[]): string 
   Needituj ho ručně, přepíše se. Jen skutečné URL – kotvy (#web, #kontakt) sem
   nepatří, Google fragment z adresy zahodí a záznam vyhodnotí jako duplikát.
 -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${body}
 </urlset>
 `

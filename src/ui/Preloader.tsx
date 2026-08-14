@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t } from '../lib/lang'
 import { sceneState } from '../lib/scene-state'
 import { subscribeLoading } from '../lib/loading'
 import { easeInOutExpo, tween } from '../lib/spring'
@@ -58,7 +59,9 @@ export default function Preloader({ reduced }: { reduced: boolean }) {
   return (
     <div className="loadbar" role="status" aria-live="polite">
       <div className="loadbar__fill" ref={bar} />
-      <span className="sr-only">Načítám 3D scénu: {Math.round(progress)} %</span>
+      <span className="sr-only">
+        {t({ cs: 'Načítám 3D scénu', en: 'Loading 3D scene' })}: {Math.round(progress)} %
+      </span>
     </div>
   )
 }

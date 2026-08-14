@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import JournalRoot from './JournalRoot.tsx'
 import { parseJournalRoute } from './lib/journal-route.ts'
+import { adoptDocumentLang } from './lib/lang'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -30,6 +31,10 @@ import './styles/journal.css'
  */
 /* Třída `js` + hydratace: stejná mechanika a stejné důvody jako v main.tsx. */
 document.documentElement.classList.add('js')
+
+/* ★ JAZYK SE NASTAVÍ PŘED HYDRATACÍ, ne během ní. Čte se z `<html lang>`, který
+   do dokumentu zapsal build — viz lib/lang.ts. */
+adoptDocumentLang()
 
 const app = (
   <StrictMode>

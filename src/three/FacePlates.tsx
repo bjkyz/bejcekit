@@ -12,7 +12,7 @@ import {
   Vector3,
 } from 'three'
 import { FACE_TRANSFORMS } from '../lib/faces'
-import { SECTIONS } from '../content/sections'
+import { sections } from '../content/i18n'
 import { clampDelta, sceneState } from '../lib/scene-state'
 import type { Tier } from '../lib/quality'
 
@@ -93,7 +93,7 @@ function Plate({ i, tier }: { i: number; tier: Tier }) {
   const grp = useRef<Group>(null)
   const mat = useRef<MeshBasicMaterial>(null)
   const t = FACE_TRANSFORMS[i]
-  const s = SECTIONS[i]
+  const s = sections()[i]
   /* Skutečný strop ovladače, ne odhad. Na Apple GPU je to 16, na starých Intel 2 —
      a požadovat víc, než karta umí, three tiše ořízne, takže je to bezpečné číslo. */
   const maxAnisotropy = useThree((st) => Math.min(8, st.gl.capabilities.getMaxAnisotropy()))
@@ -190,7 +190,7 @@ function Plate({ i, tier }: { i: number; tier: Tier }) {
 export default function FacePlates({ tier }: { tier: Tier }) {
   return (
     <>
-      {SECTIONS.map((_, i) => (
+      {sections().map((_, i) => (
         <Plate key={i} i={i} tier={tier} />
       ))}
     </>

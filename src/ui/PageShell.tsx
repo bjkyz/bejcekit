@@ -1,5 +1,8 @@
-import { CONTACT_HREF, GITHUB, NAV_PAGES, NAV_SECTION_COUNT, SECTIONS } from '../content/sections'
+import { CONTACT_HREF, GITHUB, NAV_SECTION_COUNT } from '../content/sections'
+import { navPages, sections } from '../content/i18n'
+import { localPath, pageKeyOf, t } from '../lib/lang'
 import Icon from './Icons'
+import LangSwitch from './LangSwitch'
 import Mark from './Mark'
 import SiteMenu from './SiteMenu'
 
@@ -33,33 +36,39 @@ export function PageNav({
   ctaHref: string
 }) {
   return (
-    <nav className="nav nav--page" aria-label="Hlavní navigace">
-      <a className="nav__mark" href="/">
+    <nav className="nav nav--page" aria-label={t({ cs: 'Hlavní navigace', en: 'Main navigation' })}>
+      <a className="nav__mark" href={localPath('/')}>
         <Mark size={30} />
-        <span className="sr-only">bejcek.it, úvod</span>
+        <span className="sr-only">{t({ cs: 'bejcek.it, úvod', en: 'bejcek.it, home' })}</span>
       </a>
       <div className="nav__links">
-        {SECTIONS.slice(1, 1 + NAV_SECTION_COUNT).map((s) => (
-          <a className="nav__link" href={`/#${s.id}`} key={s.id}>
-            {s.plateCode}
-          </a>
-        ))}
-        {NAV_PAGES.map((p) => (
+        {sections()
+          .slice(1, 1 + NAV_SECTION_COUNT)
+          .map((s) => (
+            <a className="nav__link" href={`${localPath('/')}#${s.id}`} key={s.id}>
+              {s.plateCode}
+            </a>
+          ))}
+        {navPages().map((p) => (
           <a
             className={`nav__link${active === p.href ? ' is-active' : ''}`}
             href={p.href}
             key={p.href}
             aria-current={active === p.href ? 'page' : undefined}
+            /* Odkaz do druhého jazyka se přizná — viz `foreign` v content/i18n.ts. */
+            hrefLang={p.foreign ? 'cs' : undefined}
           >
             {p.label}
+            {p.foreign && <span className="sr-only"> (in Czech)</span>}
           </a>
         ))}
       </div>
       {/* ★ CÍL URČUJE STRÁNKA: většinou /kontakt (formulář), na /kontakt samém
           kotva #formular. Viz volání v jednotlivých stránkách. */}
       <div className="nav__end">
+        <LangSwitch page={pageKeyOf(active)} />
         <a className="nav__cta" href={ctaHref}>
-          Napište mi
+          {t({ cs: 'Napište mi', en: 'Get in touch' })}
         </a>
         <SiteMenu active={active} />
       </div>
@@ -86,23 +95,25 @@ export function PageFooter({ active }: { active?: string }) {
         </span>
       </p>
       <p className="footer__links">
-        <a href="/">Úvod</a>
+        <a href={localPath('/')}>{t({ cs: 'Úvod', en: 'Home' })}</a>
         <span aria-hidden="true">·</span>
-        {NAV_PAGES.filter((p) => p.href !== active).map((p) => (
-          <span className="footer__pair" key={p.href}>
-            <a href={p.href}>{p.title}</a>
-            <span aria-hidden="true">·</span>
-          </span>
-        ))}
+        {navPages()
+          .filter((p) => p.href !== active)
+          .map((p) => (
+            <span className="footer__pair" key={p.href}>
+              <a href={p.href}>{p.title}</a>
+              <span aria-hidden="true">·</span>
+            </span>
+          ))}
         {/* ★ KONTAKT NENÍ V `NAV_PAGES` SCHVÁLNĚ. Lišta unese pět položek
             (dvě sekce + tři stránky) a šestá by se na 1280 px začala tlačit ke
             značce — v liště ho navíc zastupuje tlačítko „Napište mi", které na
             něj od zavedení formuláře míří. V patičce ale být musí: je to
             poslední místo, kde návštěvník ještě může někam jít místo zavření
             karty, a konverzní stránka tam nesmí chybět. */}
-        {active !== CONTACT_HREF && (
+        {active !== localPath(CONTACT_HREF) && (
           <span className="footer__pair">
-            <a href={CONTACT_HREF}>Kontakt</a>
+            <a href={localPath(CONTACT_HREF)}>{t({ cs: 'Kontakt', en: 'Contact' })}</a>
             <span aria-hidden="true">·</span>
           </span>
         )}

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="__SITE_ORIGIN__/en" />
+
+    <!--
+      ★★★ hreflang MUSÍ BÝT OBOUSMĚRNÝ A MUSÍ OBSAHOVAT I SÁM SEBE.
+        Google bere jazykový klastr jako celek: když česká stránka odkáže na
+        anglickou, ale anglická nevrátí odkaz zpátky, značku ZAHODÍ celou a obě
+        verze pak soupeří jako duplicity. Proto je na každé stránce obojí,
+        včetně `hreflang` na sebe sama.
+
+      ★ `x-default` míří na ČESKOU verzi. Je to kořen webu a domovský trh;
+        x-default není „anglicky", ale „když nevím, ukaž tohle".
+    -->
+    <link rel="alternate" hreflang="cs" href="__SITE_ORIGIN__/" />
+    <link rel="alternate" hreflang="en" href="__SITE_ORIGIN__/en" />
+    <link rel="alternate" hreflang="x-default" href="__SITE_ORIGIN__/" />
+
+    <title>bejcek.it · AI, software and automation | Jiří Bejček</title>
+    <!-- Popisek vede přínosy hlasem H1, jméno až na konec. Pod ~160 znaky. -->
+    <meta
+      name="description"
+      content="I build AI systems, process automation and custom software: from the first idea to a product a company actually uses. Fixed price in writing, reply within 24 hours."
+    />
+    <meta name="author" content="Jiří Bejček" />
+    <meta name="theme-color" content="#08090a" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="cs_CZ" />
+    <meta property="og:url" content="__SITE_ORIGIN__/en" />
+    <meta property="og:site_name" content="bejcek.it" />
+    <meta property="og:title" content="bejcek.it · Software that does the work for you" />
+    <meta property="og:description" content="AI · Software · Automation. One engineer instead of an agency." />
+    <meta property="og:image" content="__SITE_ORIGIN__/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="bejcek.it · AI, software and automation" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!--
+      ★★ TÍŽ `@id`, JEN JINÝ JAZYK STRÁNKY. `#identity` a `#person` jsou TÁŽ
+        firma a týž člověk jako na české verzi — proto se identifikátory neliší.
+        Kdyby anglická verze zavedla vlastní `#identity-en`, vznikly by Googlu
+        dvě různé entity a autorita by se nesečetla; přesně to je chyba, kvůli
+        které jsou identifikátory v `src/lib/site.ts` na jednom místě.
+
+      ★ Uzly se přitom musí DEFINOVAT i tady. Google `@id` mezi dokumenty
+        nedereferencuje, takže odkaz na uzel popsaný jen v `index.html` by tu
+        byl prázdný objekt bez typu a jména.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "__SITE_ORIGIN__/en#page",
+            "url": "__SITE_ORIGIN__/en",
+            "name": "bejcek.it · AI, software and automation",
+            "description": "AI systems, process automation and custom software built by one engineer.",
+            "inLanguage": "en",
+            "isPartOf": { "@id": "__SITE_ORIGIN__/#website" },
+            "about": { "@id": "__SITE_ORIGIN__/#identity" },
+            "primaryImageOfPage": { "@id": "__SITE_ORIGIN__/#logo" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "__SITE_ORIGIN__/#website",
+            "url": "__SITE_ORIGIN__/",
+            "name": "bejcek.it",
+            "inLanguage": ["cs", "en"],
+            "publisher": { "@id": "__SITE_ORIGIN__/#identity" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "__SITE_ORIGIN__/#identity",
+            "name": "bejcek.it · Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "image": "__SITE_ORIGIN__/og.png",
+            "sameAs": ["https://github.com/bjkyz"],
+            "description": "AI and software engineer. AI assistants over company data and AI agents, process automation, internal tools, SaaS products and custom websites.",
+            "email": "bejcek.jirka@gmail.com",
+            "telephone": "+420607706102",
+            "areaServed": { "@type": "Country", "name": "Czechia" },
+            "priceRange": "$$",
+            "founder": { "@id": "__SITE_ORIGIN__/#person" },
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "__SITE_ORIGIN__/#logo",
+              "url": "__SITE_ORIGIN__/og.png",
+              "width": 1200,
+              "height": 630
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "email": "bejcek.jirka@gmail.com",
+              "telephone": "+420607706102",
+              "areaServed": "CZ",
+              "availableLanguage": ["cs", "en"],
+              "url": "__SITE_ORIGIN__/en/contact"
+            },
+            "makesOffer": [
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI assistants over company data, RAG and AI agents" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Process automation and document data extraction" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Custom internal tools, client portals and dashboards" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "SaaS products from MVP to production" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Websites, web apps and technical SEO" } }
+            ]
+          },
+          {
+            "@type": "Person",
+            "@id": "__SITE_ORIGIN__/#person",
+            "name": "Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "jobTitle": "AI and software engineer",
+            "email": "bejcek.jirka@gmail.com",
+            "telephone": "+420607706102",
+            "knowsLanguage": ["cs", "en"],
+            "sameAs": ["https://github.com/bjkyz"],
+            "worksFor": { "@id": "__SITE_ORIGIN__/#identity" },
+            "hasCredential": {
+              "@type": "EducationalOccupationalCredential",
+              "name": "Agentic Engineering",
+              "credentialCategory": "certificate",
+              "url": "__SITE_ORIGIN__/certifikat-agentic-engineering.pdf",
+              "dateCreated": "2026-05-29",
+              "recognizedBy": { "@type": "Organization", "name": "r_d by Laba" }
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <div style="max-width: 40rem; margin: 0 auto; padding: 4rem 1.5rem; color: #dee3ea; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1 style="color: #f7f8f8; font-size: 1.75rem">bejcek.it · Jiří Bejček</h1>
+        <p>AI and software engineer. AI systems, process automation and custom software.</p>
+        <p>This site needs JavaScript. You can reach me without it:</p>
+        <p>
+          Email: <a href="mailto:bejcek.jirka@gmail.com" style="color: #52aeff">bejcek.jirka@gmail.com</a><br />
+          Phone: <a href="tel:+420607706102" style="color: #52aeff">+420 607 706 102</a>
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
-import { CONTACT_CHANNELS, CONTACT_HREF, EMAIL, GITHUB, MAILTO, SECTIONS, type Section as S } from '../content/sections'
+import {
+  CONTACT_HREF,
+  EMAIL,
+  FACE_COUNT,
+  GITHUB,
+  MAILTO,
+  type Section as S,
+} from '../content/sections'
+import { contactChannelsHome, whatHappens } from '../content/i18n'
+import { localPath, t } from '../lib/lang'
 import { useReveal } from '../lib/hooks'
 import { revealDelay as delay } from '../lib/reveal'
 import Kicker from './Kicker'
@@ -9,7 +18,7 @@ import GrabPlate from './GrabPlate'
 import Icon from './Icons'
 import Mark from './Mark'
 
-const LAST = SECTIONS.length - 1
+const LAST = FACE_COUNT - 1
 
 /* Zpoždění revealu žije v lib/reveal.ts — sdílí ho i karty projektů, aby obě
    stránky nastupovaly stejným rytmem. */
@@ -32,6 +41,31 @@ export default function Section({
   const ref = useReveal<HTMLElement>(!reduced && index !== 0)
   const isHero = index === 0
   const isContact = index === LAST
+
+  /**
+   * ═══════════ POŘADÍ AKCÍ V ZÁVĚRU KRYCHLE ═══════════
+   *
+   * ★★★ NA SEKCI 05 STOJÍ HLAVNÍ TLAČÍTKO NAD KANÁLY, VŠUDE JINDE POD OBSAHEM.
+   *
+   * Dřív bylo pořadí „text → dlaždice s e-mailem → tlačítko Napsat poptávku"
+   * a byly v něm DVA primární prvky za sebou: vyplněná dlaždice (jediná plná
+   * plocha na webu) a hned pod ní jediné velké tlačítko. Návštěvník, který
+   * dorolloval na konec, tak dostal na výběr mezi dvěma nejsilnějšími signály
+   * a musel rozhodovat o formě, ne o tom, že napíše.
+   *
+   * Teď je hierarchie jednoznačná: JEDNA hlavní cesta (formulář, kde je práh
+   * nejnižší a kde se dá zpráva napsat rovnou), pak co se stane potom, a teprve
+   * pak kanály pro toho, kdo formuláře zásadně nevyplňuje. Nadpis kanálů to
+   * říká nahlas („nebo rovnou"), takže z alternativy není konkurence.
+   */
+  const ctaRow = (s.cta || s.ghostCta) && (
+    <div className="cta-row reveal" style={delay(isContact ? 3 : 5.4, 6)}>
+      {s.cta && <MagneticCTA href={s.cta.href} label={s.cta.label} enabled={!reduced} />}
+      {s.ghostCta && (
+        <MagneticCTA href={s.ghostCta.href} label={s.ghostCta.label} variant="ghost" enabled={!reduced} />
+      )}
+    </div>
+  )
 
   return (
     <section
@@ -72,6 +106,20 @@ export default function Section({
             </p>
           )}
 
+          {/* ★ ZELENÝ ŠTÍTEK KAPACITY SE V ZÁVĚRU OPAKUJE, A JE TO ZÁMĚR.
+              Na úvodu odpovídá na otázku „bere ten člověk vůbec práci?", tady
+              na tutéž otázku ve chvíli ROZHODOVÁNÍ — a mezi tím leží pět
+              obrazovek scrollu. Informace, kterou si nikdo nepamatuje pět
+              obrazovek, není opakování, ale její jediné užitečné uvedení. */}
+          {isContact && (
+            <p className="status-pill reveal" style={delay(2.6, 6)}>
+              <span className="status-pill__dot" aria-hidden="true" />
+              {t({ cs: 'Volná kapacita: zbývá 1 místo', en: 'Open capacity: 1 slot left' })}
+            </p>
+          )}
+
+          {isContact && ctaRow}
+
           {s.steps ? (
             <ProcessSteps steps={s.steps} />
           ) : isContact ? (
@@ -107,22 +155,16 @@ export default function Section({
 
           {s.stack && (
             <ul className="stack reveal" style={delay(5, 6)}>
-              {s.stack.map((t) => (
-                <li key={t} className="stack__chip">
-                  {t}
+              {/* `chip`, ne `t`: `t` je překladová funkce z lib/lang.ts. */}
+              {s.stack.map((chip) => (
+                <li key={chip} className="stack__chip">
+                  {chip}
                 </li>
               ))}
             </ul>
           )}
 
-          {(s.cta || s.ghostCta) && (
-            <div className="cta-row reveal" style={delay(5.4, 6)}>
-              {s.cta && <MagneticCTA href={s.cta.href} label={s.cta.label} enabled={!reduced} />}
-              {s.ghostCta && (
-                <MagneticCTA href={s.ghostCta.href} label={s.ghostCta.label} variant="ghost" enabled={!reduced} />
-              )}
-            </div>
-          )}
+          {!isContact && ctaRow}
 
           {isContact && <Footer />}
         </div>
@@ -213,13 +255,45 @@ function ContactBlock() {
 
   return (
     <div className="contact">
-      <a className="contact-primary reveal" style={delay(3, 6)} href={MAILTO}>
+      {/* ═══════════ CO SE STANE POTOM ═══════════
+          ★★ NEJČASTĚJŠÍ DŮVOD, PROČ SE ČLOVĚK NEOZVE, NENÍ NEDŮVĚRA, ALE
+            NEJISTOTA: netuší, co kliknutím spustí. Dosud to stálo výhradně
+            na `/kontakt`, tedy AŽ ZA rozhodnutím kliknout — což je o jeden
+            krok pozdě. Tři řádky pod tlačítkem tu námitku sundají dřív.
+          ★ Je to JEDEN PÁS, ne tři dlaždice: `k` je slib, `v` jeho podmínka,
+            takže se to dá přejet očima. Tři plné věty pod sebou by z konce
+            scrollu udělaly další odstavec ke čtení a sekce 05 má být rozhodnutí,
+            ne text. Data sdílí s `/kontakt` (WHAT_HAPPENS), aby se sliby na
+            dvou místech webu nemohly rozejít. */}
+      <ol className="contact-next reveal" style={delay(3.4, 6)}>
+        {whatHappens().map((w, i) => (
+          <li className="contact-next__i" key={w.k}>
+            <span className="contact-next__n" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span className="contact-next__k">{w.k}</span>
+            <span className="contact-next__v">{w.v}</span>
+          </li>
+        ))}
+      </ol>
+
+      {/* ★ NADPIS DĚLÁ Z ALTERNATIVY ALTERNATIVU. Bez něj stojí vyplněná
+          dlaždice s e-mailem vedle hlavního tlačítka jako druhá stejně silná
+          nabídka; se slovem „nebo" je z ní ústupová cesta pro toho, kdo
+          formuláře zásadně nevyplňuje. Jedno slovo, celá hierarchie. */}
+      <p className="contact-or label reveal" style={delay(3.8, 6)}>
+        <span>{t({ cs: 'Nebo rovnou', en: 'Or reach me directly' })}</span>
+      </p>
+
+      <a className="contact-primary reveal" style={delay(4, 6)} href={MAILTO}>
         <span className="contact-primary__k">
           <Icon name="mail" size={15} />
-          E-mail
+          {t({ cs: 'E-mail', en: 'Email' })}
         </span>
         <span className="contact-primary__v">{EMAIL}</span>
-        <span className="contact-primary__n">Odpovím do 24 hodin, i o víkendu.</span>
+        <span className="contact-primary__n">
+          {t({ cs: 'Odpovím do 24 hodin, i o víkendu.', en: 'I reply within 24 hours, weekends included.' })}
+        </span>
         <span className="contact-primary__go" aria-hidden="true">
           →
         </span>
@@ -227,14 +301,18 @@ function ContactBlock() {
 
       {/* aria-live: bez něj je „Zkopírováno" čistě vizuální zpětná vazba a pro
           odečítač obrazovky se po stisku nestane vůbec nic. */}
-      <button type="button" className={`copy-btn reveal${copied ? ' is-copied' : ''}`} style={delay(3.3, 6)} onClick={copy}>
+      <button type="button" className={`copy-btn reveal${copied ? ' is-copied' : ''}`} style={delay(4.3, 6)} onClick={copy}>
         <Icon name={copied ? 'check' : 'copy'} size={14} />
-        <span aria-live="polite">{copied ? 'Zkopírováno' : 'Kopírovat adresu'}</span>
+        <span aria-live="polite">
+          {copied
+            ? t({ cs: 'Zkopírováno', en: 'Copied' })
+            : t({ cs: 'Kopírovat adresu', en: 'Copy address' })}
+        </span>
       </button>
 
       <ul className="channels">
-        {CONTACT_CHANNELS.map((c, i) => (
-          <li key={c.label} className="reveal" style={delay(3.7 + i * 0.3, 6)}>
+        {contactChannelsHome().map((c, i) => (
+          <li key={c.label} className="reveal" style={delay(4.6 + i * 0.3, 6)}>
             <a
               className={`channel${c.tone ? ` channel--${c.tone}` : ''}`}
               href={c.href}
@@ -254,6 +332,16 @@ function ContactBlock() {
           </li>
         ))}
       </ul>
+
+      {/* Tichý řádek pod vším: tři důvody, proč se ozvat nebojí. Táž trojice
+          stojí pod formulářem na `/kontakt` — je to jeden slib řečený na obou
+          koncích téže cesty. */}
+      <p className="contact-trust label reveal" style={delay(5.2, 6)}>
+        {t({
+          cs: 'Nezávazně · Odpověď do 24 hodin · Diskrétně',
+          en: 'No obligation · Reply within 24 hours · Confidential',
+        })}
+      </p>
     </div>
   )
 }
@@ -286,9 +374,9 @@ function Footer() {
       <p className="footer__links">
         {/* ★ Kontakt první: od zavedení formuláře je to cíl všech výzev k akci
             a patička je poslední místo, kde se na něj dá jít. */}
-        <a href={CONTACT_HREF}>Kontakt</a>
+        <a href={localPath(CONTACT_HREF)}>{t({ cs: 'Kontakt', en: 'Contact' })}</a>
         <span aria-hidden="true">·</span>
-        <a href="/projekty">Projekty</a>
+        <a href={localPath('/projekty')}>{t({ cs: 'Projekty', en: 'Work' })}</a>
         <span aria-hidden="true">·</span>
         <a href={GITHUB} target="_blank" rel="noreferrer">
           <Icon name="github" size={14} />
@@ -304,15 +392,18 @@ function Footer() {
           materiály, překomprimovaná geometrie), takže bez posledního bodu by
           atribuce byla neúplná a licence porušená. Neodstraňovat, nezkracovat. */}
       <p className="footer__legal">
-        Postaveno v Reactu a three.js. 3D model{' '}
+        {t({ cs: 'Postaveno v Reactu a three.js. 3D model ', en: 'Built with React and three.js. 3D model ' })}
         <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf" target="_blank" rel="noreferrer">
-          „Primary Ion Drive“
-        </a>{' '}
-        od Mikea Murdocka, licence{' '}
+          {t({ cs: '„Primary Ion Drive“', en: '“Primary Ion Drive”' })}
+        </a>
+        {t({ cs: ' od Mikea Murdocka, licence ', en: ' by Mike Murdock, licensed under ' })}
         <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
           CC BY 4.0
         </a>
-        . Model byl upraven (barvy materiálů, komprese geometrie).
+        {t({
+          cs: '. Model byl upraven (barvy materiálů, komprese geometrie).',
+          en: '. The model has been modified (material colors, geometry compression).',
+        })}
       </p>
     </footer>
   )

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { SECTIONS } from '../content/sections'
+import { sections } from '../content/i18n'
+import { t } from '../lib/lang'
 import { sceneState } from '../lib/scene-state'
 
 /**
@@ -33,10 +34,11 @@ export default function Status() {
     return () => clearInterval(id)
   }, [])
 
-  const i = live ? Math.min(sceneState.faceIndex, SECTIONS.length - 1) : 0
-  const s = SECTIONS[i]
+  const all = sections()
+  const i = live ? Math.min(sceneState.faceIndex, all.length - 1) : 0
+  const s = all[i]
   const transit = live && sceneState.transit
-  const next = Math.min(i + 1, SECTIONS.length - 1)
+  const next = Math.min(i + 1, all.length - 1)
   /* Ze sceneState, ne z propu: governor umí patro za běhu snížit a panel
      nesmí ukazovat kvalitu, která už dávno neběží. */
   const tier = live ? sceneState.tier : 'off'
@@ -47,11 +49,12 @@ export default function Status() {
         <span className="status__dot" />
         {transit ? (
           <span className="status__transit">
-            &gt;&gt; přechod {String(i).padStart(2, '0')} → {String(next).padStart(2, '0')}
+            &gt;&gt; {t({ cs: 'přechod', en: 'transit' })} {String(i).padStart(2, '0')} →{' '}
+            {String(next).padStart(2, '0')}
           </span>
         ) : (
           <span>
-            jednotka 06 · strana {String(i).padStart(2, '0')}/05 · {s.plateCode}
+            {t({ cs: 'jednotka 06 · strana', en: 'unit 06 · face' })} {String(i).padStart(2, '0')}/05 · {s.plateCode}
           </span>
         )}
       </div>
@@ -60,12 +63,16 @@ export default function Status() {
           Řádek „AKTIVNÍ SUBSYSTÉM" je pryč: duplikoval hlavičku panelu, pravou
           lištu i kicker sekce, a jeho výška tlačila CTA sekcí WEB a AI přímo
           na tenhle panel. */}
-      <Row k="Volná kapacita" v="Zbývá 1 místo" ok />
-      <Row k="Odezva" v="Do 24 hodin" />
+      <Row
+        k={t({ cs: 'Volná kapacita', en: 'Open capacity' })}
+        v={t({ cs: 'Zbývá 1 místo', en: '1 slot left' })}
+        ok
+      />
+      <Row k={t({ cs: 'Odezva', en: 'Response' })} v={t({ cs: 'Do 24 hodin', en: 'Within 24 hours' })} />
 
       <div className="status__meta">
         {tier === 'off'
-          ? 'statický režim · 3d vypnuto'
+          ? t({ cs: 'statický režim · 3d vypnuto', en: 'static mode · 3d off' })
           : `${sceneState.fps} fps · tier ${tier} · meshopt · model cc-by m. murdock`}
       </div>
     </aside>

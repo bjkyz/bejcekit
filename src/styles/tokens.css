@@ -97,6 +97,41 @@
      (náhled certifikátu, karta článku), takže tam nebyla žádná záloha. Teď 5.4:1. */
   --focus: 0 0 0 2px rgba(82, 174, 255, 0.75);
 
+  /**
+   * ═══════════ HRANA JE HRANA ═══════════
+   *
+   * ★★★ LEHKÝ NEOBRUTALISMUS: NULOVÝ POLOMĚR, VIDITELNÝ RÁM, ŽÁDNÝ ROZOSTŘENÝ STÍN.
+   *
+   * Web měl poloměry 2 a 3 px roztroušené v šesti souborech. Dvě věci na tom
+   * byly špatně a ani jedna není vkus:
+   *   • 2 px poloměr NENÍ VIDĚT — je to zaoblení, které nikdo nepozná, ale které
+   *     zároveň brání tomu, aby hrany různých prvků lícovaly. Buď kulaté tak,
+   *     aby to byl tvar, nebo ostré tak, aby to byla konstrukce. Tenhle web je
+   *     přístroj, takže ostré.
+   *   • ROZTROUŠENÁ HODNOTA SE ROZEJDE. Kartička na /projekty měla 3 px, chip
+   *     v žurnálu 2 px a tlačítko taky 2 px — vedle sebe to nikdo neviděl, ale
+   *     jeden token z toho dělá soustavu, kterou jde změnit jedním řádkem.
+   *
+   * ★★ „LEHKÝ" ZNAMENÁ, ŽE SE MĚNÍ KONSTRUKCE, NE PALETA. Neobrutalismus, jak se
+   *   dnes nosí, přidává křiklavé plochy a komiksové stíny; tenhle web má tmavou
+   *   scénu a jednu akcentovou rodinu, do které by to udeřilo jako cizí těleso.
+   *   Bere se z něj proto jen to, co pomáhá PŘEHLEDU:
+   *     • pravé úhly, aby prvky lícovaly a bloky se daly odečíst okem
+   *     • rám, který je opravdu vidět (--line-3, 3:1 — viz WCAG 1.4.11)
+   *     • plné barevné pásky u faktů místo měkkých závojů
+   *     • tvrdý, NEROZOSTŘENÝ posun místo záře — jen na hlavní akci
+   *
+   * ★ KULATÉ ZŮSTÁVÁ TO, CO JE OPRAVDU KULATÉ: tečky stavu (50 %) a prstenec
+   *   fokusu. Kruh je tvar, ne zaoblení.
+   */
+  --r-tile: 0px;
+  /* Tvrdý posun, nula rozostření. Nese ho JEN hlavní akce a jen při hoveru —
+     kdyby ho měl každý prvek, přestane znamenat „tady se dá stisknout". */
+  --shadow-hard: 4px 4px 0 rgba(79, 216, 232, 0.22);
+  /* Šířka barevné pásky u faktů (VÝSTUP, důkaz, dostupnost). Jedna hodnota,
+     ať se tři různé bloky nesejdou se třemi různými tloušťkami. */
+  --bar: 2px;
+
   --elev-1: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   --elev-2: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 64px rgba(8, 9, 10, 0.4);
 

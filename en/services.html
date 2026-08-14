@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="__SITE_ORIGIN__/en/services" />
+
+    <link rel="alternate" hreflang="cs" href="__SITE_ORIGIN__/sluzby" />
+    <link rel="alternate" hreflang="en" href="__SITE_ORIGIN__/en/services" />
+    <link rel="alternate" hreflang="x-default" href="__SITE_ORIGIN__/sluzby" />
+
+    <title>Services · AI systems, automation and custom software | bejcek.it</title>
+    <!-- Katalogový popisek, ne prodejní: úvod PRODÁVÁ, tahle stránka VYJMENOVÁVÁ.
+         Dva popisky ze 70 % totožné znamenají, že si Google vybere jednu URL. -->
+    <meta
+      name="description"
+      content="Service catalogue: AI assistants over company data and AI agents, process automation, internal tools and portals, SaaS products, data anonymization and custom websites."
+    />
+    <meta name="author" content="Jiří Bejček" />
+    <meta name="theme-color" content="#08090a" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="cs_CZ" />
+    <meta property="og:url" content="__SITE_ORIGIN__/en/services" />
+    <meta property="og:site_name" content="bejcek.it" />
+    <meta property="og:title" content="Services · bejcek.it" />
+    <meta
+      property="og:description"
+      content="I don't sell technology, I solve problems. AI systems, automation, internal tools, SaaS and websites."
+    />
+    <meta property="og:image" content="__SITE_ORIGIN__/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="bejcek.it · AI, software and automation" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "CollectionPage",
+            "@id": "__SITE_ORIGIN__/en/services#page",
+            "url": "__SITE_ORIGIN__/en/services",
+            "name": "Services · bejcek.it",
+            "description": "AI systems, process automation, internal tools, SaaS products, data anonymization and websites.",
+            "inLanguage": "en",
+            "about": { "@id": "__SITE_ORIGIN__/#identity" }
+          },
+          {
+            "@type": "Person",
+            "@id": "__SITE_ORIGIN__/#person",
+            "name": "Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "jobTitle": "AI and software engineer",
+            "worksFor": { "@id": "__SITE_ORIGIN__/#identity" },
+            "sameAs": ["https://github.com/bjkyz"],
+            "hasCredential": {
+              "@type": "EducationalOccupationalCredential",
+              "name": "Agentic Engineering",
+              "description": "AI agent architecture and principles, building and integrating MCP tools, controlling agents programmatically, full-stack app development with AI, agent orchestration through the SDK. 20 class hours, 10 lessons.",
+              "credentialCategory": "certificate",
+              "url": "__SITE_ORIGIN__/certifikat-agentic-engineering.pdf",
+              "dateCreated": "2026-05-29",
+              "recognizedBy": { "@type": "Organization", "name": "r_d by Laba" }
+            }
+          },
+          {
+            "@type": "OfferCatalog",
+            "@id": "__SITE_ORIGIN__/en/services#catalog",
+            "name": "What I build",
+            "provider": { "@id": "__SITE_ORIGIN__/#identity" },
+            "itemListElement": [
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI systems: assistants over company data, RAG, AI agents and MCP tools" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Process automation: document extraction, system integration, workflows" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Custom internal tools, client portals and dashboards" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "SaaS products from MVP to production, including subscriptions and admin" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Anonymization and pseudonymization of sensitive data for further processing" } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Websites, web apps, e-commerce and technical SEO" } }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "__SITE_ORIGIN__/en" },
+              { "@type": "ListItem", "position": 2, "name": "Services" }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/sluzby.tsx"></script>
+  </body>
+</html>

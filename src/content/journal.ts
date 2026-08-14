@@ -221,6 +221,33 @@ export function czechDate(iso: string): string {
   return `${d}. ${MONTHS[m - 1]} ${y}`
 }
 
+/**
+ * ★ ANGLICKÝ TVAR TÉHOŽ DATA, a ze stejného důvodu ručně. Články jsou psané
+ *   česky, ale odkazují se na ně i anglické stránky (`/en/services`) a datum
+ *   „14. srpna 2026" je v anglické větě cizí těleso. Skládá se to stejně jako
+ *   výš — `toLocaleDateString` se mezi Nodem a prohlížečem liší a rozdíl
+ *   v jediném znaku zahodí hydrataci.
+ */
+const MONTHS_EN = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+export function englishDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${MONTHS_EN[m - 1]} ${d}, ${y}`
+}
+
 /** Kotva žurnálu v navigaci a patičce. Na jednom místě, ať se nerozejde. */
 export const JOURNAL_PATH = '/clanky'
 export const JOURNAL_LABEL = 'ŽURNÁL'

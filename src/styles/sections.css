@@ -86,9 +86,14 @@
   gap: 0.6rem;
   margin-top: 1.5rem;
   padding: 0.5rem 0.9rem 0.5rem 0.75rem;
+  /* ★★ ČTVERCOVÝ ŠTÍTEK S PÁSKOU, NE PILULKA. Zelená na tomhle webu znamená
+     FAKT (dostupnost, „co dostanete") a fakt má mít všude stejný tvar: plná
+     páska vlevo a pravé úhly, přesně jako `.deliverable` o dvě obrazovky níž.
+     Pilulka naopak čte jako odznak — dekorace, kterou oko přeskočí. */
   border: 1px solid var(--green-line);
+  border-left: var(--bar) solid var(--green);
   background: var(--green-bg);
-  border-radius: 999px;
+  border-radius: var(--r-tile);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -175,6 +180,13 @@
   align-items: flex-start;
   gap: 0.55rem;
   margin-top: var(--sp-deliverable-top);
+  /* ★★ PÁSKA, NE BANNER. Zelená znamená na tomhle webu FAKT a fakty mají mít
+     jeden tvar: plná svislá páska vlevo (`--bar`), pravé úhly, žádná výplň.
+     Rámeček dokola by z důkazu udělal reklamní box — přesně to, čemu se text
+     nad tím vyhýbá. Takhle je to pořád jeden ostrý řádek, jen se dá najít
+     očima při skenování stránky. */
+  border-left: var(--bar) solid var(--green);
+  padding-left: 0.85rem;
   font-family: var(--font-sans);
   font-size: var(--fs-bullet);
   line-height: var(--lh-bullet);
@@ -285,7 +297,7 @@
   padding: 0.95rem 1.5rem;
   border: 1px solid var(--neon-2);
   color: var(--neon-2);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   position: relative;
   transition:
     color var(--d-hover) var(--e-ui),
@@ -299,7 +311,7 @@
   content: '';
   position: absolute;
   inset: -1px;
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   box-shadow: var(--glow-soft);
   opacity: 0;
   transition: opacity var(--d-lift) var(--e-ui);
@@ -355,6 +367,16 @@
   background-color: var(--neon-1);
   color: var(--bg-0);
   animation: btn-sheen 850ms var(--e-out-quint);
+  /* ★★ TVRDÝ POSUN, NULA ROZOSTŘENÍ — jediný neobrutalistický stín na webu
+     a schválně jen tady. Vyplněné tlačítko je jediná plná plocha stránky
+     (viz komentář výš), takže je to jediné místo, kde se posunutá kopie hrany
+     čte jako „tohle je hmotné a dá se to stisknout", a ne jako ozdoba.
+     ★ Přes `::after` (záře) se to nekříží: to je samostatná vrstva pod prvkem. */
+  box-shadow: var(--shadow-hard);
+}
+.btn--solid:active {
+  /* Stisk posun spolkne — tlačítko dosedne na podklad. */
+  box-shadow: none;
 }
 @keyframes btn-sheen {
   from {
@@ -427,11 +449,120 @@
        nejvíc; deska je jediný podklad, který kontrast udrží spolehlivě
    Rám je vlasový a poloměr 3px — pořád je to přístroj, ne karta z Material UI. */
 .contact {
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   width: 100%;
   max-width: 40rem;
   display: grid;
   gap: 0.625rem;
+}
+
+/* ══════════ CO SE STANE POTOM ════════════════════════════════
+   ★★★ TŘI KROKY V JEDNOM PÁSU, NE TŘI DLAŽDICE.
+     Sekce 05 je konec scrollu a s ní na obrazovce stojí ještě patička; každý
+     řádek navíc odsouvá tlačítko blíž ke spodní hraně. Pás ve třech sloupcích
+     stojí ~56 px, kdežto tři dlaždice pod sebou přes 200 px — a nesou přitom
+     TOTÉŽ. Jazykem je to táž věc jako `.hero-spec` na úvodu: `k` je slib,
+     `v` jeho podmínka, dá se to přejet očima místo číst.
+
+   ★★ ČÍSLO, SVISLÁ PÁSKA, TEXT. Páska (`--bar`) je táž konstrukce jako
+     u `.deliverable` a `.status-pill` — jenže v neutrální barvě, protože
+     tohle není zelený FAKT o dostupnosti, ale postup. Pravé úhly a plná
+     linka dělají z odstavce tabulku, kterou oko čte po sloupcích.
+
+   ★ NA TELEFONU POD SEBE, ale pořád s páskou: tři sloupce na 390 px by daly
+     osmiznakové řádky. Zlom řídí obsah (auto-fit + minmax), ne média dotaz. */
+.contact-next {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem 0.9rem;
+  margin: 0.4rem 0 0.2rem;
+  text-align: left;
+}
+.contact-next__i {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 0.5rem;
+  padding-left: 0.7rem;
+  border-left: var(--bar) solid var(--line-3);
+}
+.contact-next__n {
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--neon-3);
+  font-variant-numeric: tabular-nums;
+}
+.contact-next__k {
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-readout);
+  text-transform: uppercase;
+  color: var(--tx-1);
+}
+/* Přes oba sloupce: podmínka patří pod slib, ne vedle čísla. */
+.contact-next__v {
+  grid-column: 1 / -1;
+  margin-top: 0.15rem;
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  line-height: 1.45;
+  color: var(--tx-3);
+  text-wrap: pretty;
+}
+
+/* ══════════ „NEBO ROVNOU" ════════════════════════════════════
+   ★★ JEDNO SLOVO, CELÁ HIERARCHIE. Bez něj stojí vyplněná dlaždice s e-mailem
+     hned pod hlavním tlačítkem jako druhá stejně silná nabídka a návštěvník
+     rozhoduje o FORMĚ místo o tom, že napíše. Nadpis z ní dělá ústupovou cestu.
+   ★ Linka zprava dotáhne text k okraji bloku — je to předěl, ne nadpis sekce,
+     takže nesmí mít váhu nadpisu ani vlastní odstup nahoře i dole. */
+.contact-or {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  /* ★ --tx-3, ne --tx-4. Tenhle řádek i `.contact-trust` níž jsou spolu
+     s kopírkou JEDINÉ prvky sekce 05 BEZ vlastní dlaždice — leží rovnou na
+     scrimu nad scénou, kde je kamera nejblíž a hrana skla nejsvětlejší.
+     Přesně tam kdysi kopírka spadla na 2.84:1, tedy pod AA (viz .copy-btn).
+     7.2:1 je nezávislá pojistka pro případ, že se přísvit sloupce zase ladí. */
+  color: var(--tx-3);
+  letter-spacing: var(--ls-label);
+}
+.contact-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line-1);
+}
+
+/* ★ NA NÍZKÉM OKNĚ SE PÁS SEVŘE. Sekce 05 nese navíc patičku, takže je jako
+   jediná vždycky vyšší než okno; na 1440×900 se tím ale spodek s kanály tlačí
+   pod hranu. Zmenšuje se ROZESTUP a proklad, ne písmo — je to týž zákon jako
+   v tokens.css: velikost řídí šířka, rozestupy výška. */
+@media (min-width: 1025px) and (max-height: 1000px) {
+  .contact-next {
+    gap: 0.35rem 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+  .contact-next__v {
+    line-height: 1.35;
+  }
+  .contact {
+    margin-top: 1rem;
+  }
+}
+
+/* Tichý řádek pod vším. Táž trojice slibů stojí i pod formulářem na /kontakt —
+   je to jeden slib řečený na obou koncích téže cesty (viz .ctc-trust). */
+.contact-trust {
+  margin-top: 0.75rem;
+  color: var(--tx-3);
+  letter-spacing: var(--ls-readout);
+  text-align: left;
 }
 
 /* ★ JEDINÝ VYPLNĚNÝ PRVEK CELÉHO WEBU. Vyplněná plocha je nejsilnější vizuální
@@ -455,7 +586,7 @@
   gap: 0.15rem 1rem;
   padding: 1.15rem 1.35rem;
   border: 1px solid var(--neon-2);
-  border-radius: 3px;
+  border-radius: var(--r-tile);
   /* ★ TÁŽ BARVA, JEN UŽ SKORO NEPRŮHLEDNÁ. Bylo rgba(79,216,232,0.07), což se
      nad --bg-0 skládá na ≈ #0d1719 — a přesně to je hodnota tady, teď ale
      s krytím 0.88 místo 0.07. Vizuálně se nezměnilo nic; změnilo se, na čem to
@@ -559,7 +690,7 @@
   height: 100%;
   padding: 0.95rem 1.15rem;
   border: 1px solid var(--line-2);
-  border-radius: 3px;
+  border-radius: var(--r-tile);
   /* Ze stejného důvodu jako u `.contact-primary` výš: dlaždice si nese podklad
      sama, aby ho nemusel držet závoj přes celou sekci. Bylo 0.5. */
   background: rgba(19, 22, 25, 0.82);

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t } from '../lib/lang'
 import type { Group } from 'three'
 
 /* ★ ŽÁDNÝ hodnotový import z 'three'. GrabPlate visí na hero sekci, tedy
@@ -65,7 +66,7 @@ export default function GrabPlate({ dragRef }: { dragRef: React.RefObject<Group 
   /* ★ Popisek je STAV s výchozí desktopovou variantou, ne výpočet z matchMedia
      při renderu. Server ani neví, čím na web někdo sáhne — a jiný text
      v serverovém a prvním klientském renderu by shodil hydrataci. */
-  const [label, setLabel] = useState('táhni a otoč')
+  const [label, setLabel] = useState(t({ cs: 'táhni a otoč', en: 'drag to turn' }))
   const off = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function GrabPlate({ dragRef }: { dragRef: React.RefObject<Group 
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const coarse = window.matchMedia('(any-pointer: coarse)').matches
-    if (coarse) setLabel('přejeď do stran')
+    if (coarse) setLabel(t({ cs: 'přejeď do stran', en: 'swipe sideways' }))
 
     let seen = false
     try {

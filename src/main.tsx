@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.tsx'
+import { adoptDocumentLang } from './lib/lang'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -28,6 +29,10 @@ import './styles/hud.css'
    až kód, který ho umí zase odhalit. Nejde to inline skriptem v <head>:
    CSP má script-src 'self'. Tady je to nejdřívější povolené místo. */
 document.documentElement.classList.add('js')
+
+/* ★ JAZYK SE NASTAVÍ PŘED HYDRATACÍ, ne během ní. Čte se z `<html lang>`, který
+   do dokumentu zapsal build — viz lib/lang.ts. */
+adoptDocumentLang()
 
 /* StrictMode ZŮSTÁVÁ. R3F v9 ho konečně dědí z react-dom, takže odhalí latentní
    double-mount chyby, které byly dřív tiše skryté. Neřeš je vypnutím StrictMode —

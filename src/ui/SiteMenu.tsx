@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { CONTACT_HREF, MAILTO, NAV_PAGES, PHONE, PHONE_TEL, WHATSAPP } from '../content/sections'
+import { CONTACT_HREF, MAILTO, PHONE, PHONE_TEL, WHATSAPP } from '../content/sections'
+import { navPages } from '../content/i18n'
+import { localPath, pageKeyOf, t } from '../lib/lang'
 import Icon from './Icons'
+import LangSwitch from './LangSwitch'
 import Mark from './Mark'
 
 /**
@@ -110,9 +113,9 @@ export default function SiteMenu({
   }
 
   const items: { label: string; href: string }[] = [
-    { label: 'Úvod', href: '/' },
-    ...NAV_PAGES.map((p) => ({ label: p.title, href: p.href })),
-    { label: 'Kontakt', href: CONTACT_HREF },
+    { label: t({ cs: 'Úvod', en: 'Home' }), href: localPath('/') },
+    ...navPages().map((p) => ({ label: p.title, href: p.href })),
+    { label: t({ cs: 'Kontakt', en: 'Contact' }), href: localPath(CONTACT_HREF) },
   ]
 
   return (
@@ -123,7 +126,7 @@ export default function SiteMenu({
         className="nav__burger"
         aria-expanded={open}
         aria-controls="site-menu"
-        aria-label={open ? 'Zavřít menu' : 'Otevřít menu'}
+        aria-label={open ? t({ cs: 'Zavřít menu', en: 'Close menu' }) : t({ cs: 'Otevřít menu', en: 'Open menu' })}
         onClick={() => setOpen((o) => !o)}
       >
         <span aria-hidden="true" />
@@ -134,7 +137,7 @@ export default function SiteMenu({
         createPortal(
           <div className="menu" id="site-menu" ref={panelRef} role="dialog" aria-modal="true" aria-label="Menu">
             <div className="menu__bar">
-              <a className="menu__brand" href="/" onClick={onItem('/')}>
+              <a className="menu__brand" href={localPath('/')} onClick={onItem(localPath('/'))}>
                 <Mark size={30} />
                 <span>
                   bejcek<b>.it</b>
@@ -144,14 +147,14 @@ export default function SiteMenu({
                 type="button"
                 className="nav__burger is-open"
                 onClick={() => setOpen(false)}
-                aria-label="Zavřít menu"
+                aria-label={t({ cs: 'Zavřít menu', en: 'Close menu' })}
               >
                 <span aria-hidden="true" />
                 <span aria-hidden="true" />
               </button>
             </div>
 
-            <nav className="menu__pages" aria-label="Stránky">
+            <nav className="menu__pages" aria-label={t({ cs: 'Stránky', en: 'Pages' })}>
               {items.map((it, i) => (
                 <a
                   key={it.href}
@@ -175,8 +178,12 @@ export default function SiteMenu({
             <div className="menu__foot">
               {/* Táž hlavní akce jako v liště — menu ji nesmí schovat. Na /kontakt
                   vede sama na sebe, což `onItem` promění v zavření menu. */}
-              <a className="btn btn--solid menu__cta" href={CONTACT_HREF} onClick={onItem(CONTACT_HREF)}>
-                Napište mi
+              <a
+                className="btn btn--solid menu__cta"
+                href={localPath(CONTACT_HREF)}
+                onClick={onItem(localPath(CONTACT_HREF))}
+              >
+                {t({ cs: 'Napište mi', en: 'Get in touch' })}
                 <span aria-hidden="true">→</span>
               </a>
               <div className="menu__channels">
@@ -190,9 +197,14 @@ export default function SiteMenu({
                 </a>
                 <a href={MAILTO}>
                   <Icon name="mail" size={15} />
-                  E-mail
+                  {t({ cs: 'E-mail', en: 'Email' })}
                 </a>
               </div>
+              {/* ★ PŘEPÍNAČ JAZYKA PATŘÍ I SEM. Pod 800 px je lišta schovaná
+                  v burgeru, takže menu je JEDINÉ místo, kde se na telefonu dá
+                  jazyk přepnout. Když by tu chyběl, byla by anglická verze na
+                  mobilu dosažitelná jen přímou adresou. */}
+              <LangSwitch page={pageKeyOf(active)} />
             </div>
           </div>,
           document.body,

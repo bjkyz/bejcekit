@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { INQUIRY_ANCHOR, PROJECTS } from './content/projects'
+import { INQUIRY_ANCHOR } from './content/projects'
+import { projects } from './content/i18n'
 import { CONTACT_HREF, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
+import { localPath, t } from './lib/lang'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import { tilt } from './lib/tilt'
@@ -53,7 +55,7 @@ export default function ProjectsPage() {
   return (
     <>
       <a className="skip-link" href="#projekty">
-        Přeskočit na projekty
+        {t({ cs: 'Přeskočit na projekty', en: 'Skip to projects' })}
       </a>
 
       <div className="bg-field" aria-hidden="true" />
@@ -70,7 +72,7 @@ export default function ProjectsPage() {
 
       {/* Navigace i patička jsou od přidání žurnálu společné pro všechny
           podstránky — viz ui/PageShell.tsx (a NAV_PAGES v content/sections.ts). */}
-      <PageNav active="/projekty" ctaHref={CONTACT_HREF} />
+      <PageNav active={localPath('/projekty')} ctaHref={localPath(CONTACT_HREF)} />
 
       <main className="page" ref={main}>
         {/* ── HLAVIČKA STRÁNKY ─────────────────────────────────────
@@ -80,26 +82,30 @@ export default function ProjectsPage() {
             Důvody a pravidla anonymizace: content/projects.ts. */}
         <header className="page__head">
           <p className="kicker label reveal" style={revealDelay(0, 5)}>
-            [ PROJEKTY ]
+            {t({ cs: '[ PROJEKTY ]', en: '[ WORK ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            Weby běží naživo. Jména kryje mlčenlivost.
+            {t({ cs: 'Weby běží naživo. Jména kryje mlčenlivost.', en: 'The sites are live. The names stay confidential.' })}
           </h1>
           {/* Třetí věta („celé reference ukazuji na schůzce") stála na stránce
               třikrát: tady, v poznámce pod tím a v CTA dole. Zůstává jen v CTA,
               kde je z ní akce místo popisu. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
-            Klientské práce tu visí jen v obrysech: rozmazaný snímek, obor a technická fakta. Víc smlouva
-            o mlčenlivosti nedovolí.
+            {t({
+              cs: 'Klientské práce tu visí jen v obrysech: rozmazaný snímek, obor a technická fakta. Víc smlouva o mlčenlivosti nedovolí.',
+              en: 'Client work is shown in outline only: a blurred screenshot, the field, and the technical facts. That is as far as the NDA lets me go.',
+            })}
           </p>
           <p className="page__note reveal" style={revealDelay(1.8, 5)}>
-            <span className="page__note-k">Proč zámky</span>
+            <span className="page__note-k">{t({ cs: 'Proč zámky', en: 'Why the locks' })}</span>
             {/* ★ POSLEDNÍ VĚTA MUSELA PRYČ Z JINÉHO DŮVODU NEŽ KVŮLI DÉLCE:
                 nabízela zakázky na IT infrastrukturu, a ta z nabídky odešla při
                 přepozicování na AI · Software · Automatizace. Slib služby, kterou
                 web nikde jinde nezmiňuje, je horší než žádný text. */}
-            Diskrétnost není překážka, je součást služby. Stejná smlouva, která dnes kryje tyhle klienty, bude
-            jednou krýt i vás: váš web, vaše čísla, vaše data.
+            {t({
+              cs: 'Diskrétnost není překážka, je součást služby. Stejná smlouva, která dnes kryje tyhle klienty, bude jednou krýt i vás: váš web, vaše čísla, vaše data.',
+              en: "Discretion isn't an obstacle, it's part of the service. The same agreement that covers these clients today will one day cover you: your site, your numbers, your data.",
+            })}
           </p>
         </header>
 
@@ -107,10 +113,10 @@ export default function ProjectsPage() {
         {/* ★ `.reveal` je na BUŇCE, ne na kartě: na jednom prvku by přebilo
             naklápění (viz ProjectCard.tsx a projects.css). */}
         <ul className="pgrid" id="projekty" ref={grid}>
-          {PROJECTS.map((p, i) => (
+          {projects().map((p, i) => (
             <li
               className={`pgrid__cell reveal${i === 0 ? ' pgrid__cell--wide' : ''}`}
-              style={revealDelay(i, PROJECTS.length)}
+              style={revealDelay(i, 4)}
               key={p.id}
             >
               <ProjectCard p={p} i={i} />
@@ -124,17 +130,18 @@ export default function ProjectsPage() {
             a slíbit odemčení – ne obecné „napište mi". */}
         <section className="page__cta" id={INQUIRY_ANCHOR} aria-labelledby="page-cta-h">
           <h2 className="headline reveal" id="page-cta-h" style={revealDelay(0, 3)}>
-            Reference vám ukážu celé. Mezi čtyřma očima.
+            {t({ cs: 'Reference vám ukážu celé. Mezi čtyřma očima.', en: "I'll show you the references in full. Face to face." })}
           </h2>
           <p className="body reveal" style={revealDelay(0.8, 3)}>
-            Napište mi, co stavíte, vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý,
-            co to bude stát a kdy to bude hotové. A portfolio vám odemknu: weby naživo, jména
-            i výsledky.
+            {t({
+              cs: 'Napište mi, co stavíte, vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý, co to bude stát a kdy to bude hotové. A portfolio vám odemknu: weby naživo, jména i výsledky.',
+              en: "Tell me what you're building, in your own words. Within 24 hours you'll know whether I'm the right person for it, what it will cost, and when it will be done. And I'll open the portfolio up for you: live sites, names, results.",
+            })}
           </p>
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
-            <a className="btn btn--solid" href={CONTACT_HREF}>
+            <a className="btn btn--solid" href={localPath(CONTACT_HREF)}>
               <Icon name="mail" size={15} />
-              Napsat poptávku
+              {t({ cs: 'Napsat poptávku', en: 'Send an inquiry' })}
             </a>
             <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
               <Icon name="whatsapp" size={15} />
@@ -149,11 +156,11 @@ export default function ProjectsPage() {
               Mono readout přes sdílenou `.label`, ne další tlačítka –
               je to poznámka, ne nabídka. */}
           <p className="page__cta-trust label reveal" style={revealDelay(2.2, 3)}>
-            Nezávazně · Odpověď do 24 hodin · Diskrétně
+            {t({ cs: 'Nezávazně · Odpověď do 24 hodin · Diskrétně', en: 'No obligation · Reply within 24 hours · Discreet' })}
           </p>
         </section>
 
-        <PageFooter active="/projekty" />
+        <PageFooter active={localPath('/projekty')} />
       </main>
 
       <div className="grain" aria-hidden="true" />

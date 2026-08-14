@@ -122,7 +122,7 @@
      prvků 3:1. --line-3 je nově přesně 3.01:1. */
   border: 1px solid var(--line-3);
   padding: 0.55rem 0.9rem;
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   transition:
     border-color var(--d-hover) var(--e-ui),
     background-color var(--d-hover) var(--e-ui);
@@ -140,6 +140,76 @@
   gap: 0.6rem;
 }
 
+/* ══════════ PŘEPÍNAČ JAZYKA ══════════════════════════════════
+   ★★ DVĚ SEGMENTOVANÁ TLAČÍTKA V JEDNOM RÁMU, NE DVA ODKAZY VEDLE SEBE.
+     Je to volba mezi dvěma stavy téže věci, a přesně tak to má i vypadat:
+     jeden box, uvnitř dělicí linka, aktivní půlka vyplněná. Dva samostatné
+     odkazy by v liště čtly jako další dvě navigační položky — a lišta jich
+     unese pět, ne sedm (viz NAV_SECTION_COUNT v content/sections.ts).
+
+   ★ NEAKTIVNÍ PŮLKA MUSÍ BÝT ČITELNÁ, ne našeptaná: je to jediný ovládací
+     prvek, který návštěvník hledá podle textu („EN"), ne podle ikony.
+     Proto --tx-3 (7.2:1), ne --tx-4.
+
+   ★ Šířka je pevná (2.35rem na segment): „CS" a „EN" jsou dva znaky, ale
+     v proporcionálním písmu různě široké, takže by se rám při přepnutí
+     jazyka nepatrně zúžil a celá lišta by poskočila. Mono + pevná šířka
+     to drží na pixel. */
+.langsw {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-tile);
+  overflow: hidden;
+  flex: none;
+}
+.langsw__i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.35rem;
+  padding: 0.45rem 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--tx-3);
+  text-decoration: none;
+  transition:
+    color var(--d-hover) var(--e-ui),
+    background-color var(--d-hover) var(--e-ui);
+}
+.langsw__i + .langsw__i {
+  border-left: 1px solid var(--line-3);
+}
+.langsw__i:hover {
+  color: var(--tx-1);
+  background: rgba(255, 255, 255, 0.06);
+}
+/* Aktivní = azurová jako každý „tady jsi" stav na webu (aktivní tick pravé
+   lišty, aktivní odkaz v liště). Plocha, ne jen barva písma: v segmentovaném
+   ovladači nese stav VÝPLŇ, jinak se dvě skoro stejná slova nedají rozeznat. */
+.langsw__i.is-active {
+  color: var(--bg-0);
+  background: var(--neon-2);
+  font-weight: 600;
+}
+.langsw__i.is-active:hover {
+  color: var(--bg-0);
+  background: var(--neon-1);
+}
+
+/* ★★ Z LIŠTY MIZÍ PŘESNĚ TAM, KDE SE OBJEVUJE BURGER — 800 px, ANI O PIXEL JINDE.
+   Kdyby se schoval dřív (třeba na 900), vzniklo by pásmo, ve kterém není
+   přepínač ani v liště, ani v menu (burger tam ještě není), a anglická verze
+   by na těch šířkách šla otevřít jen přímou adresou. Práh se proto NESMÍ ladit
+   samostatně: je to táž hranice jako u `.nav__links` a `.nav__burger` níž. */
+@media (max-width: 800px) {
+  .nav__end .langsw {
+    display: none;
+  }
+}
+
 /* ── BURGER ──────────────────────────────────────────────────
    Existuje jen pod 800 px — přesně tam, kde mizí .nav__links. Rám má stejný
    jazyk jako CTA vedle (viz .nav__cta: --line-3 kvůli WCAG 1.4.11). */
@@ -153,7 +223,7 @@
   height: 44px;
   flex: none;
   border: 1px solid var(--line-3);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   background: none;
   color: var(--tx-1);
   cursor: pointer;
@@ -339,6 +409,22 @@
 }
 .menu__channels a:hover {
   color: var(--tx-1);
+}
+
+/* ★ PŘEPÍNAČ JAZYKA V MENU. Pod 800 px je lišta schovaná v burgeru, takže
+   tohle je JEDINÉ místo, kde se na telefonu dá přepnout jazyk. Stojí až úplně
+   dole, pod kanály: je to nastavení, ne cíl cesty — a menu má vést k akci,
+   ne nabízet volby o jazyce dřív než odkaz na kontakt.
+   ★ Segmenty tu smí být vyšší: na dotyku je 44 px minimum zásahové plochy. */
+/* ★ `justify-self`, ne `align-self`. `.menu__foot` je grid, takže `align-self`
+   řídí SVISLOU osu — rám se roztáhl přes celou šířku desky a dva segmenty po
+   3 rem v něm plavaly vlevo jako v prázdné krabici. */
+.menu__foot .langsw {
+  justify-self: start;
+}
+.menu__foot .langsw__i {
+  min-width: 3rem;
+  min-height: 44px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -538,8 +624,10 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     padding: 0 0.25rem;
-    border: 1px solid var(--line-2);
-    border-radius: 999px;
+    /* ★ Ovládací prvek → --line-3 a 3:1 (WCAG 1.4.11). Lišta plovoucí nad
+       textem musí mít viditelnou hranici, jinak čte jako skvrna v obsahu. */
+    border: 1px solid var(--line-3);
+    border-radius: var(--r-tile);
   }
   .rail__tick {
     min-width: 2.75rem;

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useReducedMotion } from '../lib/hooks'
+import { t } from '../lib/lang'
 
 /**
  * ═══════════ ZNAČKOVÁ PEČEŤ ═══════════
@@ -95,7 +96,12 @@ export default function BullSeal({
            obrazovky hlásil podruhé. Velká pečeť na rozcestníku popis má. */
         {...(variant === 'byline'
           ? { 'aria-hidden': true as const }
-          : { 'aria-label': 'Značka bejcek.it: kovový býk se svítícími modrými hranami, pomalá smyčka.' })}
+          : {
+              'aria-label': t({
+                cs: 'Značka bejcek.it: kovový býk se svítícími modrými hranami, pomalá smyčka.',
+                en: 'The bejcek.it mark: a metal bull with glowing blue edges, slow loop.',
+              }),
+            })}
       >
         <source src="/media/bull.mp4" type="video/mp4" />
       </video>

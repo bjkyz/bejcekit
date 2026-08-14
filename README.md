@@ -93,6 +93,9 @@ web běží výhradně přes HTTPS a nikdy nebude jinak.
 | Chci změnit | Soubor |
 |---|---|
 | **Texty, služby, kontakty, telefon** | `src/content/sections.ts` — jediný soubor s obsahem úvodu |
+| **Anglické texty (všechny stránky)** | `src/content/en.ts` — protějšek všech `content/*.ts` |
+| **Krátké texty rozhraní (obě verze)** | `t({ cs: …, en: … })` přímo v komponentě (`src/lib/lang.ts`) |
+| **Anglické adresy a co má/nemá překlad** | `ROUTES` v `src/lib/lang.ts` |
 | **Katalog služeb, technologie, certifikát** | `src/content/services.ts` |
 | **Projekty a reference** | `src/content/projects.ts` + snímky v `public/projects/` |
 | **Článek** (opravit, stáhnout) | `src/content/articles/<slug>.json` — jeden soubor = jeden článek |
@@ -120,6 +123,56 @@ krychle: šest stěn, šest sekcí. Sedmá položka scénu nezhorší, ale **sho
 klampuje polohu na dráze na pět, takže by kamera na posledních dvou sekcích
 zamrzla. Nový obsah tedy patří na **vlastní stránku** (jako `/projekty`), ne
 do `SECTIONS`.
+
+## Dvojjazyčnost: česky na kořeni, anglicky pod `/en/`
+
+Web má od 2026-08-14 anglickou verzi: `/en`, `/en/services`, `/en/work`,
+`/en/contact`. **Žurnál anglicky NENÍ** a je to rozhodnutí, ne opomenutí —
+články píše každý den cron přes jazykový model, takže by druhá větev znamenala
+druhé volání modelu denně, druhý RSS kanál a riziko, že se překlad rozejde
+s originálem (`journal: null` v `ROUTES`).
+
+Jak to drží pohromadě:
+
+- **Jazyk je modulový stav, ne React context** (`src/lib/lang.ts`). Web je MPA:
+  každá stránka je vlastní dokument s vlastním `<html lang>`, takže se jazyk za
+  běhu nikdy nemění. V prohlížeči ho nastaví vstupní bod z `document.documentElement.lang`
+  (`adoptDocumentLang()`) PŘED hydratací, v prerenderu `entry-prerender.tsx` před
+  každým `renderToString`.
+- **Anglické stránky nemají vlastní skripty.** `en/index.html` ukazuje na týž
+  `/src/main.tsx` jako česká verze; liší se jediný atribut v HTML. Osm skoro
+  identických vstupních souborů by se při první změně rozešlo.
+- **Odkazy překládá `localPath()`**, ne komponenty. Obsah dál píše `/kontakt`
+  a na anglické verzi z toho vyjde `/en/contact`. Neznámá cesta projde beze
+  změny (kotvy, soubory, externí odkazy).
+- **Obsah se skládá v `src/content/i18n.ts`**: kostra z české verze, texty
+  z `en.ts`. Když přibude sekce nebo karta, anglická verze se NEROZBIJE —
+  ukáže na tom místě češtinu, dokud překlad nedorazí.
+- **`hreflang` je obousměrný a na každé stránce včetně sebe sama** (v `<head>`
+  i v sitemapě přes `xhtml:link`). Neúplný klastr Google zahodí celý a obě
+  verze pak soupeří jako duplicity. `x-default` míří na češtinu.
+- **Formulář posílá skryté pole `lang`.** Bez JS odpovídá `api/contact.ts`
+  přesměrováním — bez toho pole by anglický návštěvník po odeslání skončil na
+  české stránce. Podle téhož pole volí funkce jazyk hlášek. ★ Klíče chyb
+  (`?chyba=jmeno`) zůstávají české: je to protokol, ne text pro člověka.
+
+## Vzhled: lehký neobrutalismus
+
+Poloměry byly 2–3 px roztroušené v šesti souborech. Dvě věci na tom byly špatně
+a ani jedna není vkus: 2px zaoblení **není vidět**, ale zároveň brání tomu, aby
+hrany různých prvků lícovaly; a roztroušená hodnota se dřív nebo později rozejde.
+Teď je z toho soustava — `--r-tile: 0` v `tokens.css`, jedno místo.
+
+„Lehký" znamená, že se mění **konstrukce, ne paleta**. Neobrutalismus, jak se
+dnes nosí, přidává křiklavé plochy a komiksové stíny; tenhle web má tmavou scénu
+a jednu akcentovou rodinu, do které by to udeřilo jako cizí těleso. Bere se z něj
+jen to, co pomáhá přehledu:
+
+- **pravé úhly**, aby prvky lícovaly a bloky se daly odečíst okem
+- **rám, který je opravdu vidět** (`--line-3`, 3:1 — WCAG 1.4.11 u ovládacích prvků)
+- **plné barevné pásky u faktů** (`--bar`): důkaz, „co dostanete" i štítek
+  dostupnosti mají teď jeden tvar — zelená páska vlevo, žádný banner
+- **tvrdý, nerozostřený posun** (`--shadow-hard`) jen na hlavní vyplněné akci
 
 ## Co je potřeba vědět, než do toho sáhneš
 

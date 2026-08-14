@@ -10,6 +10,7 @@ Klíčová fakta:
 - Doložená kvalifikace: certifikát Agentic Engineering (r_d by Laba, 29. 5. 2026, 20 vyučovacích hodin) – architektura AI agentů, MCP nástroje, orchestrace agentů přes SDK. Dokument: __SITE_ORIGIN__/certifikat-agentic-engineering.pdf
 - Reference: anonymizované ukázky (NDA) na __SITE_ORIGIN__/projekty, celé reference na vyžádání
 - Web má čtyři části: úvod (__SITE_ORIGIN__/), služby (__SITE_ORIGIN__/sluzby), projekty (__SITE_ORIGIN__/projekty) a žurnál (__SITE_ORIGIN__/clanky)
+- Anglická verze: úvod (__SITE_ORIGIN__/en), služby (__SITE_ORIGIN__/en/services), projekty (__SITE_ORIGIN__/en/work), kontakt (__SITE_ORIGIN__/en/contact). Obsah je týž, psaný anglicky; žurnál anglickou verzi nemá a vychází jen česky.
 - Žurnál vychází denně; přehled článků je na konci tohoto souboru a v kanálu __SITE_ORIGIN__/rss.xml
 
 ## Služby

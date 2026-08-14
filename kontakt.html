@@ -7,6 +7,17 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href="__SITE_ORIGIN__/kontakt" />
 
+    <!--
+      ★★★ hreflang MUSÍ BÝT OBOUSMĚRNÝ. Když česká stránka odkáže na anglickou,
+        ale anglická nevrátí odkaz zpátky, Google jazykový klastr ZAHODÍ celý
+        a obě verze pak spolu soupeří jako duplicity. Proto je na každé stránce
+        obojí, včetně odkazu na sebe sama.
+      ★ `x-default` míří na ČESKOU verzi: je to kořen webu a domovský trh.
+    -->
+    <link rel="alternate" hreflang="cs" href="__SITE_ORIGIN__/kontakt" />
+    <link rel="alternate" hreflang="en" href="__SITE_ORIGIN__/en/contact" />
+    <link rel="alternate" hreflang="x-default" href="__SITE_ORIGIN__/kontakt" />
+
     <title>Kontakt · Poptávka na AI, automatizaci a software | bejcek.it</title>
     <!-- Popisek je slib, ne výčet: co člověk dostane a jak rychle. Pod ~160 znaky. -->
     <meta
@@ -19,6 +30,7 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:url" content="__SITE_ORIGIN__/kontakt" />
     <meta property="og:site_name" content="bejcek.it" />
     <meta property="og:title" content="Kontakt · bejcek.it" />

@@ -1,4 +1,4 @@
-import { LANGS, LOCALE, ROUTES, type Lang } from '../lib/lang'
+import { getLang, LANGS, LOCALE, ROUTES } from '../lib/lang'
 
 /**
  * ═══════════ PŘEPÍNAČ JAZYKA ═══════════
@@ -30,11 +30,24 @@ import { LANGS, LOCALE, ROUTES, type Lang } from '../lib/lang'
  *   jinojazyčný dokument"), kdežto značka v hlavičce je signál pro vyhledávač.
  *   Web má obojí, protože každé řeší něco jiného.
  */
-export default function LangSwitch({ current, path }: { current: Lang; path: string }) {
+export default function LangSwitch({
+  /**
+   * Která stránka to je — KLÍČ, ne cesta. Cesta by se musela porovnávat
+   * s aktuálním jazykem („jsme na `/kontakt`, nebo na `/en/contact`?") a to je
+   * přesně ta úvaha, kterou tady nikdo nemá dělat podruhé. Klíč platí v obou
+   * jazycích a `ROUTES` z něj vyrobí obě adresy.
+   */
+  page,
+}: {
+  page: keyof (typeof ROUTES)['cs']
+}) {
+  const current = getLang()
   return (
     <div className="langsw" role="group" aria-label="Jazyk / Language">
       {LANGS.map((lang) => {
-        const target = ROUTES[lang][pathKey(path, current)]
+        /* Protějšek nemusí existovat (žurnál je jen česky) — pak se z klíče
+           stane domovská stránka toho jazyka, ne mrtvý odkaz. */
+        const target = ROUTES[lang][page] ?? ROUTES[lang].home
         if (!target) return null
         const active = lang === current
         return (
@@ -55,17 +68,4 @@ export default function LangSwitch({ current, path }: { current: Lang; path: str
       })}
     </div>
   )
-}
-
-/**
- * Ze současné cesty odvodí, o kterou stránku jde, aby se dal najít její
- * protějšek. Fallback na `home` je záměr: neznámá cesta (třeba článek žurnálu)
- * pošle člověka na úvod druhého jazyka místo na 404.
- */
-function pathKey(path: string, lang: Lang): keyof (typeof ROUTES)['cs'] {
-  const map = ROUTES[lang]
-  for (const key of Object.keys(map) as (keyof typeof map)[]) {
-    if (map[key] === path) return key
-  }
-  return 'home'
 }

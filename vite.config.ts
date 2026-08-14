@@ -238,6 +238,32 @@ export default defineConfig({
            scroll pěti obrazovkami WebGL. Konverzní cesta musí být co nejkratší. */
         kontakt: resolve(process.cwd(), 'kontakt.html'),
         clanky: resolve(process.cwd(), 'clanky.html'),
+        /**
+         * ═══════════ ANGLICKÁ VERZE ═══════════
+         *
+         * ★★★ ČTYŘI DALŠÍ HTML, ALE ŽÁDNÝ DALŠÍ VSTUPNÍ SKRIPT. Každá anglická
+         *   stránka ukazuje na TÝŽ `/src/*.tsx` jako její česká dvojnice a liší
+         *   se jen atributem `<html lang="en">` — jazyk si vstupní bod přečte
+         *   z dokumentu (`adoptDocumentLang`, lib/lang.ts).
+         *
+         *   Alternativa (vlastní `main.en.tsx` pro každou stránku) by znamenala
+         *   osm skoro identických souborů, které by se při první změně rozešly.
+         *   Takhle je rozdíl mezi jazyky JEDEN atribut v HTML a jeden modulový
+         *   stav — a nemá se co rozejít, protože kód je doslova tentýž.
+         *
+         * ★ Cesta souboru určuje cestu ve výstupu: `en/services.html` skončí
+         *   v `dist/en/services.html` a Vercel ho s `cleanUrls: true` naservíruje
+         *   na `/en/services`. Žádný rewrite, žádný router.
+         *
+         * ★★ ŽURNÁL ANGLICKY NENÍ, a je to rozhodnutí (viz `ROUTES` v lib/lang.ts):
+         *   články píše každý den cron přes jazykový model, takže by druhá jazyková
+         *   větev znamenala druhé volání modelu denně, druhý RSS kanál a riziko,
+         *   že se překlad rozejde s originálem.
+         */
+        enIndex: resolve(process.cwd(), 'en/index.html'),
+        enServices: resolve(process.cwd(), 'en/services.html'),
+        enWork: resolve(process.cwd(), 'en/work.html'),
+        enContact: resolve(process.cwd(), 'en/contact.html'),
       },
       output: {
         // Vite 8 běží na Rolldownu, který `manualChunks` sice zavolá, ale výsledek

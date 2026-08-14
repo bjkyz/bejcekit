@@ -1,5 +1,7 @@
-import { LOCKED_DOMAIN, type Project } from '../content/projects'
+import { type Project } from '../content/projects'
+import { lockedDomain, projectCardLabels } from '../content/i18n'
 import { CONTACT_HREF } from '../content/sections'
+import { localPath } from '../lib/lang'
 import Icon from './Icons'
 
 /**
@@ -53,8 +55,11 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
      • místo domény nese štítek LOCKED_DOMAIN,
      • „do ciziny" se pozná z tvaru odkazu, ne z ručního příznaku, který by
        se při příští veřejné referenci zapomněl nastavit. */
-  const href = p.locked ? CONTACT_HREF : p.href
-  const domain = p.locked ? LOCKED_DOMAIN : p.domain
+  const L = projectCardLabels()
+  /* ★ `localPath` i na odemčené kartě: jediná odemčená reference je TENHLE web
+     (`href: '/'`), takže by anglická verze poslala návštěvníka na český úvod. */
+  const href = localPath(p.locked ? CONTACT_HREF : p.href)
+  const domain = p.locked ? lockedDomain() : p.domain
   const external = !p.locked && /^https?:\/\//.test(p.href)
   const icon = p.locked ? 'lock' : external ? 'external' : 'back'
 
@@ -108,9 +113,9 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
           <span className="pcard__seal label" aria-hidden="true">
             <span className="pcard__seal-head">
               <Icon name="lock" size={12} />
-              Chráněno NDA
+              {L.ndaSeal}
             </span>
-            <span>Detail na vyžádání</span>
+            <span>{L.detailOnRequest}</span>
           </span>
         )}
       </div>
@@ -128,7 +133,7 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
           {!p.locked && (
             <span className="pcard__live">
               <span className="pcard__live-dot" />
-              živá ukázka
+              {L.live}
             </span>
           )}
         </p>
@@ -146,8 +151,8 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
                 dodatek to udělá, aniž by se do jména odkazu psalo něco navíc
                 pro vidoucí. */}
             <Icon name={icon} size={14} />
-            {p.locked && <span className="sr-only"> (pod NDA, detail na vyžádání)</span>}
-            {external && <span className="sr-only"> (otevře se v nové kartě)</span>}
+            {p.locked && <span className="sr-only">{L.srLocked}</span>}
+            {external && <span className="sr-only">{L.srExternal}</span>}
           </a>
         </h2>
 
@@ -167,7 +172,7 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
 
         {p.outcome && (
           <p className="pcard__outcome">
-            <span className="pcard__outcome-k">Výsledek</span>
+            <span className="pcard__outcome-k">{L.outcome}</span>
             {p.outcome}
           </p>
         )}

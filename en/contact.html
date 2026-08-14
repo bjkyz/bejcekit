@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" style="background: #08090a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="__SITE_ORIGIN__/en/contact" />
+
+    <link rel="alternate" hreflang="cs" href="__SITE_ORIGIN__/kontakt" />
+    <link rel="alternate" hreflang="en" href="__SITE_ORIGIN__/en/contact" />
+    <link rel="alternate" hreflang="x-default" href="__SITE_ORIGIN__/kontakt" />
+
+    <title>Contact · Enquire about AI, automation and software | bejcek.it</title>
+    <meta
+      name="description"
+      content="Tell me what you need solved. You don't need to know the technology or have a spec. Within 24 hours you'll know what it costs and when it's done. No obligation, confidential."
+    />
+    <meta name="author" content="Jiří Bejček" />
+    <meta name="theme-color" content="#08090a" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="cs_CZ" />
+    <meta property="og:url" content="__SITE_ORIGIN__/en/contact" />
+    <meta property="og:site_name" content="bejcek.it" />
+    <meta property="og:title" content="Contact · bejcek.it" />
+    <meta
+      property="og:description"
+      content="Tell me what you need solved. Reply within 24 hours, fixed price in writing."
+    />
+    <meta property="og:image" content="__SITE_ORIGIN__/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="bejcek.it · contact" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preload" href="/fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- ★ `FAQPage` je vlastní uzel s `mainEntity`, ne pole přilepené ke stránce.
+         Otázky se musí SHODOVAT s tím, co je na stránce vidět (CONTACT_EN
+         v src/content/en.ts) — značkování, které slibuje jiný obsah než
+         stránka, je porušení pravidel pro strukturovaná data. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ContactPage",
+            "@id": "__SITE_ORIGIN__/en/contact#page",
+            "url": "__SITE_ORIGIN__/en/contact",
+            "name": "Contact · bejcek.it",
+            "description": "Enquiries about AI systems, process automation and custom software. Reply within 24 hours, fixed price in writing.",
+            "inLanguage": "en",
+            "isPartOf": { "@id": "__SITE_ORIGIN__/#website" },
+            "about": { "@id": "__SITE_ORIGIN__/#identity" },
+            "primaryImageOfPage": { "@id": "__SITE_ORIGIN__/#logo" }
+          },
+          {
+            "@type": "ProfessionalService",
+            "@id": "__SITE_ORIGIN__/#identity",
+            "name": "bejcek.it · Jiří Bejček",
+            "url": "__SITE_ORIGIN__/",
+            "description": "AI and software engineer. AI assistants over company data and AI agents, process automation, internal tools, SaaS products and custom websites.",
+            "email": "bejcek.jirka@gmail.com",
+            "telephone": "+420607706102",
+            "areaServed": { "@type": "Country", "name": "Czechia" },
+            "availableLanguage": ["cs", "en"],
+            "priceRange": "$$",
+            "sameAs": ["https://github.com/bjkyz"],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "email": "bejcek.jirka@gmail.com",
+              "telephone": "+420607706102",
+              "areaServed": "CZ",
+              "availableLanguage": ["cs", "en"]
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "__SITE_ORIGIN__/en/contact#faq",
+            "isPartOf": { "@id": "__SITE_ORIGIN__/en/contact#page" },
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What will it cost?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You get the price in writing up front, after a free 30-minute call. Smaller automations start in the tens of thousands of CZK, custom software depends on scope. If the scope changes while I work, you know the new price before I start on the change."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Do I need to know exactly what I want?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. One sentence is enough: we do this by hand, or this keeps slowing us down. Writing the technical spec is my job, not yours."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does it take?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Smaller automations take a few weeks, custom software months. I ship continuously, so you see a running version before everything is finished."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where are you based?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Prague, Czech Republic. Most of the work runs remotely, and I come to meetings in person when it makes sense."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What if you're not the right person for it?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "I'll tell you straight and point you to someone who is. I don't take work that won't pay for itself."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Who owns the finished code?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You do. You get the code, the access, and the documentation. You're not dependent on me and I don't hold a key anywhere."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "__SITE_ORIGIN__/en" },
+              { "@type": "ListItem", "position": 2, "name": "Contact" }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!--
+      ★★ NOSCRIPT NESE FUNKČNÍ FORMULÁŘ, NE JEN ADRESU. Skryté pole `lang`
+        je tu podstatné: podle něj `api/contact.ts` pozná, kam po odeslání
+        přesměrovat a v jakém jazyce odpovědět (viz jeho hlavička).
+    -->
+    <noscript>
+      <div style="max-width: 40rem; margin: 0 auto; padding: 4rem 1.5rem; color: #c1c8d1; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1 style="color: #d2d8df; font-size: 1.75rem">Contact · bejcek.it</h1>
+        <p>Tell me what you need solved. I reply within 24 hours.</p>
+        <form method="post" action="/api/contact" style="display: grid; gap: 0.75rem; margin: 1.5rem 0">
+          <input type="hidden" name="lang" value="en" />
+          <label>Name<br /><input name="name" required style="width: 100%; padding: 0.6rem" /></label>
+          <label>Email<br /><input name="email" type="email" required style="width: 100%; padding: 0.6rem" /></label>
+          <label>What do you need solved?<br /><textarea name="message" required rows="6" style="width: 100%; padding: 0.6rem"></textarea></label>
+          <button type="submit" style="padding: 0.7rem 1.2rem">Send inquiry</button>
+        </form>
+        <p>
+          Or reach me directly:<br />
+          Email: <a href="mailto:bejcek.jirka@gmail.com" style="color: #52aeff">bejcek.jirka@gmail.com</a><br />
+          Phone: <a href="tel:+420607706102" style="color: #52aeff">+420 607 706 102</a><br />
+          WhatsApp: <a href="https://wa.me/420607706102" style="color: #52aeff">+420 607 706 102</a>
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/kontakt.tsx"></script>
+  </body>
+</html>

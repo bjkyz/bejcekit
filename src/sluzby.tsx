@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import ServicesPage from './ServicesPage.tsx'
+import { adoptDocumentLang } from './lib/lang'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -22,6 +23,10 @@ import './styles/services.css'
  * viz komentář v services.css — proto tam mají přepisy vyšší specificitu.)
  */
 document.documentElement.classList.add('js')
+
+/* ★ JAZYK SE NASTAVÍ PŘED HYDRATACÍ, ne během ní. Čte se z `<html lang>`, který
+   do dokumentu zapsal build — viz lib/lang.ts. */
+adoptDocumentLang()
 
 const app = (
   <StrictMode>

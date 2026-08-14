@@ -45,6 +45,20 @@ export function getLang(): Lang {
   return current
 }
 
+/**
+ * Nastaví jazyk podle `<html lang>` aktuálního dokumentu. Volá se ve VSTUPNÍM
+ * BODĚ, ještě před `hydrateRoot`.
+ *
+ * ★★ ČTE SE DOKUMENT, NE `navigator.language`. Atribut do HTML zapsal tentýž
+ *   build, který stránku vyrenderoval, takže se serverový a klientský render
+ *   nemají jak rozejít. Odvození z prohlížeče by je rozešlo okamžitě: Čech
+ *   s anglickým systémem by dostal jiný první render, než co je v HTML,
+ *   a React by celý strom zahodil a postavil znovu.
+ */
+export function adoptDocumentLang(): void {
+  setLang(document.documentElement.lang === 'en' ? 'en' : DEFAULT_LANG)
+}
+
 /** `true` na anglické verzi. Zkratka pro nejčastější větvení. */
 export function isEn(): boolean {
   return current === 'en'
@@ -104,6 +118,42 @@ export function route(key: keyof (typeof ROUTES)['cs']): string | null {
 }
 
 /**
+ * ★★★ PŘEKLADAČ ODKAZŮ, KTERÝ DRŽÍ CELOU ANGLICKOU VERZI POHROMADĚ.
+ *
+ * Obsah (`content/*.ts`) píše cesty česky — `/kontakt`, `/sluzby`. Kdyby si
+ * každá komponenta cíl vybírala sama podle jazyka, byla by to podmínka na
+ * dvaceti místech a první, co by se stalo, je odkaz z anglické stránky na
+ * českou. Tady se to řeší jednou: dovnitř jde česká cesta, ven cesta
+ * v aktuálním jazyce.
+ *
+ * ★ NEZNÁMÁ CESTA PROJDE BEZE ZMĚNY. Kotvy (`/#ai`), soubory (`/og.png`)
+ *   i externí odkazy tedy fungují dál a nemusí se nikde vyjmenovávat.
+ *
+ * ★★ ŽURNÁL JE VÝJIMKA A JE TO ZÁMĚR: anglickou verzi nemá (viz ROUTES), takže
+ *   `/clanky` se vrací nepřeložený. Anglický návštěvník tak dostane český
+ *   žurnál — a texty, které na něj odkazují, to říkají nahlas
+ *   („Read the journal (Czech)"). Rozbitý odkaz je horší než přiznaný jazyk.
+ */
+const CS_PATH_KEYS: Record<string, keyof (typeof ROUTES)['cs']> = {
+  '/': 'home',
+  '/sluzby': 'services',
+  '/projekty': 'work',
+  '/kontakt': 'contact',
+  '/clanky': 'journal',
+}
+
+export function localPath(csPath: string): string {
+  /* Kotva na jiné stránce (`/#ai`, `/kontakt#formular`) se rozdělí a přeloží
+     se jen ta část před mřížkou — jinak by mapa musela znát každou kotvu. */
+  const hash = csPath.indexOf('#')
+  const base = hash === -1 ? csPath : csPath.slice(0, hash)
+  const rest = hash === -1 ? '' : csPath.slice(hash)
+  const key = CS_PATH_KEYS[base]
+  if (!key) return csPath
+  return (ROUTES[current][key] ?? base) + rest
+}
+
+/**
  * Protějšek dané cesty v druhém jazyce, nebo `null`, když neexistuje.
  * Čte to přepínač jazyka v navigaci i generátor `hreflang`.
  */
@@ -121,4 +171,23 @@ export function counterpart(path: string, from: Lang): string | null {
 export const LOCALE: Record<Lang, { html: string; og: string; name: string }> = {
   cs: { html: 'cs', og: 'cs_CZ', name: 'Čeština' },
   en: { html: 'en', og: 'en_US', name: 'English' },
+}
+
+/**
+ * Ze současné cesty odvodí, o kterou stránku jde. Používají to stránky, které
+ * svou identitu drží jako `href` (navigace podstránek), ne jako klíč.
+ *
+ * ★ HLEDÁ SE V OBOU JAZYCÍCH. `/sluzby` i `/en/services` musí dát `services`,
+ *   protože tatáž komponenta běží na obou verzích a dostane vždycky cestu té své.
+ * ★ Fallback na `home` je záměr: neznámá cesta (třeba článek žurnálu) pošle
+ *   člověka na úvod druhého jazyka místo na 404.
+ */
+export function pageKeyOf(path: string): keyof (typeof ROUTES)['cs'] {
+  for (const lang of LANGS) {
+    const map = ROUTES[lang]
+    for (const key of Object.keys(map) as (keyof typeof map)[]) {
+      if (map[key] === path) return key
+    }
+  }
+  return 'home'
 }

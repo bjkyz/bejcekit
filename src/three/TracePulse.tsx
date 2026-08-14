@@ -4,12 +4,12 @@ import { BufferAttribute, BufferGeometry, Color, Group, LineBasicMaterial } from
 import { FACE_TRANSFORMS } from '../lib/faces'
 import { clampDelta, sceneState } from '../lib/scene-state'
 import { bus } from '../lib/bus'
-import { SECTIONS } from '../content/sections'
+import { FACE_COUNT } from '../content/sections'
 
 const HALF = 1.42
 const PER_SIDE = 40
 const STEPS = PER_SIDE * 4 // bodů po obvodu (bez uzavíracího duplikátu)
-const CONTACT = SECTIONS.length - 1
+const CONTACT = FACE_COUNT - 1
 
 const HOT = new Color('#b8f5ff').multiplyScalar(3)
 

@@ -44,7 +44,7 @@
    četla jako věc, do které se píše. */
 .ctc-form {
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--r-tile);
   background:
     linear-gradient(180deg, rgba(19, 22, 25, 0.66), rgba(11, 13, 15, 0.82)) padding-box,
     linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04) 45%, rgba(79, 216, 232, 0.14))
@@ -120,7 +120,7 @@
   /* --line-3 (3.01:1): hranice ovládacího prvku, ne typografický předěl.
      Při --line-2 (1.24:1) pole nevypadá jako pole. Viz WCAG 1.4.11. */
   border: 1px solid var(--line-3);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   transition:
     border-color var(--d-hover) var(--e-ui),
     background-color var(--d-hover) var(--e-ui),
@@ -188,7 +188,7 @@
   text-transform: uppercase;
   color: var(--tx-3);
   border: 1px solid var(--line-2);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   transition:
     color var(--d-hover) var(--e-ui),
     border-color var(--d-hover) var(--e-ui),
@@ -257,7 +257,7 @@
   padding: 0.7rem 0.9rem;
   border: 1px solid rgba(255, 138, 122, 0.4);
   border-left: 2px solid #ff8a7a;
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   background: rgba(255, 138, 122, 0.08);
   font-size: var(--fs-bullet);
   line-height: var(--lh-bullet);
@@ -271,7 +271,7 @@
   padding: 1.25rem;
   border: 1px solid var(--green-line);
   border-left: 2px solid var(--green);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   background: var(--green-bg);
 }
 .ctc-ok:focus-visible {

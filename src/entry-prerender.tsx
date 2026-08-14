@@ -5,7 +5,25 @@ import ProjectsPage from './ProjectsPage.tsx'
 import ServicesPage from './ServicesPage.tsx'
 import ContactPage from './ContactPage.tsx'
 import JournalRoot from './JournalRoot.tsx'
+import { setLang, type Lang } from './lib/lang.ts'
 import type { JournalRoute } from './lib/journal-route.ts'
+
+/**
+ * ═══════════ JAZYK PŘI PRERENDERU ═══════════
+ *
+ * ★★ `renderToString` JE SYNCHRONNÍ, A PRÁVĚ PROTO JE MODULOVÝ STAV BEZPEČNÝ.
+ *   Nastaví se jazyk, vyrenderuje se celá stránka, teprve pak se nastaví další.
+ *   Nikdy neběží dva rendery najednou, takže se globální stav nemá jak proplést.
+ *
+ * ★ JAZYK SE NASTAVUJE U KAŽDÉ STRÁNKY, I U ČESKÉ. Kdyby se spoléhalo na
+ *   výchozí hodnotu, stačilo by jedno přeházené pořadí v `PAGES` a české
+ *   stránky by se vyrenderovaly anglicky — chyba, která projde buildem
+ *   i testem a pozná se až v produkci.
+ */
+function page(lang: Lang, node: React.ReactElement): string {
+  setLang(lang)
+  return renderToString(<StrictMode>{node}</StrictMode>)
+}
 
 /**
  * ═══════════ VSTUP PRO BUILD-TIME PRERENDER ═══════════
@@ -31,33 +49,20 @@ import type { JournalRoute } from './lib/journal-route.ts'
  *   textovými uzly a hydratace by na sousedních textech nesedla.
  */
 export const PAGES: Record<string, () => string> = {
-  'index.html': () =>
-    renderToString(
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    ),
-  'projekty.html': () =>
-    renderToString(
-      <StrictMode>
-        <ProjectsPage />
-      </StrictMode>,
-    ),
-  'sluzby.html': () =>
-    renderToString(
-      <StrictMode>
-        <ServicesPage />
-      </StrictMode>,
-    ),
+  'index.html': () => page('cs', <App />),
+  'projekty.html': () => page('cs', <ProjectsPage />),
+  'sluzby.html': () => page('cs', <ServicesPage />),
   /* ★ Kontakt se prerenderuje jako každá jiná stránka. Formulář je čistý HTML
      s `action` a `method`, takže vyrenderovaná verze funguje i bez hydratace —
      viz komentář v ContactPage.tsx. */
-  'kontakt.html': () =>
-    renderToString(
-      <StrictMode>
-        <ContactPage />
-      </StrictMode>,
-    ),
+  'kontakt.html': () => page('cs', <ContactPage />),
+
+  /* ★ Anglické stránky jsou TYTÉŽ komponenty, jen s jiným jazykem. Žádná
+     kopie stromu, žádná druhá sada souborů — viz `input` ve vite.config.ts. */
+  'en/index.html': () => page('en', <App />),
+  'en/work.html': () => page('en', <ProjectsPage />),
+  'en/services.html': () => page('en', <ServicesPage />),
+  'en/contact.html': () => page('en', <ContactPage />),
 }
 
 /**
@@ -71,9 +76,7 @@ export const PAGES: Record<string, () => string> = {
  * render nemají jak rozejít.
  */
 export function renderJournal(route: JournalRoute): string {
-  return renderToString(
-    <StrictMode>
-      <JournalRoot route={route} />
-    </StrictMode>,
-  )
+  /* Žurnál je jen česky (viz ROUTES v lib/lang.ts) — jazyk se přesto nastavuje
+     explicitně, protože tahle funkce běží AŽ PO anglických stránkách výš. */
+  return page('cs', <JournalRoot route={route} />)
 }

@@ -46,6 +46,51 @@ const HONEYPOT_FIELD = 'website'
 const INQUIRY_VALUES = ['ai', 'automatizace', 'software', 'web', 'nevim']
 
 /**
+ * ═══════════ DVA JAZYKY, JEDEN ENDPOINT ═══════════
+ *
+ * ★★★ FORMULÁŘ POSÍLÁ SKRYTÉ POLE `lang`. Řeší to dvě věci najednou, a obě jsou
+ *   vidět jen ve verzi BEZ JavaScriptu, tedy tam, kde se nikdy netestuje:
+ *     • kam se po odeslání přesměruje (`/kontakt` vs `/en/contact`) — bez toho
+ *       by anglický návštěvník po odeslání skončil na české stránce
+ *     • v jakém jazyce dostane hlášku
+ *
+ * ★★ KLÍČE (`?chyba=jmeno`) ZŮSTÁVAJÍ ČESKÉ V OBOU JAZYCÍCH. Je to protokol mezi
+ *   funkcí a stránkou, ne text pro člověka; přeložený klíč by znamenal dvě sady
+ *   větví na dvou místech, která se rozejdou. Stejné rozhodnutí je zapsané
+ *   i v `src/ContactPage.tsx` u `urlErrors()`.
+ *
+ * ★ CESTY JSOU TU OPSANÉ, protože tenhle soubor nesmí nic importovat (viz
+ *   hlavička). Kdyby se anglická cesta změnila, mění se `ROUTES` v
+ *   `src/lib/lang.ts` A tenhle řádek.
+ */
+const PAGE = { cs: '/kontakt', en: '/en/contact' }
+
+const MESSAGES = {
+  cs: {
+    metoda: 'Použij POST.',
+    telo: 'Nepodařilo se přečíst data formuláře.',
+    jmeno: 'Napište prosím své jméno.',
+    email: 'Tahle adresa nevypadá platně.',
+    zpravaShort: `Napište prosím aspoň ${LIMITS.message.min} znaků, ať vím, o co jde.`,
+    zpravaLong: 'Zpráva je moc dlouhá.',
+    limit: 'Zpráv z jedné adresy přišlo moc. Zkuste to za chvíli, nebo napište přímo na e-mail.',
+    konfigurace: 'Formulář teď není nastavený. Napište mi prosím přímo na e-mail nebo WhatsApp.',
+    odeslani: 'Zprávu se nepodařilo odeslat. Zkuste to prosím znovu, nebo napište na WhatsApp.',
+  },
+  en: {
+    metoda: 'Use POST.',
+    telo: "Couldn't read the form data.",
+    jmeno: 'Please enter your name.',
+    email: "That address doesn't look valid.",
+    zpravaShort: `Please write at least ${LIMITS.message.min} characters so I know what this is about.`,
+    zpravaLong: 'That message is too long.',
+    limit: 'Too many messages came from one address. Try again in a bit, or email me directly.',
+    konfigurace: "The form isn't set up right now. Please email me or message me on WhatsApp.",
+    odeslani: "The message couldn't be sent. Please try again, or message me on WhatsApp.",
+  },
+}
+
+/**
  * ★ NEJKRATŠÍ ROZUMNÁ DOBA VYPLNĚNÍ. Člověk, který má napsat aspoň dvacet
  *   znaků zprávy, to pod tři vteřiny nestihne; skript ano. Je to druhá vrstva
  *   za honeypotem a stojí jedno skryté pole s časovou značkou.
@@ -138,6 +183,11 @@ export default async function handler(req: unknown, res?: NodeRes): Promise<Resp
    *   Rozliší se to podle `Accept`: prohlížeč posílá `text/html`, `fetch` ne.
    */
   const wantsHtml = header('accept').includes('text/html')
+  /* ★ Jazyk se dozvíme až z těla, ale `done()` se používá i PŘED jeho čtením
+     (kontrola metody). Proměnná se proto zakládá česky a přepíše se, jakmile
+     jsou data přečtená — dřív než kterákoli hláška pro člověka vznikne. */
+  let lang: 'cs' | 'en' = 'cs'
+  const M = () => MESSAGES[lang]
   const redirect = (status: number, to: string) => {
     if (res && typeof res.setHeader === 'function') {
       res.setHeader('Location', to)
@@ -148,10 +198,12 @@ export default async function handler(req: unknown, res?: NodeRes): Promise<Resp
   /* 303, ne 302: po POSTu musí prohlížeč přejít na GET, jinak nabídne
      při obnovení stránky odeslat formulář znovu. */
   const done = (ok: boolean, code = '') =>
-    wantsHtml ? redirect(303, ok ? '/kontakt?odeslano=1' : `/kontakt?chyba=${code || 'obecna'}`) : null
+    wantsHtml
+      ? redirect(303, ok ? `${PAGE[lang]}?odeslano=1` : `${PAGE[lang]}?chyba=${code || 'obecna'}`)
+      : null
 
   if ((r?.method ?? 'GET') !== 'POST') {
-    return done(false, 'metoda') ?? json(405, { error: 'Použij POST.' })
+    return done(false, 'metoda') ?? json(405, { error: M().metoda })
   }
 
   /* ── TĚLO ──────────────────────────────────────────────────
@@ -190,10 +242,13 @@ export default async function handler(req: unknown, res?: NodeRes): Promise<Resp
       data = r.body as Record<string, string>
     }
   } catch {
-    return done(false, 'telo') ?? json(400, { error: 'Nepodařilo se přečíst data formuláře.' })
+    return done(false, 'telo') ?? json(400, { error: MESSAGES.cs.telo })
   }
 
   const str = (k: string) => (typeof data[k] === 'string' ? data[k].trim() : '')
+
+  /* Od téhle chvíle mluví funkce jazykem odesílatele. */
+  if (str('lang') === 'en') lang = 'en'
 
   /* ── ROBOTI ────────────────────────────────────────────────
      ★ ODPOVÍDÁME 200 A „ODESLÁNO". Vrátit robotovi chybu znamená říct mu,
@@ -217,19 +272,19 @@ export default async function handler(req: unknown, res?: NodeRes): Promise<Resp
   const kind = INQUIRY_VALUES.includes(str('kind')) ? str('kind') : ''
 
   if (name.length < LIMITS.name.min || name.length > LIMITS.name.max) {
-    return done(false, 'jmeno') ?? json(422, { error: 'Napište prosím své jméno.', field: 'name' })
+    return done(false, 'jmeno') ?? json(422, { error: M().jmeno, field: 'name' })
   }
   if (!looksLikeEmail(email)) {
-    return done(false, 'email') ?? json(422, { error: 'Tahle adresa nevypadá platně.', field: 'email' })
+    return done(false, 'email') ?? json(422, { error: M().email, field: 'email' })
   }
   if (message.length < LIMITS.message.min) {
     return (
       done(false, 'zprava') ??
-      json(422, { error: `Napište prosím aspoň ${LIMITS.message.min} znaků, ať vím, o co jde.`, field: 'message' })
+      json(422, { error: M().zpravaShort, field: 'message' })
     )
   }
   if (message.length > LIMITS.message.max) {
-    return done(false, 'zprava') ?? json(422, { error: 'Zpráva je moc dlouhá.', field: 'message' })
+    return done(false, 'zprava') ?? json(422, { error: M().zpravaLong, field: 'message' })
   }
 
   /* IP z hlaviček proxy. `x-forwarded-for` může nést řetěz adres; první je klient. */
@@ -237,7 +292,7 @@ export default async function handler(req: unknown, res?: NodeRes): Promise<Resp
   if (tooMany(ip)) {
     return (
       done(false, 'limit') ??
-      json(429, { error: 'Zpráv z jedné adresy přišlo moc. Zkuste to za chvíli, nebo napište přímo na e-mail.' })
+      json(429, { error: M().limit })
     )
   }
 
@@ -251,7 +306,7 @@ export default async function handler(req: unknown, res?: NodeRes): Promise<Resp
     console.error('contact: chybí RESEND_API_KEY / CONTACT_TO / CONTACT_FROM')
     return (
       done(false, 'konfigurace') ??
-      json(500, { error: 'Formulář teď není nastavený. Napište mi prosím přímo na e-mail nebo WhatsApp.' })
+      json(500, { error: M().konfigurace })
     )
   }
 
@@ -296,7 +351,7 @@ Téma: ${esc(kindLabel)}</p>
       console.error('contact: Resend odmítl', resp.status, detail)
       return (
         done(false, 'odeslani') ??
-        json(502, { error: 'Zprávu se nepodařilo odeslat. Zkuste to prosím znovu, nebo napište na WhatsApp.' })
+        json(502, { error: M().odeslani })
       )
     }
   } catch (err) {

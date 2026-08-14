@@ -73,7 +73,7 @@
   padding: 0.85rem 1.1rem;
   border: 1px solid var(--line-1);
   border-left: 2px solid var(--line-3);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   font-size: var(--fs-bullet);
   line-height: var(--lh-bullet);
   color: var(--tx-2);
@@ -202,7 +202,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 3px;
+  border-radius: var(--r-tile);
   padding: 0.75rem 0.75rem 1.25rem;
 
   /**
@@ -322,7 +322,7 @@
   content: '';
   position: absolute;
   inset: -1px;
-  border-radius: 3px;
+  border-radius: var(--r-tile);
   box-shadow: var(--glow-hard);
   opacity: 0;
   transition: opacity var(--d-lift) var(--e-ui);
@@ -339,7 +339,7 @@
    Snímek webu zapuštěný do desky jako displej do přístroje. */
 .pcard__screen {
   position: relative;
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   overflow: hidden; /* smí tady, viz komentář u .pcard */
   /* ★★ BEZ TOHOHLE ŘÁDKU NEJDE KLIKNOUT NA OBRÁZEK — tedy na dvě třetiny karty.
      Natažený zásahový obdélník (`.pcard__link::after`) leží uvnitř `.pcard__body`,
@@ -466,7 +466,7 @@
   gap: 0.3rem;
   padding: 0.7rem 1.1rem;
   border: 1px solid var(--line-3);
-  border-radius: 2px;
+  border-radius: var(--r-tile);
   background: rgba(8, 9, 10, 0.82);
   line-height: var(--lh-mono);
   text-align: center;
@@ -602,7 +602,7 @@
   position: absolute;
   inset: -1px;
   z-index: 1;
-  border-radius: 3px;
+  border-radius: var(--r-tile);
 }
 
 .pcard__kind {

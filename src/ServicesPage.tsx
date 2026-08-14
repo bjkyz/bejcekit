@@ -1,7 +1,8 @@
-import { SERVICE_GROUPS, TECH_STACK } from './content/services'
+import { serviceGroups, techStack } from './content/i18n'
 import { CONTACT_HREF, PHONE, PHONE_TEL, WHATSAPP } from './content/sections'
 import { latestArticles } from './content/journal'
-import { czechDate } from './content/journal'
+import { czechDate, englishDate } from './content/journal'
+import { isEn, localPath, t } from './lib/lang'
 import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import Certificate from './ui/Certificate'
@@ -35,11 +36,13 @@ export default function ServicesPage() {
   /* Tři nejnovější články: dělá to z katalogu živou stránku a je to poctivý
      odkaz z nejsilnější obchodní stránky na nejčerstvější obsah. */
   const latest = latestArticles(3)
+  const GROUPS = serviceGroups()
+  const date = isEn() ? englishDate : czechDate
 
   return (
     <>
       <a className="skip-link" href="#katalog">
-        Přeskočit na služby
+        {t({ cs: 'Přeskočit na služby', en: 'Skip to services' })}
       </a>
 
       <div className="bg-field" aria-hidden="true" />
@@ -51,22 +54,24 @@ export default function ServicesPage() {
         <span />
       </div>
 
-      <PageNav active="/sluzby" ctaHref={CONTACT_HREF} />
+      <PageNav active={localPath('/sluzby')} ctaHref={localPath(CONTACT_HREF)} />
 
       <main className="page page--services" ref={main}>
         <header className="page__head svc-head">
           <p className="kicker label reveal" style={revealDelay(0, 5)}>
-            [ SLUŽBY ]
+            {t({ cs: '[ SLUŽBY ]', en: '[ SERVICES ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            Neprodávám technologie. Řeším problémy.
+            {t({ cs: 'Neprodávám technologie. Řeším problémy.', en: "I don't sell technology. I solve problems." })}
           </h1>
           {/* První věta byla doslova hero úvodu („Nemusíte vědět, jestli
               potřebujete agenta, API nebo databázi") — úvod PRODÁVÁ, tahle
               stránka VYJMENOVÁVÁ, takže si silnější formulaci nechává úvod. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
-            Řekněte mi, co dnes zabírá vašemu týmu čas, co nefunguje nebo co chcete vytvořit. Řešení najdu
-            a postavím.
+            {t({
+              cs: 'Řekněte mi, co dnes zabírá vašemu týmu čas, co nefunguje nebo co chcete vytvořit. Řešení najdu a postavím.',
+              en: "Tell me what's eating your team's time today, what doesn't work, or what you want to build. I'll find the solution and build it.",
+            })}
           </p>
           {/* ★ `.svc-head__claim` odstraněn. Byly to tři nominální fráze bez
               konkrétního obsahu („Méně manuální práce. Méně zbytečných nástrojů.
@@ -76,8 +81,8 @@ export default function ServicesPage() {
 
         {/* ── KATALOG ────────────────────────────────────────────── */}
         <div id="katalog">
-          {SERVICE_GROUPS.map((g, i) => (
-            <section className="svc reveal" style={revealDelay(i, SERVICE_GROUPS.length)} key={g.num} id={g.code.toLowerCase().replace(/\s+/g, '-')}>
+          {GROUPS.map((g, i) => (
+            <section className="svc reveal" style={revealDelay(i, GROUPS.length)} key={g.num} id={g.code.toLowerCase().replace(/\s+/g, '-')}>
               <div className="svc__head">
                 <p className="svc__code label">
                   <span className="svc__num">{g.num}</span>
@@ -103,8 +108,8 @@ export default function ServicesPage() {
                       katalog s úvodem oběma směry, což je to, co z webu dělá
                       souvislý graf místo tří ostrovů. */}
                   {g.anchor && (
-                    <a className="svc__anchor label" href={`/#${g.anchor}`}>
-                      Ukázat na úvodu
+                    <a className="svc__anchor label" href={`${localPath('/')}#${g.anchor}`}>
+                      {t({ cs: 'Ukázat na úvodu', en: 'See it on the home page' })}
                       <Icon name="back" size={12} />
                     </a>
                   )}
@@ -117,19 +122,23 @@ export default function ServicesPage() {
         {/* ── TECHNOLOGIE ────────────────────────────────────────── */}
         <section className="svc-tech reveal" aria-labelledby="tech-h">
           <h2 className="headline" id="tech-h">
-            Moderní stack. Praktické výsledky.
+            {t({ cs: 'Moderní stack. Praktické výsledky.', en: 'A modern stack. Practical results.' })}
           </h2>
           <p className="svc__lead">
-            Technologii vybírám podle problému, ne podle trendu. Když se úloha dá vyřešit jedním scriptem, nebude
-            z toho platforma. Technologie je prostředek, výsledek je produkt.
+            {t({
+              cs: 'Technologii vybírám podle problému, ne podle trendu. Když se úloha dá vyřešit jedním scriptem, nebude z toho platforma. Technologie je prostředek, výsledek je produkt.',
+              en: "I pick the technology to fit the problem, not the trend. When one script solves it, it won't turn into a platform. Technology is the means, the product is the result.",
+            })}
           </p>
           <dl className="techgrid">
-            {TECH_STACK.map((t) => (
-              <div className="techgrid__cell" key={t.group}>
-                <dt className="label">{t.group}</dt>
+            {/* ★ `grp`, ne `t` — `t` je překladová funkce (lib/lang.ts) a parametr
+                s tímtéž jménem by ji uvnitř bloku zastínil. */}
+            {techStack().map((grp) => (
+              <div className="techgrid__cell" key={grp.group}>
+                <dt className="label">{grp.group}</dt>
                 <dd>
                   <ul className="stack">
-                    {t.items.map((x) => (
+                    {grp.items.map((x) => (
                       <li className="stack__chip" key={x}>
                         {x}
                       </li>
@@ -144,9 +153,9 @@ export default function ServicesPage() {
         {/* ── KDO TO STAVÍ + CERTIFIKÁT ──────────────────────────── */}
         <section className="svc-about reveal" aria-labelledby="about-h">
           <div className="svc-about__text">
-            <p className="kicker label">[ KDO TO STAVÍ ]</p>
+            <p className="kicker label">{t({ cs: '[ KDO TO STAVÍ ]', en: '[ WHO BUILDS IT ]' })}</p>
             <h2 className="headline" id="about-h">
-              Jsem Jiří Bejček.
+              {t({ cs: 'Jsem Jiří Bejček.', en: "I'm Jiří Bejček." })}
             </h2>
             {/* ★ JEDEN ODSTAVEC, NE DVA. Původní znění mělo 57 slov a obojí, co
                 z nich vypadlo, tam bylo dvakrát: výčet za dvojtečkou („webové
@@ -156,10 +165,17 @@ export default function ServicesPage() {
                 Hierarchii tohohle bloku stejně nese `svc-about__method` pod ním —
                 pět sloves, která řeknou o práci víc než dva odstavce prózy. */}
             <p className="body">
-              Baví mě hledat místa, kde může software udělat práci místo člověka. Nechci stavět software proto, že to
-              jde, ale proto, že má důvod existovat.
+              {t({
+                cs: 'Baví mě hledat místa, kde může software udělat práci místo člověka. Nechci stavět software proto, že to jde, ale proto, že má důvod existovat.',
+                en: "I enjoy finding the places where software can do the work instead of a person. I don't want to build software because it can be built, but because it has a reason to exist.",
+              })}
             </p>
-            <p className="svc-about__method label">Pochopit · Navrhnout · Postavit · Zjednodušit · Automatizovat</p>
+            <p className="svc-about__method label">
+              {t({
+                cs: 'Pochopit · Navrhnout · Postavit · Zjednodušit · Automatizovat',
+                en: 'Understand · Design · Build · Simplify · Automate',
+              })}
+            </p>
           </div>
 
           <Certificate />
@@ -169,20 +185,27 @@ export default function ServicesPage() {
         {latest.length > 0 && (
           <section className="svc-journal reveal" aria-labelledby="journal-h">
             <h2 className="art__block-h label" id="journal-h">
-              Jak o tom přemýšlím
+              {t({ cs: 'Jak o tom přemýšlím', en: 'How I think about it' })}
             </h2>
             <ul className="svc-journal__list">
               {latest.map((a) => (
                 <li key={a.slug}>
-                  <a href={a.path}>{a.title}</a>
+                  {/* ★ `hrefLang` — žurnál vychází jen česky (viz ROUTES v lib/lang.ts).
+                      Nadpis bloku to říká i vidoucím, tenhle atribut odečítači
+                      a vyhledávači. */}
+                  <a href={a.path} hrefLang="cs">
+                    {a.title}
+                  </a>
                   <span className="svc-journal__date label">
-                    <time dateTime={a.published}>{czechDate(a.published)}</time>
+                    <time dateTime={a.published}>{date(a.published)}</time>
                   </span>
                 </li>
               ))}
             </ul>
             <p className="svc-journal__more label">
-              <a href="/clanky">Celý žurnál</a>
+              <a href="/clanky" hrefLang="cs">
+                {t({ cs: 'Celý žurnál', en: 'The full journal (Czech)' })}
+              </a>
             </p>
           </section>
         )}
@@ -190,16 +213,21 @@ export default function ServicesPage() {
         {/* ── VÝZVA K AKCI ──────────────────────────────────────── */}
         <section className="page__cta" id="poptavka" aria-labelledby="cta-h">
           <h2 className="headline" id="cta-h">
-            Co bychom mohli vytvořit?
+            {t({ cs: 'Co bychom mohli vytvořit?', en: 'What could we build?' })}
           </h2>
           {/* ★ TŘI ŘEČNICKÉ OTÁZKY BYLY KATALOG POTŘETÍ. A poslední dvě věty byly
               doslovná kopie nadpisu i odstavce sekce KONTAKT na úvodu — tedy dva
               indexované dokumenty se stejným odstavcem. */}
-          <p className="body">Napište, co potřebujete vyřešit. Technologii vyberu já.</p>
+          <p className="body">
+            {t({
+              cs: 'Napište, co potřebujete vyřešit. Technologii vyberu já.',
+              en: "Tell me what you need solved. I'll pick the technology.",
+            })}
+          </p>
           <div className="page__cta-row">
-            <a className="btn btn--solid" href={CONTACT_HREF}>
+            <a className="btn btn--solid" href={localPath(CONTACT_HREF)}>
               <Icon name="mail" size={15} />
-              Pojďme začít
+              {t({ cs: 'Pojďme začít', en: "Let's start" })}
             </a>
             <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
               <Icon name="whatsapp" size={15} />
@@ -210,10 +238,15 @@ export default function ServicesPage() {
               {PHONE}
             </a>
           </div>
-          <p className="page__cta-trust label">Nezávazně · Odpověď do 24 hodin · Pevná cena písemně</p>
+          <p className="page__cta-trust label">
+            {t({
+              cs: 'Nezávazně · Odpověď do 24 hodin · Pevná cena písemně',
+              en: 'No obligation · Reply within 24 hours · Fixed price in writing',
+            })}
+          </p>
         </section>
 
-        <PageFooter active="/sluzby" />
+        <PageFooter active={localPath('/sluzby')} />
       </main>
 
       <div className="grain" aria-hidden="true" />

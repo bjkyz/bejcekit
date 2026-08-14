@@ -36,7 +36,7 @@ const ENT = /\[\[([a-z0-9-]+)(?:\|([^\]]+))?\]\]/g
  * Rozseká text na kusy a značky firem. Vrací pole uzlů, ne HTML —
  * `dangerouslySetInnerHTML` se v tomhle souboru nesmí objevit ani jednou.
  */
-export function markup(text: string): ReactNode[] {
+function markup(text: string): ReactNode[] {
   const out: ReactNode[] = []
   let last = 0
   let m: RegExpExecArray | null

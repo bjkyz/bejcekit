@@ -21,7 +21,7 @@ import { SITE_ORIGIN } from './src/lib/site.js'
  * ★ `sitemap.xml` v seznamu SCHVÁLNĚ NENÍ: od přidání žurnálu se generuje
  *   v prerenderu z reálného seznamu článků (viz scripts/prerender.mjs).
  */
-const ORIGIN_FILES = ['robots.txt', 'llms.txt']
+const ORIGIN_FILES = ['robots.txt', 'llms.txt', '.well-known/security.txt']
 const TOKEN = /__SITE_ORIGIN__/g
 
 /**

@@ -1,0 +1,8 @@
+# Kam hlásit bezpečnostní nález (RFC 9116).
+# ★ `Expires` je povinné pole a je to schválně datum, ne „nikdy":
+#   soubor, kterému prošla platnost, je signál, že ho nikdo neudržuje.
+#   Při prodloužení stačí posunout rok.
+Contact: mailto:bejcek.jirka@gmail.com
+Expires: 2027-08-14T00:00:00.000Z
+Preferred-Languages: cs, en
+Canonical: __SITE_ORIGIN__/.well-known/security.txt

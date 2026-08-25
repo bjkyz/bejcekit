@@ -1,9 +1,10 @@
-import { lazy, startTransition, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, lazy, startTransition, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { Group } from 'three'
 import Hud from './hud/Hud'
 import Section from './ui/Section'
 import Preloader from './ui/Preloader'
 import SceneBoundary from './ui/SceneBoundary'
+import HomeProjects from './ui/HomeProjects'
 import { sections } from './content/i18n'
 import { t } from './lib/lang'
 import { detectTier } from './lib/quality'
@@ -198,7 +199,13 @@ export default function App() {
           const section = (
             <Section key={s.id} s={s} index={i} reduced={reduced} hasScene={showScene} dragRef={dragRef} />
           )
-          return i === 0 ? section : <Suspense key={s.id} fallback={null}>{section}</Suspense>
+          const content = i === 0 ? section : <Suspense fallback={null}>{section}</Suspense>
+          return (
+            <Fragment key={s.id}>
+              {content}
+              {i === 3 && <HomeProjects />}
+            </Fragment>
+          )
         })}
       </main>
 

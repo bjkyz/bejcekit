@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import ProjectsPage from './ProjectsPage.tsx'
 import { adoptDocumentLang } from './lib/lang'
+import MotionProvider from './ui/MotionProvider.tsx'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -10,6 +11,7 @@ import './styles/layout.css'
 import './styles/sections.css'
 import './styles/hud.css'
 import './styles/projects.css'
+import './styles/z-polish.css'
 
 /**
  * ★ DRUHÝ VSTUPNÍ BOD. Web je od téhle chvíle vícestránkový (MPA), ne SPA.
@@ -37,7 +39,9 @@ adoptDocumentLang()
 
 const app = (
   <StrictMode>
-    <ProjectsPage />
+    <MotionProvider>
+      <ProjectsPage />
+    </MotionProvider>
   </StrictMode>
 )
 

@@ -3,6 +3,7 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 import JournalRoot from './JournalRoot.tsx'
 import { parseJournalRoute } from './lib/journal-route.ts'
 import { adoptDocumentLang } from './lib/lang'
+import MotionProvider from './ui/MotionProvider.tsx'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -12,6 +13,7 @@ import './styles/sections.css'
 import './styles/hud.css'
 import './styles/projects.css'
 import './styles/journal.css'
+import './styles/z-polish.css'
 
 /**
  * ★ TŘETÍ VSTUPNÍ BOD. Web je vícestránkový (MPA), ne SPA — a žurnál to
@@ -38,7 +40,9 @@ adoptDocumentLang()
 
 const app = (
   <StrictMode>
-    <JournalRoot route={parseJournalRoute(window.location.pathname)} />
+    <MotionProvider>
+      <JournalRoot route={parseJournalRoute(window.location.pathname)} />
+    </MotionProvider>
   </StrictMode>
 )
 

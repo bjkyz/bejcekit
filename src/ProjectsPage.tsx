@@ -9,6 +9,7 @@ import { tilt } from './lib/tilt'
 import Icon from './ui/Icons'
 import ProjectCard from './ui/ProjectCard'
 import { PageFooter, PageNav } from './ui/PageShell'
+import Button from './ui/Button'
 
 /**
  * ═══════════ STRÁNKA /projekty ═══════════
@@ -130,27 +131,24 @@ export default function ProjectsPage() {
             a slíbit odemčení – ne obecné „napište mi". */}
         <section className="page__cta" id={INQUIRY_ANCHOR} aria-labelledby="page-cta-h">
           <h2 className="headline reveal" id="page-cta-h" style={revealDelay(0, 3)}>
-            {t({ cs: 'Reference vám ukážu celé. Mezi čtyřma očima.', en: "I'll show you the references in full. Face to face." })}
+            {t({ cs: 'Celé reference vám ukážu při hovoru.', en: "I'll show you the full references on a call." })}
           </h2>
           <p className="body reveal" style={revealDelay(0.8, 3)}>
             {t({
-              cs: 'Napište mi, co stavíte, vlastními slovy. Do 24 hodin víte, jestli na to jsem ten pravý, co to bude stát a kdy to bude hotové. A portfolio vám odemknu: weby naživo, jména i výsledky.',
-              en: "Tell me what you're building, in your own words. Within 24 hours you'll know whether I'm the right person for it, what it will cost, and when it will be done. And I'll open the portfolio up for you: live sites, names, results.",
+              cs: 'Napište mi, co stavíte. Do 24 hodin odpovím a navrhnu další krok. Při krátkém hovoru vám ukážu portfolio naživo, včetně jmen a výsledků; cenu a termín pak dostanete písemně.',
+              en: "Tell me what you're building. I'll reply within 24 hours and suggest the next step. On a short call, I'll show you the live portfolio, including names and results; you then get the price and timeline in writing.",
             })}
           </p>
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
-            <a className="btn btn--solid" href={localPath(CONTACT_HREF)}>
-              <Icon name="mail" size={15} />
+            <Button href={localPath(CONTACT_HREF)} variant="primary" arrow="right" icon={<Icon name="mail" size={15} />}>
               {t({ cs: 'Napsat poptávku', en: 'Send an inquiry' })}
-            </a>
-            <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
-              <Icon name="whatsapp" size={15} />
+            </Button>
+            <Button href={WHATSAPP} variant="secondary" intent="success" arrow="external" icon={<Icon name="whatsapp" size={15} />} target="_blank" rel="noreferrer">
               WhatsApp
-            </a>
-            <a className="btn btn--ghost" href={`tel:${PHONE_TEL}`}>
-              <Icon name="phone" size={15} />
+            </Button>
+            <Button href={`tel:${PHONE_TEL}`} variant="ghost" icon={<Icon name="phone" size={15} />}>
               {PHONE}
-            </a>
+            </Button>
           </div>
           {/* Tichý řádek pod tlačítky: tři důvody, proč se kliknutí nebát.
               Mono readout přes sdílenou `.label`, ne další tlačítka –

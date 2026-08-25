@@ -7,6 +7,7 @@ import ContactPage from './ContactPage.tsx'
 import JournalRoot from './JournalRoot.tsx'
 import { setLang, type Lang } from './lib/lang.ts'
 import type { JournalRoute } from './lib/journal-route.ts'
+import MotionProvider from './ui/MotionProvider.tsx'
 
 /**
  * ═══════════ JAZYK PŘI PRERENDERU ═══════════
@@ -22,7 +23,11 @@ import type { JournalRoute } from './lib/journal-route.ts'
  */
 function page(lang: Lang, node: React.ReactElement): string {
   setLang(lang)
-  return renderToString(<StrictMode>{node}</StrictMode>)
+  return renderToString(
+    <StrictMode>
+      <MotionProvider>{node}</MotionProvider>
+    </StrictMode>,
+  )
 }
 
 /**

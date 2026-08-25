@@ -5,6 +5,9 @@ import Icon from './Icons'
 import LangSwitch from './LangSwitch'
 import Mark from './Mark'
 import SiteMenu from './SiteMenu'
+import Button from './Button'
+import { m } from 'motion/react'
+import { useScrolled } from '../lib/hooks'
 
 /**
  * ═══════════ SPOLEČNÁ VÝZTUŽ PODSTRÁNEK ═══════════
@@ -35,8 +38,9 @@ export function PageNav({
   active: string
   ctaHref: string
 }) {
+  const scrolled = useScrolled()
   return (
-    <nav className="nav nav--page" aria-label={t({ cs: 'Hlavní navigace', en: 'Main navigation' })}>
+    <nav className={`nav nav--page${scrolled ? ' is-scrolled' : ''}`} aria-label={t({ cs: 'Hlavní navigace', en: 'Main navigation' })}>
       <a className="nav__mark" href={localPath('/')}>
         <Mark size={30} />
         <span className="sr-only">{t({ cs: 'bejcek.it, úvod', en: 'bejcek.it, home' })}</span>
@@ -59,6 +63,7 @@ export function PageNav({
             hrefLang={p.foreign ? 'cs' : undefined}
           >
             {p.label}
+            {active === p.href && <m.span className="nav__indicator" layoutId="page-nav-active" />}
             {p.foreign && <span className="sr-only"> (in Czech)</span>}
           </a>
         ))}
@@ -67,9 +72,9 @@ export function PageNav({
           kotva #formular. Viz volání v jednotlivých stránkách. */}
       <div className="nav__end">
         <LangSwitch page={pageKeyOf(active)} />
-        <a className="nav__cta" href={ctaHref}>
-          {t({ cs: 'Napište mi', en: 'Get in touch' })}
-        </a>
+        <Button className="nav__cta" href={ctaHref} variant="secondary" size="sm" arrow="right">
+          {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
+        </Button>
         <SiteMenu active={active} />
       </div>
     </nav>

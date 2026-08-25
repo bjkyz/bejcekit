@@ -56,9 +56,9 @@ export const SECTIONS_EN = [
           "v": "Weekends included. Remote or on site in Czechia."
         }
       ],
-      "status": "Open capacity: 1 slot left",
+      "status": "Taking on new projects",
       "cta": {
-        "label": "Let's build something smart"
+        "label": "Discuss a project"
       },
       "ghostCta": {
         "label": "What I build"
@@ -78,7 +78,7 @@ export const SECTIONS_EN = [
         "AI agents that don't just describe a task, they run it. MCP tools and orchestration.",
         "Payback math before I write the first line. If it doesn't pay back, I turn the job down."
       ],
-      "proof": "Proof: an AI pipeline I built publishes a new article on this site every day, in Czech. It can't invent a source, because it never gets the chance to. Check the dates.",
+      "proof": "Live example: an AI pipeline I built publishes this site's daily journal in Czech. Every article includes its date and sources, so you can verify the result.",
       "deliverable": {
         "label": "What you get",
         "text": "A running system wired into your tools, plus a monthly report of hours saved."
@@ -198,7 +198,7 @@ export const SECTIONS_EN = [
       "plateCode": "CONTACT",
       "plateNum": "05",
       "headline": "Tell me what you need solved.",
-      "body": "You don't need to know the technology or have a spec. Describe the problem in your own words and within 24 hours you'll know what it costs and when it's done.",
+      "body": "You don't need to know the technology or have a spec. Describe the problem in your own words. I'll reply personally within 24 hours and suggest the next step.",
       "bullets": [],
       "cta": {
         "label": "Send me your problem"
@@ -463,8 +463,8 @@ export const SERVICES_PAGE_EN = {
       "text": "Discretion isn't an obstacle, it's part of the service. The same agreement that covers these clients today will one day cover you: your site, your numbers, your data."
     },
     "cta": {
-      "h2": "I'll show you the references in full. Face to face.",
-      "body": "Tell me what you're building, in your own words. Within 24 hours you'll know whether I'm the right person for it, what it will cost, and when it will be done. And I'll open the portfolio up for you: live sites, names, results.",
+      "h2": "I'll show you the full references on a call.",
+      "body": "Tell me what you're building. I'll reply within 24 hours and suggest the next step. On a short call, I'll show you the live portfolio, including names and results; you then get the price and timeline in writing.",
       "buttons": {
         "email": "Send an email",
         "whatsapp": "WhatsApp"
@@ -683,7 +683,7 @@ export const CONTACT_EN = {
       "skipLink": "Skip to the form",
       "kicker": "[ CONTACT ]",
       "h1": "Tell me what you need solved.",
-      "lead": "You don't need to know the technology or have a spec. Describe the problem in your own words. Within 24 hours you'll know what it costs and when it will be done.",
+      "lead": "You don't need to know the technology or have a spec. Describe the problem in your own words. I'll reply personally within 24 hours and suggest the next step.",
       "formHeading": "Send me a message",
       "honeypotLabel": "Please leave this empty",
       "fields": {
@@ -798,8 +798,8 @@ export const UI_EN = {
       "head": "unit 06 · face {i}/05 · {plateCode}",
       "rows": [
         {
-          "k": "Open capacity",
-          "v": "1 slot left"
+          "k": "New projects",
+          "v": "Open"
         },
         {
           "k": "Response",

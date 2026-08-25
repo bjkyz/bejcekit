@@ -6,6 +6,9 @@ import { localPath, pageKeyOf, t } from '../lib/lang'
 import Icon from './Icons'
 import LangSwitch from './LangSwitch'
 import Mark from './Mark'
+import Button from './Button'
+import { AnimatePresence, m } from 'motion/react'
+import { ArrowRight } from 'lucide-react'
 
 /**
  * ═══════════ MOBILNÍ MENU (burger) ═══════════
@@ -133,9 +136,22 @@ export default function SiteMenu({
         <span aria-hidden="true" />
       </button>
 
-      {open &&
+      {typeof document !== 'undefined' &&
         createPortal(
-          <div className="menu" id="site-menu" ref={panelRef} role="dialog" aria-modal="true" aria-label="Menu">
+          <AnimatePresence>
+            {open && (
+              <m.div
+                className="menu"
+                id="site-menu"
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t({ cs: 'Hlavní menu', en: 'Main menu' })}
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22 }}
+              >
             <div className="menu__bar">
               <a className="menu__brand" href={localPath('/')} onClick={onItem(localPath('/'))}>
                 <Mark size={30} />
@@ -169,7 +185,7 @@ export default function SiteMenu({
                   </span>
                   {it.label}
                   <span className="menu__go" aria-hidden="true">
-                    →
+                    <ArrowRight />
                   </span>
                 </a>
               ))}
@@ -178,14 +194,16 @@ export default function SiteMenu({
             <div className="menu__foot">
               {/* Táž hlavní akce jako v liště — menu ji nesmí schovat. Na /kontakt
                   vede sama na sebe, což `onItem` promění v zavření menu. */}
-              <a
-                className="btn btn--solid menu__cta"
+              <Button
+                className="menu__cta"
                 href={localPath(CONTACT_HREF)}
+                variant="primary"
+                size="lg"
+                arrow="right"
                 onClick={onItem(localPath(CONTACT_HREF))}
               >
-                {t({ cs: 'Napište mi', en: 'Get in touch' })}
-                <span aria-hidden="true">→</span>
-              </a>
+                {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
+              </Button>
               <div className="menu__channels">
                 <a href={WHATSAPP} target="_blank" rel="noreferrer">
                   <Icon name="whatsapp" size={15} />
@@ -206,7 +224,9 @@ export default function SiteMenu({
                   mobilu dosažitelná jen přímou adresou. */}
               <LangSwitch page={pageKeyOf(active)} />
             </div>
-          </div>,
+              </m.div>
+            )}
+          </AnimatePresence>,
           document.body,
         )}
     </>

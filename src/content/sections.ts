@@ -116,8 +116,8 @@ export const SECTIONS: Section[] = [
       { k: 'Pevná cena a termín', v: 'Písemně, ještě než začnu.' },
       { k: 'Odpovím do 24 hodin', v: 'I o víkendu. Celé Česko, remote i u vás.' },
     ],
-    status: 'Volná kapacita: zbývá 1 místo',
-    cta: { label: 'Pojďme vytvořit něco chytrého', href: CONTACT_HREF },
+    status: 'Přijímám nové projekty',
+    cta: { label: 'Probrat projekt', href: CONTACT_HREF },
     /**
      * ★ DRUHÉ TLAČÍTKO VEDE NA SLUŽBY, NE NA SEKCE POD SEBOU.
      *   Scroll dolů i pravá lišta nabízejí totéž co odkaz na sekci, takže by
@@ -151,7 +151,7 @@ export const SECTIONS: Section[] = [
      *   linka vypnula, tahle věta musí ze stránky zmizet jako první.
      */
     proof:
-      'Důkaz: žurnál na tomhle webu píše každý den AI linka, kterou jsem postavil. Zdroje si nevymýšlí, protože k tomu nemá příležitost. Přečtěte si, jak je udělaná.',
+      'Ukázka v provozu: denní žurnál na tomto webu publikuje AI linka, kterou jsem postavil. Každý článek uvádí datum i zdroje, takže si výsledek můžete ověřit.',
     deliverable: {
       label: 'Co dostanete',
       text: 'Běžící řešení napojené na vaše systémy a měsíční report ušetřených hodin.',
@@ -266,7 +266,7 @@ export const SECTIONS: Section[] = [
      */
     headline: 'Řekněte mi, co potřebujete vyřešit.',
     body:
-      'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy a do 24 hodin víte, co to bude stát a kdy to bude hotové.',
+      'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin se vám ozvu osobně a navrhnu další krok.',
     bullets: [],
     cta: { label: 'Napsat poptávku', href: CONTACT_HREF },
     align: 'center',

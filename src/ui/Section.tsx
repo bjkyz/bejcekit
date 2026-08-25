@@ -17,6 +17,7 @@ import MagneticCTA from './MagneticCTA'
 import GrabPlate from './GrabPlate'
 import Icon from './Icons'
 import Mark from './Mark'
+import ServiceDemo from './ServiceDemo'
 
 const LAST = FACE_COUNT - 1
 
@@ -60,7 +61,7 @@ export default function Section({
    */
   const ctaRow = (s.cta || s.ghostCta) && (
     <div className="cta-row reveal" style={delay(isContact ? 3 : 5.4, 6)}>
-      {s.cta && <MagneticCTA href={s.cta.href} label={s.cta.label} enabled={!reduced} />}
+      {s.cta && <MagneticCTA href={s.cta.href} label={s.cta.label} variant="solid" enabled={!reduced} />}
       {s.ghostCta && (
         <MagneticCTA href={s.ghostCta.href} label={s.ghostCta.label} variant="ghost" enabled={!reduced} />
       )}
@@ -97,6 +98,12 @@ export default function Section({
             {s.body}
           </p>
 
+          {(s.id === 'ai' || s.id === 'automatizace' || s.id === 'software') && (
+            <div className="reveal" style={delay(2.5, 6)}>
+              <ServiceDemo type={s.id} />
+            </div>
+          )}
+
           {/* Zelený štítek dostupnosti. Nejsilnější konverzní prvek hero sekce:
               první, co návštěvník potřebuje vědět, je „bere ten člověk vůbec práci?" */}
           {s.status && (
@@ -114,7 +121,7 @@ export default function Section({
           {isContact && (
             <p className="status-pill reveal" style={delay(2.6, 6)}>
               <span className="status-pill__dot" aria-hidden="true" />
-              {t({ cs: 'Volná kapacita: zbývá 1 místo', en: 'Open capacity: 1 slot left' })}
+              {t({ cs: 'Přijímám nové projekty', en: 'Taking on new projects' })}
             </p>
           )}
 
@@ -126,7 +133,7 @@ export default function Section({
             <ContactBlock />
           ) : (
             s.bullets.length > 0 && (
-              <ul className={`bullets${isHero ? ' bullets--plain' : ''}`}>
+              <ul className={`bullets${isHero ? ' bullets--plain' : ''}${['ai', 'automatizace', 'software'].includes(s.id) ? ' bullets--capabilities' : ''}`}>
                 {s.bullets.map((b, i) => (
                   <li key={i} className="bullet reveal" style={delay(3 + i * 0.35, 6)}>
                     <span className="bullet__i" aria-hidden="true">
@@ -141,8 +148,8 @@ export default function Section({
 
           {s.proof && (
             <p className="proof reveal" style={delay(4.3, 6)}>
-              <span className="proof__mark" aria-hidden="true">✓</span>
-              {s.proof}
+              <span className="proof__mark" aria-hidden="true">●</span>
+              <span><strong>LIVE SYSTEM</strong>{s.proof}</span>
             </p>
           )}
 

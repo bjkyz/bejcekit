@@ -8,6 +8,7 @@ import ArticleCard from './ui/ArticleCard'
 import BullSeal from './ui/BullSeal'
 import Icon from './ui/Icons'
 import { PageFooter, PageNav } from './ui/PageShell'
+import Button from './ui/Button'
 
 /**
  * ═══════════ ROZCESTNÍK ŽURNÁLU ═══════════
@@ -170,24 +171,21 @@ export function JournalCta() {
         Zajímá vás, co z toho platí pro vás?
       </h2>
       <p className="body">
-        Napište mi, co řešíte, vlastními slovy. Do 24 hodin víte, jestli se do toho vůbec vyplatí jít, co to bude
-        stát a kdy to bude hotové. Když se to nevrátí, řeknu to rovnou.
+        Napište mi, co řešíte, vlastními slovy. Do 24 hodin odpovím a navrhnu další krok. Na krátkém hovoru
+        společně zjistíme, jestli se investice může vrátit. Když ne, řeknu to rovnou.
       </p>
       <div className="page__cta-row">
         {/* ★ „Napsat poptávku", ne „Napsat e-mail" — tlačítko vede na formulář
             /kontakt a slib musí sedět s cílem. */}
-        <a className="btn btn--solid" href={CONTACT_HREF}>
-          <Icon name="mail" size={15} />
+        <Button href={CONTACT_HREF} variant="primary" arrow="right" icon={<Icon name="mail" size={15} />}>
           Napsat poptávku
-        </a>
-        <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
-          <Icon name="whatsapp" size={15} />
+        </Button>
+        <Button href={WHATSAPP} variant="secondary" intent="success" arrow="external" icon={<Icon name="whatsapp" size={15} />} target="_blank" rel="noreferrer">
           WhatsApp
-        </a>
-        <a className="btn btn--ghost" href={`tel:${PHONE_TEL}`}>
-          <Icon name="phone" size={15} />
+        </Button>
+        <Button href={`tel:${PHONE_TEL}`} variant="ghost" icon={<Icon name="phone" size={15} />}>
           {PHONE}
-        </a>
+        </Button>
       </div>
       <p className="page__cta-trust label">Nezávazně · Odpověď do 24 hodin · Bez obchodníka</p>
     </section>

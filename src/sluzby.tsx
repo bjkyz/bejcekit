@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import ServicesPage from './ServicesPage.tsx'
 import { adoptDocumentLang } from './lib/lang'
+import MotionProvider from './ui/MotionProvider.tsx'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -12,6 +13,7 @@ import './styles/hud.css'
 import './styles/projects.css'
 import './styles/journal.css'
 import './styles/services.css'
+import './styles/z-polish.css'
 
 /**
  * ★ ČTVRTÝ VSTUPNÍ BOD. Katalog nabídky, který se nevešel na šest stěn krychle
@@ -30,7 +32,9 @@ adoptDocumentLang()
 
 const app = (
   <StrictMode>
-    <ServicesPage />
+    <MotionProvider>
+      <ServicesPage />
+    </MotionProvider>
   </StrictMode>
 )
 

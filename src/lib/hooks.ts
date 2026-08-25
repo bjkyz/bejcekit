@@ -108,6 +108,21 @@ export function useScrollIdle(ms = 1200): boolean {
   return idle
 }
 
+/** Header materialises only after content starts travelling underneath it. */
+export function useScrolled(threshold = 24): boolean {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const update = () => setScrolled((current) => {
+      const next = window.scrollY > threshold
+      return current === next ? current : next
+    })
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [threshold])
+  return scrolled
+}
+
 /** Přihlášení k dosednutí krychle na stěnu (kvůli scramblu a pulsu). */
 export function useFaceLand(fn: (i: number) => void): void {
   const saved = useRef(fn)

@@ -64,8 +64,8 @@ export default function Status() {
           lištu i kicker sekce, a jeho výška tlačila CTA sekcí WEB a AI přímo
           na tenhle panel. */}
       <Row
-        k={t({ cs: 'Volná kapacita', en: 'Open capacity' })}
-        v={t({ cs: 'Zbývá 1 místo', en: '1 slot left' })}
+        k={t({ cs: 'Nové projekty', en: 'New projects' })}
+        v={t({ cs: 'Přijímám', en: 'Open' })}
         ok
       />
       <Row k={t({ cs: 'Odezva', en: 'Response' })} v={t({ cs: 'Do 24 hodin', en: 'Within 24 hours' })} />

@@ -8,6 +8,7 @@ import { revealDelay } from './lib/reveal'
 import Certificate from './ui/Certificate'
 import Icon from './ui/Icons'
 import { PageFooter, PageNav } from './ui/PageShell'
+import Button from './ui/Button'
 
 /**
  * ═══════════ STRÁNKA /sluzby ═══════════
@@ -62,15 +63,15 @@ export default function ServicesPage() {
             {t({ cs: '[ SLUŽBY ]', en: '[ SERVICES ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            {t({ cs: 'Neprodávám technologie. Řeším problémy.', en: "I don't sell technology. I solve problems." })}
+            {t({ cs: 'Vy popíšete problém. Já postavím řešení.', en: 'You bring the problem. I build the solution.' })}
           </h1>
           {/* První věta byla doslova hero úvodu („Nemusíte vědět, jestli
               potřebujete agenta, API nebo databázi") — úvod PRODÁVÁ, tahle
               stránka VYJMENOVÁVÁ, takže si silnější formulaci nechává úvod. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
             {t({
-              cs: 'Řekněte mi, co dnes zabírá vašemu týmu čas, co nefunguje nebo co chcete vytvořit. Řešení najdu a postavím.',
-              en: "Tell me what's eating your team's time today, what doesn't work, or what you want to build. I'll find the solution and build it.",
+              cs: 'AI, automatizace, interní nástroj nebo nový web. Volbu technologie nechte na mně; vy určujete, co má výsledek změnit.',
+              en: 'AI, automation, an internal tool, or a new website. I choose the technology; you define what the result needs to change.',
             })}
           </p>
           {/* ★ `.svc-head__claim` odstraněn. Byly to tři nominální fráze bez
@@ -225,18 +226,15 @@ export default function ServicesPage() {
             })}
           </p>
           <div className="page__cta-row">
-            <a className="btn btn--solid" href={localPath(CONTACT_HREF)}>
-              <Icon name="mail" size={15} />
+            <Button href={localPath(CONTACT_HREF)} variant="primary" arrow="right" icon={<Icon name="mail" size={15} />}>
               {t({ cs: 'Pojďme začít', en: "Let's start" })}
-            </a>
-            <a className="btn btn--green" href={WHATSAPP} target="_blank" rel="noreferrer">
-              <Icon name="whatsapp" size={15} />
+            </Button>
+            <Button href={WHATSAPP} variant="secondary" intent="success" arrow="external" icon={<Icon name="whatsapp" size={15} />} target="_blank" rel="noreferrer">
               WhatsApp
-            </a>
-            <a className="btn btn--ghost" href={`tel:${PHONE_TEL}`}>
-              <Icon name="phone" size={15} />
+            </Button>
+            <Button href={`tel:${PHONE_TEL}`} variant="ghost" icon={<Icon name="phone" size={15} />}>
               {PHONE}
-            </a>
+            </Button>
           </div>
           <p className="page__cta-trust label">
             {t({

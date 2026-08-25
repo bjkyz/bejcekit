@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import { CONTACT_HREF, NAV_SECTION_COUNT } from '../content/sections'
 import { navPages, sections } from '../content/i18n'
 import { localPath, t } from '../lib/lang'
-import { useActiveSection, useScrollIdle } from '../lib/hooks'
+import { useActiveSection, useScrolled, useScrollIdle } from '../lib/hooks'
 import { lockScroll, scrollToSection } from '../lib/scroll'
 import { sceneState } from '../lib/scene-state'
 import LangSwitch from '../ui/LangSwitch'
 import Mark from '../ui/Mark'
 import SiteMenu from '../ui/SiteMenu'
 import Status from './Status'
+import Button from '../ui/Button'
+import { m } from 'motion/react'
 
 export default function Hud() {
   const active = useActiveSection()
@@ -28,8 +30,9 @@ function Nav({ active }: { active: number }) {
      v content/sections.ts — je tam i důvod, proč ustoupil zrovna SOFTWARE.
      Na všech šest stěn se dá skočit pravou lištou i scrollem. */
   const links = sections().slice(1, 1 + NAV_SECTION_COUNT)
+  const scrolled = useScrolled()
   return (
-    <nav className="nav" aria-label={t({ cs: 'Hlavní navigace', en: 'Main navigation' })}>
+    <nav className={`nav${scrolled ? ' is-scrolled' : ''}`} aria-label={t({ cs: 'Hlavní navigace', en: 'Main navigation' })}>
       {/* ★ ZNAČKA JE OBRÁZEK, NE SLOVO — a proto potřebuje jméno pro odečítač
           obrazovky. <svg aria-hidden> sám o sobě je prázdné místo, takže by
           z odkazu na domovskou sekci zbyl nepojmenovaný odkaz (a Lighthouse
@@ -47,6 +50,7 @@ function Nav({ active }: { active: number }) {
             onClick={anchor(s.id)}
           >
             {s.plateCode}
+            {active === i + 1 && <m.span className="nav__indicator" layoutId="home-nav-active" />}
           </a>
         ))}
         {/* ★ SKUTEČNÉ ODKAZY NA JINÉ STRÁNKY, TAKŽE ŽÁDNÝ preventDefault.
@@ -70,9 +74,9 @@ function Nav({ active }: { active: number }) {
             předpoklad čtení, ne akce na konci cesty — a hlavní tlačítko musí
             zůstat poslední věcí v liště, tedy tou, na které oko skončí. */}
         <LangSwitch page="home" />
-        <a className="nav__cta" href={localPath(CONTACT_HREF)}>
-          {t({ cs: 'Napište mi', en: 'Get in touch' })}
-        </a>
+        <Button className="nav__cta" href={localPath(CONTACT_HREF)} variant="secondary" size="sm" arrow="right">
+          {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
+        </Button>
         {/* Burger: na telefonu jediná cesta z úvodu na podstránky (odkazy
             v liště jsou pod 800 px skryté). Scroll nahoru jde přes Lenis. */}
         <SiteMenu active={localPath('/')} onHomeNav={() => scrollToSection('ident')} onLock={lockScroll} />

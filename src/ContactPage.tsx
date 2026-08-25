@@ -7,6 +7,7 @@ import { useReducedMotion, useReveal } from './lib/hooks'
 import { revealDelay } from './lib/reveal'
 import Icon from './ui/Icons'
 import { PageFooter, PageNav } from './ui/PageShell'
+import Button from './ui/Button'
 
 /**
  * ═══════════ STRÁNKA /kontakt ═══════════
@@ -61,6 +62,32 @@ function urlErrors(): Record<string, string> {
       }
 }
 
+type FormField = 'name' | 'email' | 'message'
+
+/**
+ * Rychlá kontrola před síťovým požadavkem. Server zůstává autorita, ale běžná
+ * chyba se má ukázat u pole okamžitě, ne až po cestě přes serverless funkci.
+ * Pravidla záměrně odpovídají `api/contact.ts`, včetně volné kontroly e-mailu.
+ */
+function clientError(form: HTMLFormElement): { field: FormField; message: string } | null {
+  const value = (name: FormField) =>
+    ((form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? '').trim()
+  const name = value('name')
+  const email = value('email')
+  const message = value('message')
+
+  if (name.length < LIMITS.name.min) {
+    return { field: 'name', message: urlErrors().jmeno }
+  }
+  if (!/^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(email) || email.length > LIMITS.email.max) {
+    return { field: 'email', message: urlErrors().email }
+  }
+  if (message.length < LIMITS.message.min || message.length > LIMITS.message.max) {
+    return { field: 'message', message: urlErrors().zprava }
+  }
+  return null
+}
+
 export default function ContactPage() {
   const reduced = useReducedMotion()
   const main = useReveal<HTMLElement>(!reduced)
@@ -110,6 +137,17 @@ export default function ContactPage() {
        se pořád odešle nativně. */
     e.preventDefault()
     if (status === 'sending') return
+
+    const invalid = clientError(e.currentTarget)
+    if (invalid) {
+      setStatus('error')
+      setError(invalid.message)
+      setField(invalid.field)
+      const invalidControl = e.currentTarget.elements.namedItem(invalid.field) as HTMLElement | null
+      invalidControl?.focus()
+      return
+    }
+
     setStatus('sending')
     setError('')
     setField('')
@@ -167,8 +205,8 @@ export default function ContactPage() {
           </h1>
           <p className="body reveal" style={revealDelay(1.2, 5)}>
             {t({
-              cs: 'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin víte, co to bude stát a kdy to bude hotové.',
-              en: "You don't need to know the technology or have a spec. Describe the problem in your own words. Within 24 hours you'll know what it costs and when it will be done.",
+              cs: 'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin se vám ozvu osobně a navrhnu další krok.',
+              en: "You don't need to know the technology or have a spec. Describe the problem in your own words. I'll reply personally within 24 hours and suggest the next step.",
             })}
           </p>
         </header>
@@ -241,8 +279,15 @@ export default function ContactPage() {
                       autoComplete="name"
                       minLength={LIMITS.name.min}
                       maxLength={LIMITS.name.max}
+                      aria-invalid={field === 'name' ? true : undefined}
+                      aria-describedby={field === 'name' ? 'ctc-name-error' : undefined}
                       placeholder={t({ cs: 'Jan Novák', en: 'Jane Doe' })}
                     />
+                    {status === 'error' && field === 'name' && (
+                      <p className="ctc-error" id="ctc-name-error" role="alert">
+                        {error}
+                      </p>
+                    )}
                   </div>
                   <div className="ctc-field">
                     <label className="ctc-label label" htmlFor="ctc-email">
@@ -256,8 +301,15 @@ export default function ContactPage() {
                       required
                       autoComplete="email"
                       maxLength={LIMITS.email.max}
+                      aria-invalid={field === 'email' ? true : undefined}
+                      aria-describedby={field === 'email' ? 'ctc-email-error' : undefined}
                       placeholder={t({ cs: 'jan@firma.cz', en: 'jane@company.com' })}
                     />
+                    {status === 'error' && field === 'email' && (
+                      <p className="ctc-error" id="ctc-email-error" role="alert">
+                        {error}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -309,14 +361,21 @@ export default function ContactPage() {
                     rows={6}
                     minLength={LIMITS.message.min}
                     maxLength={LIMITS.message.max}
+                    aria-invalid={field === 'message' ? true : undefined}
+                    aria-describedby={field === 'message' ? 'ctc-message-error' : undefined}
                     placeholder={t({
                       cs: 'Například: každý den ručně přepisujeme objednávky z e-mailů do systému. Zabere to dvě hodiny denně a děláme v tom chyby.',
                       en: 'For example: every day we retype orders from emails into our system by hand. It takes two hours a day and we keep making mistakes.',
                     })}
                   />
+                  {status === 'error' && field === 'message' && (
+                    <p className="ctc-error" id="ctc-message-error" role="alert">
+                      {error}
+                    </p>
+                  )}
                 </div>
 
-                {status === 'error' && (
+                {status === 'error' && !field && (
                   /* `role="alert"` ohlásí chybu okamžitě, i když se ohnisko nehnulo. */
                   <p className="ctc-error" role="alert">
                     {error}
@@ -324,12 +383,17 @@ export default function ContactPage() {
                 )}
 
                 <div className="ctc-actions">
-                  <button className="btn btn--solid" type="submit" disabled={status === 'sending'}>
-                    <Icon name="mail" size={15} />
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    arrow={status === 'sending' ? false : 'right'}
+                    icon={status === 'sending' ? undefined : <Icon name="mail" size={15} />}
+                    loading={status === 'sending'}
+                  >
                     {status === 'sending'
                       ? t({ cs: 'Odesílám…', en: 'Sending…' })
                       : t({ cs: 'Odeslat poptávku', en: 'Send inquiry' })}
-                  </button>
+                  </Button>
                   <p className="ctc-trust label">
                     {t({
                       cs: 'Nezávazně · Odpověď do 24 hodin · Diskrétně',

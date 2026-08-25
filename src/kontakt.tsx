@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import ContactPage from './ContactPage.tsx'
 import { adoptDocumentLang } from './lib/lang'
+import MotionProvider from './ui/MotionProvider.tsx'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -17,6 +18,7 @@ import './styles/hud.css'
    chovat stejně, jinak se testuje něco jiného, než se nasazuje. */
 import './styles/projects.css'
 import './styles/contact.css'
+import './styles/z-polish.css'
 
 /**
  * ★ PÁTÝ VSTUPNÍ BOD. Stejná mechanika jako u ostatních podstránek: vlastní HTML
@@ -41,7 +43,9 @@ adoptDocumentLang()
 
 const app = (
   <StrictMode>
-    <ContactPage />
+    <MotionProvider>
+      <ContactPage />
+    </MotionProvider>
   </StrictMode>
 )
 

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { magnetic } from '../lib/magnetic'
 import { scrollToSection } from '../lib/scroll'
 import Icon, { type IconName } from './Icons'
+import Button from './Button'
 
 /**
  * Magnetické CTA. Vnější obal je jen zvětšená zásahová plocha (20px),
@@ -35,13 +36,16 @@ export default function MagneticCTA({
   const isAnchor = href.startsWith('#')
   const isExternal = href.startsWith('http')
 
-  const cls = `btn${variant === 'line' ? '' : ` btn--${variant}`}`
+  const buttonVariant = variant === 'solid' ? 'primary' : variant === 'line' ? 'secondary' : 'ghost'
 
   return (
     <span className="magnetic" ref={wrap}>
-      <a
-        className={cls}
+      <Button
         href={href}
+        variant={buttonVariant}
+        intent={variant === 'green' ? 'success' : 'default'}
+        arrow={icon ? false : isExternal ? 'external' : 'right'}
+        icon={icon ? <Icon name={icon} /> : undefined}
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noreferrer' : undefined}
         onClick={
@@ -53,10 +57,8 @@ export default function MagneticCTA({
             : undefined
         }
       >
-        {icon && <Icon name={icon} />}
         {label}
-        {!icon && <span aria-hidden="true">→</span>}
-      </a>
+      </Button>
     </span>
   )
 }

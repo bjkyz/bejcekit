@@ -125,6 +125,8 @@
    *   fokusu. Kruh je tvar, ne zaoblení.
    */
   --r-tile: 0px;
+  --r-control: 0px;
+  --r-card: 0px;
   /* Tvrdý posun, nula rozostření. Nese ho JEN hlavní akce a jen při hoveru —
      kdyby ho měl každý prvek, přestane znamenat „tady se dá stisknout". */
   --shadow-hard: 4px 4px 0 rgba(79, 216, 232, 0.22);
@@ -150,6 +152,17 @@
   --d-pulse: 700ms;
   --d-curtain: 1100ms;
   --d-ignite: 1400ms;
+
+  /* ── SHARED COMPONENT GEOMETRY ── */
+  --control-sm: 2.5rem;
+  --control-md: 3rem;
+  --control-lg: 3.5rem;
+  --icon-sm: 0.875rem;
+  --icon-md: 1rem;
+  --icon-lg: 1.125rem;
+  --card-pad: clamp(1.25rem, 2.4vw, 2rem);
+  --section-space: clamp(5rem, 9vw, 8.75rem);
+  --container-page: 78rem;
 
   /* ── TYPOGRAFIE ── */
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

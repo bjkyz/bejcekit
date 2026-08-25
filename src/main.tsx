@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { adoptDocumentLang } from './lib/lang'
+import MotionProvider from './ui/MotionProvider.tsx'
 
 import './styles/fonts.css'
 import './styles/tokens.css'
@@ -9,6 +10,7 @@ import './styles/base.css'
 import './styles/layout.css'
 import './styles/sections.css'
 import './styles/hud.css'
+import './styles/z-polish.css'
 
 /**
  * ★ TADY SE UŽ NIC NEMĚŘÍ A NIC NESÁZÍ — a je to výhra, ne opomenutí.
@@ -39,7 +41,9 @@ adoptDocumentLang()
    napiš úklidové funkce. (useFrame je bezpečný, R3F ho při unmountu odhlásí.) */
 const app = (
   <StrictMode>
-    <App />
+    <MotionProvider>
+      <App />
+    </MotionProvider>
   </StrictMode>
 )
 

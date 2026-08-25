@@ -129,7 +129,6 @@
   --r-card: 0px;
   /* Tvrdý posun, nula rozostření. Nese ho JEN hlavní akce a jen při hoveru —
      kdyby ho měl každý prvek, přestane znamenat „tady se dá stisknout". */
-  --shadow-hard: 4px 4px 0 rgba(79, 216, 232, 0.22);
   /* Šířka barevné pásky u faktů (VÝSTUP, důkaz, dostupnost). Jedna hodnota,
      ať se tři různé bloky nesejdou se třemi různými tloušťkami. */
   --bar: 2px;

@@ -40,20 +40,20 @@ export const SECTIONS_EN = [
       "plateCode": "IDENT",
       "plateNum": "00",
       "headline": "Software that does the work for you.",
-      "body": "I'm Jiří Bejček. I build AI systems, process automation, and custom software. You don't need to know whether you need an agent, an API, or a database. Just tell me what's eating your time today.",
+      "body": "I'm Jiří Bejček. I build AI, automation, and custom software that save time and remove manual work. You describe the problem. I design and deliver the solution.",
       "bullets": [],
       "specs": [
         {
           "k": "One engineer, not an agency",
-          "v": "You talk straight to the person who builds it and stands behind it."
+          "v": "You work directly with me. I design, build, and deploy it."
         },
         {
           "k": "Fixed price and deadline",
-          "v": "In writing, before I start."
+          "v": "You get both in writing before I start."
         },
         {
           "k": "Reply within 24 hours",
-          "v": "Weekends included. Remote or on site in Czechia."
+          "v": "Weekends included. I work across Czechia."
         }
       ],
       "status": "Taking on new projects",
@@ -61,7 +61,7 @@ export const SECTIONS_EN = [
         "label": "Discuss a project"
       },
       "ghostCta": {
-        "label": "What I build"
+        "label": "View services"
       },
       "subsystem": "IDENTIFICATION"
     },
@@ -70,18 +70,18 @@ export const SECTIONS_EN = [
       "kicker": "[ 01 / AI ]",
       "plateCode": "AI",
       "plateNum": "01",
-      "headline": "AI that actually works.",
-      "body": "AI doesn't have to be a chatbot. I build it to answer from your data, show the source, and start the next step on its own.",
+      "headline": "AI that works with your data.",
+      "body": "It answers from your documents, cites its sources, and can start the next step in the process.",
       "bullets": [
-        "Assistants that know your documents and your processes. They answer from those, not from the internet.",
-        "Extraction from contracts, invoices, orders, and resumes. The data lands straight in your system.",
-        "AI agents that don't just describe a task, they run it. MCP tools and orchestration.",
-        "Payback math before I write the first line. If it doesn't pay back, I turn the job down."
+        "Internal assistants answer from your documents and verified sources.",
+        "Contracts, invoices, and orders are extracted straight into your system.",
+        "AI agents carry out tasks across tools instead of only answering.",
+        "We calculate the payback first. If it doesn't make sense, I say so."
       ],
-      "proof": "Live example: an AI pipeline I built publishes this site's daily journal in Czech. Every article includes its date and sources, so you can verify the result.",
+      "proof": "Live example: an AI pipeline on this site prepares the journal articles. Every article includes a date and sources, so you can verify the result.",
       "deliverable": {
         "label": "What you get",
-        "text": "A running system wired into your tools, plus a monthly report of hours saved."
+        "text": "A deployed system connected to your tools, documentation, and a record of time saved."
       },
       "stack": [
         "Anthropic API",
@@ -92,10 +92,10 @@ export const SECTIONS_EN = [
         "Python"
       ],
       "cta": {
-        "label": "Put AI to work"
+        "label": "Discuss an AI solution"
       },
       "ghostCta": {
-        "label": "Read the journal (Czech)"
+        "label": "Live example: journal"
       },
       "subsystem": "AI SYSTEMS"
     },
@@ -104,16 +104,16 @@ export const SECTIONS_EN = [
       "kicker": "[ 02 / AUTO ]",
       "plateCode": "AUTO",
       "plateNum": "02",
-      "headline": "Automate the work that repeats.",
-      "body": "Copying data, emails, spreadsheets, reports, retyping between systems. When a person does the same thing over and over, a machine can almost always take it over.",
+      "headline": "Let automation take over repetitive work.",
+      "body": "One workflow connects emails, documents, and data. People handle only the exceptions.",
       "bullets": [
-        "Before: email, person, open the document, retype the data, check it, save.",
-        "After: email, extraction, check, database, done. A person only approves the exceptions.",
-        "n8n, APIs, webhooks, CRM. I connect the systems that don't talk to each other today."
+        "It reads an email or document and extracts the data you need.",
+        "It checks the data and writes it to your CRM, database, or accounting system.",
+        "It sends the result, flags errors, and keeps an audit trail."
       ],
       "deliverable": {
         "label": "What you get",
-        "text": "A running workflow, the documentation, and a monthly report of hours saved."
+        "text": "A deployed workflow, documentation, and a record of time saved."
       },
       "stack": [
         "n8n",
@@ -124,7 +124,7 @@ export const SECTIONS_EN = [
         "Cron"
       ],
       "cta": {
-        "label": "Automate my process"
+        "label": "Discuss automation"
       },
       "subsystem": "AUTOMATION"
     },
@@ -133,17 +133,17 @@ export const SECTIONS_EN = [
       "kicker": "[ 03 / SOFTWARE ]",
       "plateCode": "SOFTWARE",
       "plateNum": "03",
-      "headline": "When off-the-shelf isn't enough.",
-      "body": "You shouldn't have to bend your process to fit a tool. I build internal tools, client portals, dashboards, and SaaS products around the way you already work. From an MVP that tests the idea to a product ready for thousands of customers.",
+      "headline": "Software built around your process.",
+      "body": "I build internal tools, client portals, dashboards, and SaaS. From a fast MVP to a product for thousands of users.",
       "bullets": [
-        "Internal tools and portals: documents, data, and workflow in one place.",
-        "SaaS from MVP to production: accounts, subscriptions, limits, payments, admin.",
-        "Dashboards: numbers you can decide on, not another export to Excel.",
-        "Websites and web apps that are fast because they were built that way from day one."
+        "Internal tools and portals connect documents, data, and workflows.",
+        "SaaS includes accounts, subscriptions, payments, and administration.",
+        "Dashboards show the numbers you can make decisions from.",
+        "Websites and apps are fast, secure, and ready to grow."
       ],
       "deliverable": {
         "label": "What you get",
-        "text": "A deployed app, the accounts and the code in your hands, and a plan for what comes next."
+        "text": "A deployed app, source code, access, documentation, and a plan for what comes next."
       },
       "stack": [
         "Next.js",
@@ -154,10 +154,10 @@ export const SECTIONS_EN = [
         "Vercel"
       ],
       "cta": {
-        "label": "Build my software"
+        "label": "Discuss custom software"
       },
       "ghostCta": {
-        "label": "See the projects"
+        "label": "View projects"
       },
       "subsystem": "CUSTOM SOFTWARE"
     },
@@ -166,29 +166,29 @@ export const SECTIONS_EN = [
       "kicker": "[ 04 / PROCESS ]",
       "plateCode": "PROCESS",
       "plateNum": "04",
-      "headline": "From an idea to a working product.",
-      "body": "You don't need a technical spec. One sentence is enough: “we do this by hand” or “we want to build this”.",
+      "headline": "From a problem to a deployed solution.",
+      "body": "Describe what you do by hand today or what you want to build. I prepare the technical specification.",
       "bullets": [],
       "steps": [
         {
           "title": "Discovery",
-          "text": "A free half-hour call. I find out what you need. And more to the point, what you don't."
+          "text": "On the first call, we define the problem, the goal, and the priorities."
         },
         {
           "title": "Proposal",
-          "text": "The solution, the architecture, and a fixed price. In writing, before anything starts. If the scope changes, you know the price up front."
+          "text": "You get the proposed solution, scope, fixed price, and timeline in writing."
         },
         {
           "title": "Build",
-          "text": "I ship as I go. You see a running version, not slides about a running version."
+          "text": "I deploy continuously. You see a working version from the start."
         },
         {
           "title": "Run and improve",
-          "text": "Monitoring, changes, new features. I don't disappear the moment the invoice goes out."
+          "text": "After launch, I handle monitoring, changes, and further development."
         }
       ],
       "cta": {
-        "label": "Book a free call"
+        "label": "Book an introductory call"
       },
       "subsystem": "WORKFLOW"
     },
@@ -197,11 +197,11 @@ export const SECTIONS_EN = [
       "kicker": "[ 05 / CONTACT ]",
       "plateCode": "CONTACT",
       "plateNum": "05",
-      "headline": "Tell me what you need solved.",
-      "body": "You don't need to know the technology or have a spec. Describe the problem in your own words. I'll reply personally within 24 hours and suggest the next step.",
+      "headline": "Describe the problem. I'll propose the next step.",
+      "body": "A few sentences are enough. I'll reply personally within 24 hours and tell you whether the solution makes sense and what it should look like.",
       "bullets": [],
       "cta": {
-        "label": "Send me your problem"
+        "label": "Discuss a project"
       },
       "subsystem": "CONTACT"
     }
@@ -212,28 +212,28 @@ export const SERVICE_GROUPS_EN = [
     {
       "num": "01",
       "code": "AI SYSTEMS",
-      "title": "AI wired into your business.",
-      "lead": "Five ways AI can work with what your company already has, and it shows you where every answer came from.",
+      "title": "AI over your data and processes.",
+      "lead": "It works with company documents, cites its sources, and can carry out the next step.",
       "items": [
         {
           "k": "AI assistants",
-          "v": "Internal assistants that know your documents, your processes, and your information."
+          "v": "They answer from your documents and processes, not random websites."
         },
         {
           "k": "Document processing",
-          "v": "Automatic extraction from contracts, invoices, orders, and resumes."
+          "v": "They extract data from contracts, invoices, orders, and resumes."
         },
         {
-          "k": "AI over company data",
-          "v": "Search your internal knowledge in plain language, with the source cited."
+          "k": "Company knowledge",
+          "v": "They find answers in internal data and cite the source."
         },
         {
           "k": "Agents and workflows",
-          "v": "AI that doesn't just answer, it carries the task out. MCP tools, orchestration."
+          "v": "They carry out specific tasks across your tools."
         },
         {
           "k": "Custom AI",
-          "v": "Built around your process, not around a tool's template."
+          "v": "A solution adapted to your process and rules."
         }
       ],
       "punch": "AI isn't the goal. The goal is work a person no longer has to do.",
@@ -242,8 +242,8 @@ export const SERVICE_GROUPS_EN = [
     {
       "num": "02",
       "code": "AUTOMATION",
-      "title": "The manual steps a machine can take over.",
-      "lead": "Four places where a repeated procedure can be handed to a machine.",
+      "title": "A repeated process without manual retyping.",
+      "lead": "Automation connects the input, checks, writing, and alerts in one workflow.",
       "items": [
         {
           "k": "Data extraction and entry",
@@ -251,15 +251,15 @@ export const SERVICE_GROUPS_EN = [
         },
         {
           "k": "System integration",
-          "v": "APIs, webhooks, and databases. Tools that don't talk to each other today start talking."
+          "v": "APIs, webhooks, and databases pass data without copying."
         },
         {
           "k": "Checks and watchdogs",
-          "v": "Regular verification of data, statuses, and deadlines. A warning before something breaks."
+          "v": "They check data, status, or deadlines and flag problems in time."
         },
         {
           "k": "Reports",
-          "v": "The document you assemble by hand today shows up on its own, at the same time every time."
+          "v": "A regular report is prepared and sent automatically."
         }
       ],
       "punch": "Less manual work, fewer mistakes, and a record of what happened when.",
@@ -268,24 +268,24 @@ export const SERVICE_GROUPS_EN = [
     {
       "num": "03",
       "code": "INTERNAL TOOLS",
-      "title": "Software shaped around the way you work.",
-      "lead": "Sometimes it costs less to build a tool around the process than to bend the process around a tool.",
+      "title": "Software built around how you actually work.",
+      "lead": "A custom tool removes spreadsheet workarounds, long email chains, and manual steps.",
       "items": [
         {
           "k": "Internal tools",
-          "v": "Processing company data, generating documents, running workflows."
+          "v": "They process data, create documents, and run workflows."
         },
         {
           "k": "Client portals",
-          "v": "Documents, messages, services, and information in one place."
+          "v": "Documents, communication, and services in one place."
         },
         {
           "k": "Dashboards",
-          "v": "Data turned into an interface you can decide from."
+          "v": "Current data presented for clear decisions."
         },
         {
           "k": "CRM and internal systems",
-          "v": "Records that fit how the company actually runs, not the other way around."
+          "v": "Records adapted to the way your company works."
         }
       ],
       "punch": "Your workspace. Your rules. Your software.",
@@ -294,12 +294,12 @@ export const SERVICE_GROUPS_EN = [
     {
       "num": "04",
       "code": "SAAS",
-      "title": "Got a product idea? Let's build it.",
-      "lead": "SaaS isn't a web app, it's a product: one customer, or thousands.",
+      "title": "From an idea to a SaaS product.",
+      "lead": "First we validate the product. Then we build a system that can grow with its customers.",
       "items": [
         {
           "k": "MVP",
-          "v": "A fast check on whether the idea holds up, before the budget sinks into it."
+          "v": "Validate the product's core value before spending the full budget."
         },
         {
           "k": "Product development",
@@ -324,8 +324,8 @@ export const SERVICE_GROUPS_EN = [
     {
       "num": "05",
       "code": "DATA PRIVACY",
-      "title": "Sensitive data doesn't have to stand between you and AI.",
-      "lead": "Sensitive documents go through detection and anonymization before the next system or model ever sees them.",
+      "title": "Sensitive data prepared for safe processing.",
+      "lead": "Personal data is detected and anonymized before another system or AI model sees the document.",
       "items": [
         {
           "k": "Detecting personal data",
@@ -345,8 +345,8 @@ export const SERVICE_GROUPS_EN = [
     {
       "num": "06",
       "code": "WEB",
-      "title": "A website that isn't just a business card.",
-      "lead": "Speed isn't a line item at the end of the quote, it's an architecture decision: what loads before the text does.",
+      "title": "A website that guides visitors to act.",
+      "lead": "A fast, clear, and measurable website built around one business goal.",
       "items": [
         {
           "k": "Company websites",
@@ -369,7 +369,7 @@ export const SERVICE_GROUPS_EN = [
           "v": "The technical base for speed, indexing, and long-term visibility."
         }
       ],
-      "punch": "The site you're reading right now scores 100 out of 100 on desktop Lighthouse in all four categories. Don't take my word for it. Measure it.",
+      "punch": "On this website, the text renders before the 3D scene. The content stays fast and accessible even without WebGL.",
       "anchor": "software"
     }
   ] as const
@@ -645,26 +645,26 @@ export const CONTACT_EN = {
         "v": "I answer you personally. Weekends included."
       },
       {
-        "k": "A 30-minute call",
-        "v": "Free, no strings attached. I'll work out what you need and what you don't."
+        "k": "Introductory call",
+        "v": "Free and without obligation. We clarify the problem and goal."
       },
       {
         "k": "Price and timeline",
-        "v": "In writing, before I start. If the scope changes, you know the price up front."
+        "v": "You get both in writing before I start."
       }
     ],
     "CONTACT_FAQ": [
       {
         "q": "What will it cost?",
-        "a": "You get the price in writing up front, after a free 30-minute call. Smaller automations start in the tens of thousands of CZK, custom software depends on scope. If the scope changes while I work, you know the new price before I start on the change."
+        "a": "Smaller automations start in the tens of thousands of CZK. Custom software depends on scope. You get the exact price in writing before I start."
       },
       {
         "q": "Do I need to know exactly what I want?",
-        "a": "No. One sentence is enough: “we do this by hand” or “this keeps slowing us down.” Writing the technical spec is my job, not yours."
+        "a": "No. Describe what you do by hand today or what keeps slowing you down. I prepare the technical specification."
       },
       {
         "q": "How long does it take?",
-        "a": "Smaller automations take a few weeks, custom software months. I ship continuously, so you see a running version before everything is finished."
+        "a": "Smaller automations usually take a few weeks and custom software takes months. I deploy working versions continuously."
       },
       {
         "q": "Where are you based?",
@@ -672,19 +672,19 @@ export const CONTACT_EN = {
       },
       {
         "q": "What if you're not the right person for it?",
-        "a": "I'll tell you straight and point you to someone who is. I don't take work that won't pay for itself."
+        "a": "I will say so directly and recommend a better route. I do not take work without a clear benefit."
       },
       {
         "q": "Who owns the finished code?",
-        "a": "You do. You get the code, the access, and the documentation. You're not dependent on me and I don't hold a key anywhere."
+        "a": "You do. You get the source code, access, and documentation, so you are not locked into one supplier."
       }
     ],
     "page": {
       "skipLink": "Skip to the form",
       "kicker": "[ CONTACT ]",
-      "h1": "Tell me what you need solved.",
-      "lead": "You don't need to know the technology or have a spec. Describe the problem in your own words. I'll reply personally within 24 hours and suggest the next step.",
-      "formHeading": "Send me a message",
+      "h1": "Describe the problem. I will reply with the next step.",
+      "lead": "You do not need a technical specification. A few sentences are enough. I will reply personally within 24 hours.",
+      "formHeading": "Discuss a project",
       "honeypotLabel": "Please leave this empty",
       "fields": {
         "nameLabel": "Name",
@@ -696,9 +696,9 @@ export const CONTACT_EN = {
         "optionalTag": "optional",
         "kindsLegend": "What do you need help with?",
         "messageLabel": "What do you need solved?",
-        "messagePlaceholder": "For example: every day we retype orders from emails into our system by hand. It takes two hours a day and we keep making mistakes."
+        "messagePlaceholder": "For example: every day we retype orders from emails into our system. It takes two hours and causes errors."
       },
-      "submit": "Send inquiry",
+      "submit": "Send message",
       "submitSending": "Sending…",
       "trust": "No obligation · Reply within 24 hours · Confidential",
       "ok": {

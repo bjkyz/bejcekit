@@ -45,7 +45,7 @@ const MAX_TILT = 5
 /** Doba doběhu při sledování kurzoru. Nízká = karta jde s rukou skoro 1:1. */
 const SMOOTH_IN = 0.09
 /** Návrat do klidu je ZÁMĚRNĚ pomalejší než náběh: rychlý návrat vypadá jako
-    odskočení, pomalý jako dojezd hmoty. Stejný trik jako u magnetu. */
+    odskočení, pomalý jako dojezd hmoty. */
 const SMOOTH_OUT = 0.3
 /** ★ HLOUBKA MÁ VLASTNÍ, POMALEJŠÍ NÁBĚH. `--lift` řídí zanoření obrazovky,
     zdvih karty a odlesk — tedy HMOTU, ne polohu kurzoru. Když jela stejnou

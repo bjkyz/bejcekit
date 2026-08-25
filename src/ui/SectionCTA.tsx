@@ -1,45 +1,25 @@
-import { useEffect, useRef } from 'react'
-import { magnetic } from '../lib/magnetic'
 import { scrollToSection } from '../lib/scroll'
 import Icon, { type IconName } from './Icons'
 import Button from './Button'
 
-/**
- * Magnetické CTA. Vnější obal je jen zvětšená zásahová plocha (20px),
- * aby magnet chytal dřív, než kurzor dojede na vizuální hranu.
- *
- * Varianty nesou VÝZNAM, ne náladu:
- *   solid = hlavní akce (existuje jen na kontaktu)
- *   green = stav/dostupnost (WhatsApp)
- *   ghost = vedlejší akce
- */
-export default function MagneticCTA({
+/** Homepage CTA using the same stationary Button primitive as every subpage. */
+export default function SectionCTA({
   href,
   label,
   variant = 'line',
   icon,
-  enabled = true,
 }: {
   href: string
   label: string
   variant?: 'line' | 'solid' | 'ghost' | 'green'
   icon?: IconName
-  enabled?: boolean
 }) {
-  const wrap = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    if (!wrap.current || !enabled) return
-    return magnetic(wrap.current)
-  }, [enabled])
-
   const isAnchor = href.startsWith('#')
   const isExternal = href.startsWith('http')
-
   const buttonVariant = variant === 'solid' ? 'primary' : variant === 'line' ? 'secondary' : 'ghost'
 
   return (
-    <span className="magnetic" ref={wrap}>
+    <span className="cta-hit">
       <Button
         href={href}
         variant={buttonVariant}
@@ -50,8 +30,8 @@ export default function MagneticCTA({
         rel={isExternal ? 'noreferrer' : undefined}
         onClick={
           isAnchor
-            ? (e) => {
-                e.preventDefault()
+            ? (event) => {
+                event.preventDefault()
                 scrollToSection(href.slice(1))
               }
             : undefined

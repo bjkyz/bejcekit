@@ -201,12 +201,12 @@ export default function ContactPage() {
             {t({ cs: '[ KONTAKT ]', en: '[ CONTACT ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            {t({ cs: 'Řekněte mi, co potřebujete vyřešit.', en: 'Tell me what you need solved.' })}
+            {t({ cs: 'Popište problém. Ozvu se s dalším krokem.', en: 'Describe the problem. I will reply with the next step.' })}
           </h1>
           <p className="body reveal" style={revealDelay(1.2, 5)}>
             {t({
-              cs: 'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin se vám ozvu osobně a navrhnu další krok.',
-              en: "You don't need to know the technology or have a spec. Describe the problem in your own words. I'll reply personally within 24 hours and suggest the next step.",
+              cs: 'Technické zadání nepotřebujete. Stačí několik vět o tom, co vás zdržuje nebo co chcete vytvořit. Odpovím osobně do 24 hodin.',
+              en: "You do not need a technical specification. A few sentences about what is slowing you down or what you want to build are enough. I will reply personally within 24 hours.",
             })}
           </p>
         </header>
@@ -219,7 +219,7 @@ export default function ContactPage() {
                 `minLength`) zůstávají — čte je odečítač obrazovky i server. */}
           <section className="ctc-form reveal" id="formular" style={revealDelay(1.8, 5)} aria-labelledby="form-h">
             <h2 className="ctc-form__h headline" id="form-h">
-              {t({ cs: 'Napište mi', en: 'Send me a message' })}
+              {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
             </h2>
 
             {status === 'ok' ? (
@@ -364,8 +364,8 @@ export default function ContactPage() {
                     aria-invalid={field === 'message' ? true : undefined}
                     aria-describedby={field === 'message' ? 'ctc-message-error' : undefined}
                     placeholder={t({
-                      cs: 'Například: každý den ručně přepisujeme objednávky z e-mailů do systému. Zabere to dvě hodiny denně a děláme v tom chyby.',
-                      en: 'For example: every day we retype orders from emails into our system by hand. It takes two hours a day and we keep making mistakes.',
+                      cs: 'Například: každý den přepisujeme objednávky z e-mailů do systému. Trvá to dvě hodiny a vznikají chyby.',
+                      en: 'For example: every day we retype orders from emails into our system. It takes two hours and causes errors.',
                     })}
                   />
                   {status === 'error' && field === 'message' && (
@@ -392,7 +392,7 @@ export default function ContactPage() {
                   >
                     {status === 'sending'
                       ? t({ cs: 'Odesílám…', en: 'Sending…' })
-                      : t({ cs: 'Odeslat poptávku', en: 'Send inquiry' })}
+                      : t({ cs: 'Odeslat zprávu', en: 'Send message' })}
                   </Button>
                   <p className="ctc-trust label">
                     {t({

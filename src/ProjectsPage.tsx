@@ -86,15 +86,15 @@ export default function ProjectsPage() {
             {t({ cs: '[ PROJEKTY ]', en: '[ WORK ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            {t({ cs: 'Weby běží naživo. Jména kryje mlčenlivost.', en: 'The sites are live. The names stay confidential.' })}
+            {t({ cs: 'Produkční projekty. Klienti zůstávají v soukromí.', en: 'Production projects. Client names stay private.' })}
           </h1>
           {/* Třetí věta („celé reference ukazuji na schůzce") stála na stránce
               třikrát: tady, v poznámce pod tím a v CTA dole. Zůstává jen v CTA,
               kde je z ní akce místo popisu. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
             {t({
-              cs: 'Klientské práce tu visí jen v obrysech: rozmazaný snímek, obor a technická fakta. Víc smlouva o mlčenlivosti nedovolí.',
-              en: 'Client work is shown in outline only: a blurred screenshot, the field, and the technical facts. That is as far as the NDA lets me go.',
+              cs: 'U každé reference vidíte problém, řešení a technologii. Jména a ostré snímky chrání smlouva o mlčenlivosti.',
+              en: 'Each case shows the problem, solution, and technology. NDAs protect the names and full screenshots.',
             })}
           </p>
           <p className="page__note reveal" style={revealDelay(1.8, 5)}>
@@ -104,8 +104,8 @@ export default function ProjectsPage() {
                 přepozicování na AI · Software · Automatizace. Slib služby, kterou
                 web nikde jinde nezmiňuje, je horší než žádný text. */}
             {t({
-              cs: 'Diskrétnost není překážka, je součást služby. Stejná smlouva, která dnes kryje tyhle klienty, bude jednou krýt i vás: váš web, vaše čísla, vaše data.',
-              en: "Discretion isn't an obstacle, it's part of the service. The same agreement that covers these clients today will one day cover you: your site, your numbers, your data.",
+              cs: 'Celé reference včetně jmen a výsledků ukazuji při osobním hovoru.',
+              en: 'I show the complete references, including names and results, on a private call.',
             })}
           </p>
         </header>
@@ -131,17 +131,17 @@ export default function ProjectsPage() {
             a slíbit odemčení – ne obecné „napište mi". */}
         <section className="page__cta" id={INQUIRY_ANCHOR} aria-labelledby="page-cta-h">
           <h2 className="headline reveal" id="page-cta-h" style={revealDelay(0, 3)}>
-            {t({ cs: 'Celé reference vám ukážu při hovoru.', en: "I'll show you the full references on a call." })}
+            {t({ cs: 'Chcete vidět celé reference?', en: 'Want to see the complete references?' })}
           </h2>
           <p className="body reveal" style={revealDelay(0.8, 3)}>
             {t({
-              cs: 'Napište mi, co stavíte. Do 24 hodin odpovím a navrhnu další krok. Při krátkém hovoru vám ukážu portfolio naživo, včetně jmen a výsledků; cenu a termín pak dostanete písemně.',
-              en: "Tell me what you're building. I'll reply within 24 hours and suggest the next step. On a short call, I'll show you the live portfolio, including names and results; you then get the price and timeline in writing.",
+              cs: 'Při krátkém hovoru ukážu projekty naživo, včetně jmen a výsledků. Stačí napsat, co plánujete.',
+              en: 'On a short call, I will show the projects live, including names and results. Just tell me what you are planning.',
             })}
           </p>
           <div className="page__cta-row reveal" style={revealDelay(1.6, 3)}>
             <Button href={localPath(CONTACT_HREF)} variant="primary" arrow="right" icon={<Icon name="mail" size={15} />}>
-              {t({ cs: 'Napsat poptávku', en: 'Send an inquiry' })}
+              {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
             </Button>
             <Button href={WHATSAPP} variant="secondary" intent="success" arrow="external" icon={<Icon name="whatsapp" size={15} />} target="_blank" rel="noreferrer">
               WhatsApp

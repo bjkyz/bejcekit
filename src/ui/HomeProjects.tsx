@@ -18,8 +18,8 @@ export default function HomeProjects() {
           <p className="kicker label">[ CASE LOG / SELECTED ]</p>
           <h2 className="headline" id="home-work-h">{t({ cs: 'Vybrané realizace.', en: 'Selected work.' })}</h2>
           <p className="body">{t({
-            cs: 'Produkční řešení, ne koncepty. Jména klientů kryje mlčenlivost; problém, způsob řešení a technická práce zůstávají konkrétní.',
-            en: 'Production systems, not concepts. Client names stay confidential; the problem, solution, and engineering remain concrete.',
+            cs: 'Ukázky nasazených řešení. U každého vidíte problém, řešení a použitou technologii.',
+            en: 'Deployed solutions. Each case shows the problem, solution, and technology used.',
           })}</p>
         </header>
 
@@ -62,10 +62,10 @@ export default function HomeProjects() {
 
         <div className="home-work__actions">
           <Button href={localPath('/projekty')} variant="secondary" arrow="right">
-            {t({ cs: 'Prohlédnout všechny projekty', en: 'View all work' })}
+            {t({ cs: 'Zobrazit projekty', en: 'View projects' })}
           </Button>
           <Button href={localPath(CONTACT_HREF)} variant="text" arrow="right">
-            {t({ cs: 'Probrat podobný projekt', en: 'Discuss a similar project' })}
+            {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
           </Button>
         </div>
       </div>

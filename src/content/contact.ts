@@ -104,8 +104,8 @@ export const CONTACT_CHANNELS_PAGE: {
  */
 export const WHAT_HAPPENS: { k: string; v: string }[] = [
   { k: 'Do 24 hodin', v: 'Odpovím vám osobně. I o víkendu.' },
-  { k: 'Půlhodina hovoru', v: 'Zdarma a nezávazně. Vytáhnu z vás, co potřebujete a co ne.' },
-  { k: 'Cena a termín', v: 'Písemně, ještě než začnu. Když se rozsah změní, znáte cenu předem.' },
+  { k: 'Úvodní hovor', v: 'Zdarma a nezávazně. Ujasníme si problém a cíl.' },
+  { k: 'Cena a termín', v: 'Dostanete je písemně před začátkem.' },
 ]
 
 /**
@@ -116,15 +116,15 @@ export const WHAT_HAPPENS: { k: string; v: string }[] = [
 export const CONTACT_FAQ: { q: string; a: string }[] = [
   {
     q: 'Kolik to bude stát?',
-    a: 'Cenu řeknu písemně předem, po půlhodinovém hovoru zdarma. Menší automatizace začínají v desítkách tisíc, software na míru podle rozsahu. Když se rozsah během práce změní, znáte novou cenu dřív, než se do změny pustím.',
+    a: 'Menší automatizace začínají v desítkách tisíc korun, software na míru se odvíjí od rozsahu. Přesnou cenu dostanete písemně před začátkem.',
   },
   {
     q: 'Musím vědět, co přesně chci?',
-    a: 'Ne. Stačí věta „tohle děláme ručně" nebo „tohle nás zdržuje". Technické zadání je moje práce, ne vaše.',
+    a: 'Ne. Stačí popsat, co dnes děláte ručně nebo co vás zdržuje. Technické zadání připravím já.',
   },
   {
     q: 'Jak dlouho to trvá?',
-    a: 'Menší automatizace jednotky týdnů, software na míru měsíce. Nasazuji průběžně, takže běžící verzi vidíte dřív, než je hotovo všechno.',
+    a: 'Menší automatizace obvykle trvají několik týdnů, software na míru měsíce. Běžící verzi nasazuji průběžně.',
   },
   {
     q: 'Pracujete i mimo Prahu?',
@@ -132,10 +132,10 @@ export const CONTACT_FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Co když na to nejste ten pravý?',
-    a: 'Řeknu vám to rovnou a pošlu vás za někým, kdo je. Zakázku, která se nevrátí, nevezmu.',
+    a: 'Řeknu to rovnou a doporučím vhodnější cestu. Zakázku bez smysluplného přínosu nevezmu.',
   },
   {
     q: 'Komu patří výsledný kód?',
-    a: 'Vám. Dostanete kód, přístupy i dokumentaci. Nejste na mně závislí a nikde nemám zámek.',
+    a: 'Vám. Dostanete zdrojový kód, přístupy i dokumentaci, takže nejste závislí na jednom dodavateli.',
   },
 ]

@@ -63,15 +63,15 @@ export default function ServicesPage() {
             {t({ cs: '[ SLUŽBY ]', en: '[ SERVICES ]' })}
           </p>
           <h1 className="display reveal" style={revealDelay(0.6, 5)}>
-            {t({ cs: 'Vy popíšete problém. Já postavím řešení.', en: 'You bring the problem. I build the solution.' })}
+            {t({ cs: 'Řešení pro práci, která vás dnes zdržuje.', en: 'Solutions for the work slowing you down today.' })}
           </h1>
           {/* První věta byla doslova hero úvodu („Nemusíte vědět, jestli
               potřebujete agenta, API nebo databázi") — úvod PRODÁVÁ, tahle
               stránka VYJMENOVÁVÁ, takže si silnější formulaci nechává úvod. */}
           <p className="body reveal" style={revealDelay(1.2, 5)}>
             {t({
-              cs: 'AI, automatizace, interní nástroj nebo nový web. Volbu technologie nechte na mně; vy určujete, co má výsledek změnit.',
-              en: 'AI, automation, an internal tool, or a new website. I choose the technology; you define what the result needs to change.',
+              cs: 'AI, automatizace, software nebo web. Vy určíte cíl. Já vyberu technologii a dodám funkční řešení.',
+              en: 'AI, automation, software, or a website. You define the goal. I choose the technology and deliver a working solution.',
             })}
           </p>
           {/* ★ `.svc-head__claim` odstraněn. Byly to tři nominální fráze bez
@@ -123,12 +123,12 @@ export default function ServicesPage() {
         {/* ── TECHNOLOGIE ────────────────────────────────────────── */}
         <section className="svc-tech reveal" aria-labelledby="tech-h">
           <h2 className="headline" id="tech-h">
-            {t({ cs: 'Moderní stack. Praktické výsledky.', en: 'A modern stack. Practical results.' })}
+            {t({ cs: 'Technologie podle úkolu.', en: 'Technology chosen for the job.' })}
           </h2>
           <p className="svc__lead">
             {t({
-              cs: 'Technologii vybírám podle problému, ne podle trendu. Když se úloha dá vyřešit jedním scriptem, nebude z toho platforma. Technologie je prostředek, výsledek je produkt.',
-              en: "I pick the technology to fit the problem, not the trend. When one script solves it, it won't turn into a platform. Technology is the means, the product is the result.",
+              cs: 'Použiji nejjednodušší řešení, které splní cíl a půjde bezpečně provozovat. Někdy je to skript, jindy celá aplikace.',
+              en: 'I use the simplest solution that meets the goal and can run safely. Sometimes that is a script, sometimes a full application.',
             })}
           </p>
           <dl className="techgrid">
@@ -167,8 +167,8 @@ export default function ServicesPage() {
                 pět sloves, která řeknou o práci víc než dva odstavce prózy. */}
             <p className="body">
               {t({
-                cs: 'Baví mě hledat místa, kde může software udělat práci místo člověka. Nechci stavět software proto, že to jde, ale proto, že má důvod existovat.',
-                en: "I enjoy finding the places where software can do the work instead of a person. I don't want to build software because it can be built, but because it has a reason to exist.",
+                cs: 'Hledám místa, kde software ušetří čas, sníží chybovost nebo umožní nový produkt. Stavím jen to, co má jasný přínos.',
+                en: 'I look for places where software saves time, reduces errors, or enables a new product. I only build what has a clear benefit.',
               })}
             </p>
             <p className="svc-about__method label">
@@ -214,20 +214,20 @@ export default function ServicesPage() {
         {/* ── VÝZVA K AKCI ──────────────────────────────────────── */}
         <section className="page__cta" id="poptavka" aria-labelledby="cta-h">
           <h2 className="headline" id="cta-h">
-            {t({ cs: 'Co bychom mohli vytvořit?', en: 'What could we build?' })}
+            {t({ cs: 'Máte konkrétní problém?', en: 'Do you have a specific problem?' })}
           </h2>
           {/* ★ TŘI ŘEČNICKÉ OTÁZKY BYLY KATALOG POTŘETÍ. A poslední dvě věty byly
               doslovná kopie nadpisu i odstavce sekce KONTAKT na úvodu — tedy dva
               indexované dokumenty se stejným odstavcem. */}
           <p className="body">
             {t({
-              cs: 'Napište, co potřebujete vyřešit. Technologii vyberu já.',
-              en: "Tell me what you need solved. I'll pick the technology.",
+              cs: 'Popište ho několika větami. Do 24 hodin navrhnu další krok.',
+              en: "Describe it in a few sentences. I'll suggest the next step within 24 hours.",
             })}
           </p>
           <div className="page__cta-row">
             <Button href={localPath(CONTACT_HREF)} variant="primary" arrow="right" icon={<Icon name="mail" size={15} />}>
-              {t({ cs: 'Pojďme začít', en: "Let's start" })}
+              {t({ cs: 'Probrat projekt', en: 'Discuss a project' })}
             </Button>
             <Button href={WHATSAPP} variant="secondary" intent="success" arrow="external" icon={<Icon name="whatsapp" size={15} />} target="_blank" rel="noreferrer">
               WhatsApp

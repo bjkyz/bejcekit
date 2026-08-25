@@ -13,7 +13,7 @@ import { localPath, t } from '../lib/lang'
 import { useReveal } from '../lib/hooks'
 import { revealDelay as delay } from '../lib/reveal'
 import Kicker from './Kicker'
-import MagneticCTA from './MagneticCTA'
+import SectionCTA from './SectionCTA'
 import GrabPlate from './GrabPlate'
 import Icon from './Icons'
 import Mark from './Mark'
@@ -48,7 +48,7 @@ export default function Section({
    *
    * ★★★ NA SEKCI 05 STOJÍ HLAVNÍ TLAČÍTKO NAD KANÁLY, VŠUDE JINDE POD OBSAHEM.
    *
-   * Dřív bylo pořadí „text → dlaždice s e-mailem → tlačítko Napsat poptávku"
+   * Dřív bylo pořadí „text → dlaždice s e-mailem → hlavní CTA"
    * a byly v něm DVA primární prvky za sebou: vyplněná dlaždice (jediná plná
    * plocha na webu) a hned pod ní jediné velké tlačítko. Návštěvník, který
    * dorolloval na konec, tak dostal na výběr mezi dvěma nejsilnějšími signály
@@ -61,9 +61,9 @@ export default function Section({
    */
   const ctaRow = (s.cta || s.ghostCta) && (
     <div className="cta-row reveal" style={delay(isContact ? 3 : 5.4, 6)}>
-      {s.cta && <MagneticCTA href={s.cta.href} label={s.cta.label} variant="solid" enabled={!reduced} />}
+      {s.cta && <SectionCTA href={s.cta.href} label={s.cta.label} variant="solid" />}
       {s.ghostCta && (
-        <MagneticCTA href={s.ghostCta.href} label={s.ghostCta.label} variant="ghost" enabled={!reduced} />
+        <SectionCTA href={s.ghostCta.href} label={s.ghostCta.label} variant="ghost" />
       )}
     </div>
   )

@@ -277,13 +277,12 @@
   justify-content: center;
 }
 
-/* Magnetické tlačítko: vnější obal je jen zvětšená zásahová plocha (20px),
-   aby magnet chytal dřív, než kurzor dojede na vizuální hranu. */
-.magnetic {
+/* Vnější obal drží rozestupy homepage CTA. Samotné tlačítko se při hoveru
+   neposouvá; animuje se jen jeho vnitřní obsah ve sdíleném Button systému. */
+.cta-hit {
   display: inline-block;
   padding: 20px;
   margin: -20px;
-  will-change: transform;
 }
 
 .btn {
@@ -303,7 +302,6 @@
     color var(--d-hover) var(--e-ui),
     background-color var(--d-hover) var(--e-ui),
     border-color var(--d-hover) var(--e-ui);
-  will-change: transform;
 }
 .btn::after {
   /* záře se vykreslí jednou a animuje se jen opacity — blur v box-shadow
@@ -324,11 +322,6 @@
   background: rgba(79, 216, 232, 0.08);
   color: var(--neon-1);
 }
-.btn:active {
-  transform: scale(0.98);
-  transition-duration: var(--d-press);
-}
-
 /* WhatsApp — zelená = stav/dostupnost. Nikde jinde na webu není. */
 .btn--green {
   border-color: var(--green-line);
@@ -367,17 +360,11 @@
   background-color: var(--neon-1);
   color: var(--bg-0);
   animation: btn-sheen 850ms var(--e-out-quint);
-  /* ★★ TVRDÝ POSUN, NULA ROZOSTŘENÍ — jediný neobrutalistický stín na webu
-     a schválně jen tady. Vyplněné tlačítko je jediná plná plocha stránky
-     (viz komentář výš), takže je to jediné místo, kde se posunutá kopie hrany
-     čte jako „tohle je hmotné a dá se to stisknout", a ne jako ozdoba.
-     ★ Přes `::after` (záře) se to nekříží: to je samostatná vrstva pod prvkem. */
-  box-shadow: var(--shadow-hard);
+  /* Rám zůstává na místě. Jemná záře zvýrazní hlavní akci, zatímco pohyb
+     probíhá jen uvnitř tlačítka přes `.btn__content` a šipku. */
+  box-shadow: 0 0 0 1px rgba(158, 241, 255, 0.16), 0 0 24px rgba(79, 216, 232, 0.12);
 }
-.btn--solid:active {
-  /* Stisk posun spolkne — tlačítko dosedne na podklad. */
-  box-shadow: none;
-}
+.btn--solid:active { box-shadow: none; }
 @keyframes btn-sheen {
   from {
     background-position: 100% 0;
@@ -1160,12 +1147,12 @@
   /* ★ TLAČÍTKA PŘES CELOU ŠÍŘKU. Na 390px displeji stály dvě CTA pod sebou,
      každé jinak široké podle délky svého popisku — levá hrana seděla, pravá
      poskakovala. Stejná šířka je klidnější a hlavně se do ní líp trefí palec.
-     `.magnetic` je jen zvětšená zásahová plocha (padding 20px / margin -20px),
+     `.cta-hit` je jen zvětšená zásahová plocha (padding 20px / margin -20px),
      takže width: 100% na něm dá tlačítku uvnitř přesně šířku sloupce. */
   .cta-row {
     width: 100%;
   }
-  .cta-row .magnetic {
+  .cta-row .cta-hit {
     display: block;
     width: 100%;
   }

@@ -43,11 +43,11 @@ export default function Button({
   const classes = join('btn', `btn--${variant}`, `btn--${size}`, intent === 'success' && 'btn--success', className)
   const trailing = arrow === 'external' ? <ArrowUpRight /> : arrow === 'right' ? <ArrowRight /> : null
   const content = (
-    <>
+    <span className="btn__content">
       <span className="btn__icon" aria-hidden="true">{loading ? <LoaderCircle className="btn__spinner" /> : icon}</span>
       <span className="btn__label">{children}</span>
       {trailing && <span className="btn__arrow" aria-hidden="true">{trailing}</span>}
-    </>
+    </span>
   )
 
   if (href) {

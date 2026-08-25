@@ -1,6 +1,6 @@
 /**
- * Náhrada GSAPu. Celý web ho používal jen na tři věci — magnet, pružinu úchopu
- * a časovou osu preloaderu — a platil za to ~30 kB gz NA KRITICKÉ CESTĚ.
+ * Náhrada GSAPu pro pružinu úchopu a časovou osu preloaderu. Původní knihovna
+ * stála ~30 kB gz na kritické cestě kvůli několika drobným animacím.
  * Tady je totéž na pár řádcích a nula bajtů závislostí.
  */
 

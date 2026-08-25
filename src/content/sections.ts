@@ -109,12 +109,12 @@ export const SECTIONS: Section[] = [
      *   výčet zkratek — ten je až ve stacku o dvě obrazovky níž.
      */
     body:
-      'Jsem Jiří Bejček. Stavím AI systémy, automatizace a software na míru. Nemusíte vědět, jestli potřebujete agenta, API nebo databázi. Stačí říct, co vám dnes bere čas.',
+      'Jsem Jiří Bejček. Stavím AI, automatizace a software na míru, které šetří čas a odstraňují ruční práci. Vy popíšete problém. Já navrhnu a dodám řešení.',
     bullets: [],
     specs: [
-      { k: 'Jeden inženýr, ne agentura', v: 'Mluvíte přímo s tím, kdo to staví a kdo za to ručí.' },
-      { k: 'Pevná cena a termín', v: 'Písemně, ještě než začnu.' },
-      { k: 'Odpovím do 24 hodin', v: 'I o víkendu. Celé Česko, remote i u vás.' },
+      { k: 'Jeden inženýr, ne agentura', v: 'Mluvíte přímo se mnou. Navrhnu, postavím i nasadím.' },
+      { k: 'Pevná cena a termín', v: 'Dostanete je písemně před začátkem.' },
+      { k: 'Odpovím do 24 hodin', v: 'I o víkendu. Pracuji po celém Česku.' },
     ],
     status: 'Přijímám nové projekty',
     cta: { label: 'Probrat projekt', href: CONTACT_HREF },
@@ -125,7 +125,7 @@ export const SECTIONS: Section[] = [
      *   na šest stěn krychle nevešel — a na telefonu je tohle jediná cesta,
      *   jak se k němu z úvodu dostat (odkazy v liště jsou pod 800 px skryté).
      */
-    ghostCta: { label: 'Co všechno stavím', href: '/sluzby' },
+    ghostCta: { label: 'Zobrazit služby', href: '/sluzby' },
     align: 'center',
     subsystem: 'IDENTIFIKACE',
   },
@@ -134,14 +134,14 @@ export const SECTIONS: Section[] = [
     kicker: '[ 01 / AI ]',
     plateCode: 'AI',
     plateNum: '01',
-    headline: 'AI, která skutečně pracuje.',
+    headline: 'AI, která pracuje s vašimi daty.',
     body:
-      'AI nemusí být chatbot. Stavím ji tak, aby odpovídala z vašich dat, ukázala zdroj a sama spustila navazující proces.',
+      'Odpovídá z vašich dokumentů, uvádí zdroje a umí spustit další krok procesu.',
     bullets: [
-      'Asistenti, kteří znají vaše dokumenty a procesy. Odpovídají z nich, ne z internetu.',
-      'Vytěžování smluv, faktur, objednávek a životopisů. Data padají rovnou do systému.',
-      'AI agenti, kteří úkol nejen popíšou, ale provedou. Nástroje MCP a orchestrace.',
-      'Propočet návratnosti dřív, než napíšu první řádek. Když se nevrátí, zakázku nevezmu.',
+      'Interní asistenti odpovídají z vašich dokumentů a ověřených zdrojů.',
+      'Smlouvy, faktury a objednávky vytěží a zapíšou přímo do systému.',
+      'AI agenti provedou úkol napříč nástroji, ne jen odpoví.',
+      'Návratnost spočítáme předem. Když nedává smysl, řeknu to.',
     ],
     /**
      * Nejsilnější argument téhle sekce: ověřitelný důkaz místo tvrzení.
@@ -151,14 +151,14 @@ export const SECTIONS: Section[] = [
      *   linka vypnula, tahle věta musí ze stránky zmizet jako první.
      */
     proof:
-      'Ukázka v provozu: denní žurnál na tomto webu publikuje AI linka, kterou jsem postavil. Každý článek uvádí datum i zdroje, takže si výsledek můžete ověřit.',
+      'Ukázka v provozu: AI linka na tomto webu připravuje články žurnálu. Každý má datum a zdroje, takže výsledek můžete ověřit.',
     deliverable: {
       label: 'Co dostanete',
-      text: 'Běžící řešení napojené na vaše systémy a měsíční report ušetřených hodin.',
+      text: 'Nasazené řešení napojené na vaše systémy, dokumentaci a přehled ušetřeného času.',
     },
     stack: ['Anthropic API', 'OpenAI API', 'RAG', 'MCP', 'Vektorová DB', 'Python'],
-    cta: { label: 'Chci nasadit AI', href: CONTACT_HREF },
-    ghostCta: { label: 'Číst žurnál', href: '/clanky' },
+    cta: { label: 'Probrat AI řešení', href: CONTACT_HREF },
+    ghostCta: { label: 'Ukázka: žurnál', href: '/clanky' },
     align: 'left',
     subsystem: 'AI SYSTÉMY',
   },
@@ -167,20 +167,20 @@ export const SECTIONS: Section[] = [
     kicker: '[ 02 / AUTO ]',
     plateCode: 'AUTO',
     plateNum: '02',
-    headline: 'Automatizujte to, co se opakuje.',
+    headline: 'Opakovanou práci převezme automatizace.',
     body:
-      'Kopírování dat, e-maily, tabulky, reporty, přepisování mezi systémy. Když člověk dělá pořád totéž, dá se to skoro vždycky předat stroji.',
+      'E-maily, dokumenty a data propojí jeden workflow. Člověk řeší jen výjimky.',
     bullets: [
-      'Dřív: e-mail, člověk, otevřít dokument, přepsat data, zkontrolovat, uložit.',
-      'Teď: e-mail, extrakce, kontrola, databáze, hotovo. Člověk jen schvaluje výjimky.',
-      'n8n, API, webhooky, CRM. Propojím systémy, které spolu dnes nemluví.',
+      'Načte e-mail nebo dokument a vytáhne potřebná data.',
+      'Data zkontroluje a zapíše do CRM, databáze nebo účetního systému.',
+      'Pošle výsledek, upozorní na chybu a uloží dohledatelnou stopu.',
     ],
     deliverable: {
       label: 'Co dostanete',
-      text: 'Běžící workflow, dokumentaci a měsíční report ušetřených hodin.',
+      text: 'Nasazený workflow, dokumentaci a přehled ušetřeného času.',
     },
     stack: ['n8n', 'API', 'Webhooky', 'PostgreSQL', 'Node.js', 'Cron'],
-    cta: { label: 'Chci zautomatizovat proces', href: CONTACT_HREF },
+    cta: { label: 'Probrat automatizaci', href: CONTACT_HREF },
     align: 'right',
     subsystem: 'AUTOMATIZACE',
   },
@@ -189,22 +189,22 @@ export const SECTIONS: Section[] = [
     kicker: '[ 03 / SOFTWARE ]',
     plateCode: 'SOFTWARE',
     plateNum: '03',
-    headline: 'Když hotové řešení nestačí.',
+    headline: 'Software podle vašeho procesu.',
     body:
-      'Nemusíte ohýbat svůj proces podle softwaru. Stavím interní nástroje, klientské portály, dashboardy i SaaS produkty přesně podle toho, jak pracujete. Od MVP, které ověří nápad, po produkt připravený na tisíce zákazníků.',
+      'Stavím interní nástroje, klientské portály, dashboardy a SaaS. Od rychlého MVP po produkt pro tisíce uživatelů.',
     bullets: [
-      'Interní nástroje a portály: dokumenty, data a workflow na jednom místě.',
-      'SaaS od MVP po produkci: účty, předplatné, limity, platby, administrace.',
-      'Dashboardy: čísla, ze kterých se dá rozhodnout, ne exporty do Excelu.',
-      'Weby a webové aplikace, které jsou rychlé, protože se tak stavěly od začátku.',
+      'Interní nástroje a portály spojí dokumenty, data a workflow.',
+      'SaaS zahrne účty, předplatné, platby i administraci.',
+      'Dashboardy ukážou čísla, podle kterých se dá rozhodnout.',
+      'Weby a aplikace stavím rychlé, bezpečné a připravené na růst.',
     ],
     deliverable: {
       label: 'Co dostanete',
-      text: 'Nasazenou aplikaci, přístupy i kód ve svých rukou a plán dalšího rozvoje.',
+      text: 'Nasazenou aplikaci, zdrojový kód, přístupy, dokumentaci a plán dalšího rozvoje.',
     },
     stack: ['Next.js', 'React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Vercel'],
-    cta: { label: 'Chci postavit software', href: CONTACT_HREF },
-    ghostCta: { label: 'Prohlédnout projekty', href: '/projekty' },
+    cta: { label: 'Probrat software', href: CONTACT_HREF },
+    ghostCta: { label: 'Zobrazit projekty', href: '/projekty' },
     align: 'left',
     subsystem: 'SOFTWARE NA MÍRU',
   },
@@ -213,9 +213,9 @@ export const SECTIONS: Section[] = [
     kicker: '[ 04 / PROCES ]',
     plateCode: 'PROCES',
     plateNum: '04',
-    headline: 'Od nápadu k fungujícímu produktu.',
+    headline: 'Od problému k nasazenému řešení.',
     body:
-      'Nemusíte mít technické zadání. Stačí věta „tohle děláme ručně" nebo „tohle chceme vytvořit".',
+      'Stačí popsat, co dnes děláte ručně nebo co chcete vytvořit. Technické zadání připravím já.',
     bullets: [],
     /* ★ ČTYŘI KROKY, NE PĚT. Sekce se musí vejít do 100svh i na notebooku
        1440×900 (viz --sp-* v tokens.css); pátá dlaždice ji přetáhne a spodek
@@ -224,22 +224,22 @@ export const SECTIONS: Section[] = [
     steps: [
       {
         title: 'Analýza',
-        text: 'Půlhodina hovoru zdarma. Vytáhnu z vás, co potřebujete. A hlavně co nepotřebujete.',
+        text: 'Na úvodním hovoru společně pojmenujeme problém, cíl a priority.',
       },
       {
         title: 'Návrh',
-        text: 'Řešení, architektura a pevná cena. Písemně, před začátkem. Když se rozsah změní, znáte cenu předem.',
+        text: 'Dostanete návrh řešení, rozsah, pevnou cenu a termín písemně.',
       },
       {
         title: 'Stavba',
-        text: 'Nasazuji průběžně. Vidíte běžící verzi, ne slidy o běžící verzi.',
+        text: 'Nasazuji průběžně. Běžící verzi vidíte od začátku vývoje.',
       },
       {
         title: 'Provoz a rozvoj',
-        text: 'Monitoring, úpravy, další funkce. Po vystavení faktury nemizím.',
+        text: 'Po nasazení řeším monitoring, úpravy a další rozvoj.',
       },
     ],
-    cta: { label: 'Domluvit hovor zdarma', href: CONTACT_HREF },
+    cta: { label: 'Domluvit úvodní hovor', href: CONTACT_HREF },
     align: 'right',
     subsystem: 'PRACOVNÍ POSTUP',
   },
@@ -264,11 +264,11 @@ export const SECTIONS: Section[] = [
      *
      * ★ Kanály pod tím zůstávají: kdo nechce formulář, nemá důvod klikat dál.
      */
-    headline: 'Řekněte mi, co potřebujete vyřešit.',
+    headline: 'Popište problém. Navrhnu další krok.',
     body:
-      'Nemusíte znát technologii ani mít zadání. Popište problém vlastními slovy. Do 24 hodin se vám ozvu osobně a navrhnu další krok.',
+      'Stačí pár vět. Do 24 hodin odpovím osobně a řeknu, zda a jak dává řešení smysl.',
     bullets: [],
-    cta: { label: 'Napsat poptávku', href: CONTACT_HREF },
+    cta: { label: 'Probrat projekt', href: CONTACT_HREF },
     align: 'center',
     subsystem: 'KONTAKT',
   },

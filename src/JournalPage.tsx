@@ -168,17 +168,16 @@ export function JournalCta() {
   return (
     <section className="page__cta" id={JOURNAL_CTA_ANCHOR} aria-labelledby="journal-cta-h">
       <h2 className="headline" id="journal-cta-h">
-        Zajímá vás, co z toho platí pro vás?
+        Chcete zjistit, zda se to vyplatí i vám?
       </h2>
       <p className="body">
-        Napište mi, co řešíte, vlastními slovy. Do 24 hodin odpovím a navrhnu další krok. Na krátkém hovoru
-        společně zjistíme, jestli se investice může vrátit. Když ne, řeknu to rovnou.
+        Popište problém několika větami. Do 24 hodin odpovím a navrhnu další krok. Když investice nedává smysl,
+        řeknu to rovnou.
       </p>
       <div className="page__cta-row">
-        {/* ★ „Napsat poptávku", ne „Napsat e-mail" — tlačítko vede na formulář
-            /kontakt a slib musí sedět s cílem. */}
+        {/* Hlavní CTA vede na formulář /kontakt a popisuje účel, ne médium. */}
         <Button href={CONTACT_HREF} variant="primary" arrow="right" icon={<Icon name="mail" size={15} />}>
-          Napsat poptávku
+          Probrat projekt
         </Button>
         <Button href={WHATSAPP} variant="secondary" intent="success" arrow="external" icon={<Icon name="whatsapp" size={15} />} target="_blank" rel="noreferrer">
           WhatsApp

@@ -172,7 +172,7 @@ jen to, co pomáhá přehledu:
 - **rám, který je opravdu vidět** (`--line-3`, 3:1 — WCAG 1.4.11 u ovládacích prvků)
 - **plné barevné pásky u faktů** (`--bar`): důkaz, „co dostanete" i štítek
   dostupnosti mají teď jeden tvar — zelená páska vlevo, žádný banner
-- **tvrdý, nerozostřený posun** (`--shadow-hard`) jen na hlavní vyplněné akci
+- **stacionární tlačítka**: rám zůstává na místě, hover animuje jen obsah, šipku a světelný přejezd
 
 ## Co je potřeba vědět, než do toho sáhneš
 

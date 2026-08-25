@@ -717,11 +717,7 @@
   gap: 0.75rem;
   margin-top: var(--sp-cta-top);
 }
-/* Tlačítka tu nejsou magnetická (magnet je vázaný na `.magnetic` obal, který
-   sem netahám kvůli jednomu efektu), takže potřebují vlastní stisk. */
-.page__cta-row .btn:active {
-  transform: scale(0.98);
-}
+/* Stisk i hover řeší sdílený Button: rám zůstává bez pohybu. */
 /* Tichý řádek důvěry pod tlačítky. Typografii nese sdílená `.label`
    (poznámka pod čarou, ne třetí vrstva tlačítek); tady zbývá jen odstup. */
 .page__cta-trust {

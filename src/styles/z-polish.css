@@ -12,6 +12,19 @@
   white-space: nowrap;
   isolation: isolate;
 }
+.btn__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-width: 0;
+  transition: transform var(--d-hover) var(--e-out-quint);
+}
+.btn:hover .btn__content { transform: translateY(-1px); }
+.btn:active .btn__content {
+  transform: translateY(1px);
+  transition-duration: var(--d-press);
+}
 .btn--sm { min-height: var(--control-sm); padding-inline: 0.9rem; }
 .btn--lg { min-height: var(--control-lg); padding-inline: 1.65rem; }
 .btn__icon,
@@ -31,7 +44,7 @@
 .btn__arrow {
   transition: transform var(--d-hover) var(--e-out-quint);
 }
-.btn:hover .btn__arrow { transform: translate(3px, -1px); }
+.btn:hover .btn__arrow { transform: translateX(4px); }
 .btn--primary,
 .btn--solid {
   background-color: var(--neon-2);
@@ -43,7 +56,7 @@
 .btn--solid:hover {
   background-color: var(--neon-1);
   color: var(--bg-0);
-  box-shadow: var(--shadow-hard);
+  box-shadow: 0 0 0 1px rgba(158, 241, 255, 0.16), 0 0 24px rgba(79, 216, 232, 0.12);
 }
 .btn--secondary {
   color: var(--neon-2);
@@ -281,5 +294,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .btn__arrow,
+  .btn__content,
   .btn__spinner { animation: none; transition: none; }
+  .btn:hover .btn__content,
+  .btn:active .btn__content { transform: none; }
 }
